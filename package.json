@@ -1,0 +1,14 @@
+{
+  "name": "root",
+  "private": true,
+  "scripts": {
+    "postinstall": "lerna bootstrap --ignore-scripts",
+    "start:demo": "parcel ./packages/demo/src/index.html"
+  },
+  "devDependencies": {
+    "lerna": "^3.22.1",
+    "parcel": "^2.0.0-beta.1",
+    "sass": "^1.26.10",
+    "typescript": "^4.0.2"
+  }
+}

@@ -1,0 +1,8 @@
+header {
+	display: flex;
+	justify-content: space-between;
+}
+
+video {
+	margin-bottom: 0;
+}
