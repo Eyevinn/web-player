@@ -11,7 +11,18 @@
 		width: 0%;
 		height: 100%;
 		background: rgb(30, 129, 160);
+
+		.indicator {
+			position: absolute;
+			top: -0.15rem;
+			right: -0.15rem;
+			height: 0.8rem;
+			width: 0.8rem;
+			background: rgb(255, 255, 255);
+			cursor: pointer;
+		}
 	}
+
 
 	&.hidden {
 		display: none;
