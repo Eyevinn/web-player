@@ -1,4 +1,4 @@
-import BaseTech from "./tech/BaseTech";
+import BaseTech, { PlaybackState } from "./tech/BaseTech";
 import { ErrorCode, ManifestType } from "./util/constants";
 import { getManifestType } from "./util/contentType";
 import EventEmitter from "./util/EventEmitter";
@@ -8,6 +8,8 @@ export { PlayerEvent } from './util/constants';
 export interface IWebPlayerOptions {
   video: HTMLVideoElement;
 }
+
+export { PlaybackState };
 
 export default class WebPlayer extends EventEmitter {
   private tech: BaseTech;
@@ -59,7 +61,7 @@ export default class WebPlayer extends EventEmitter {
     return this.tech?.pause();
   }
 
-  reset() {
+  reset() {
     if (this.tech) {
       this.tech.destroy();
       this.tech = null;

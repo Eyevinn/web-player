@@ -10,7 +10,9 @@ export enum ErrorCode {
 }
 
 export enum PlayerEvent {
+	STATE_CHANGE = "state_change",
 	PLAY = "play",
 	PAUSE = "pause",
-	TIME_UPDATE = "timeupdate"
+	TIME_UPDATE = "timeupdate",
+	BUFFERING = "buffering"
 }

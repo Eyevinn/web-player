@@ -12,4 +12,8 @@
 		height: 100%;
 		background: rgb(30, 129, 160);
 	}
+
+	&.hidden {
+		display: none;
+	}
 }

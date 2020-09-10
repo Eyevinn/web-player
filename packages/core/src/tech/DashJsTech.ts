@@ -1,5 +1,4 @@
 import { MediaPlayer, MediaPlayerClass } from "dashjs";
-import "dashjs/build/es5/src/mss";
 import BaseTech, {IBaseTechOptions} from "./BaseTech";
 
 export default class MssPlayer extends BaseTech {

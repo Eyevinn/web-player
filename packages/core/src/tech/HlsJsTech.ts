@@ -1,7 +1,7 @@
-import BaseTech, { IBaseTechOptions, IWebPlayerTech } from "./BaseTech";
+import BaseTech, { IBaseTechOptions, PlaybackState } from "./BaseTech";
 import Hls from "hls.js";
 
-export default class HlsJsPlayer extends BaseTech implements IWebPlayerTech {
+export default class HlsJsPlayer extends BaseTech {
   static isSupported() {
     return Hls.isSupported();
   }
@@ -18,6 +18,9 @@ export default class HlsJsPlayer extends BaseTech implements IWebPlayerTech {
   }
 
   load(src: string): Promise<void> {
+    if (this.state.playbackState !== PlaybackState.IDLE) {
+      this.stop();
+    }
     return new Promise(resolve => {
       this.hls.loadSource(src);
       this.hls.once(Hls.Events.LEVEL_LOADED, (event, data) => {

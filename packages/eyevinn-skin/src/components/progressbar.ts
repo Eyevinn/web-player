@@ -9,7 +9,13 @@ export default function progressbar(): IComponent {
   return {
     element: container,
     update: (currentTime: number, duration: number) => {
-      progress.style.width = `${(currentTime / duration) * 100}%`;
-    }
+      progress.style.width = `${((currentTime / duration) * 100) || 0}%`;
+    },
+    hide: () => {
+      container.classList.add(styles.hidden);
+    },
+    show: () => {
+      container.classList.remove(styles.hidden);
+    },
   };
 }

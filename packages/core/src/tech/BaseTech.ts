@@ -6,24 +6,39 @@ export interface IBaseTechOptions {
   src: string;
 }
 
-export interface IWebPlayerTech {
-  isPlaying: boolean;
-  isMuted: boolean;
-
-  load: (src: string) => Promise<void>;
+export enum PlaybackState {
+  IDLE,
+  LOADING,
+  READY,
+  PLAYING,
+  PAUSED,
+  BUFFERING,
 }
 
-export default class BaseTech extends EventEmitter implements IWebPlayerTech {
+export interface ITechState {
+  playbackState: PlaybackState;
+  currentTime: number;
+  duration: number;
+  isLive: boolean;
+}
+
+export default class BaseTech extends EventEmitter {
   protected video: HTMLVideoElement;
+  protected state: ITechState;
 
   constructor({ video }) {
     super();
+
+    this.state = {
+      playbackState: PlaybackState.IDLE,
+      currentTime: 0,
+      duration: 0,
+      isLive: false,
+    };
+
     this.video = video;
 
-    this.video.addEventListener(
-      "play",
-      (this.onPlay = this.onPlay.bind(this))
-    );
+    this.video.addEventListener("play", (this.onPlay = this.onPlay.bind(this)));
     this.video.addEventListener(
       "pause",
       (this.onPause = this.onPause.bind(this))
@@ -32,22 +47,52 @@ export default class BaseTech extends EventEmitter implements IWebPlayerTech {
       "timeupdate",
       (this.onTimeUpdate = this.onTimeUpdate.bind(this))
     );
+    this.video.addEventListener(
+      "waiting",
+      (this.onWaiting = this.onWaiting.bind(this))
+    );
+    this.video.addEventListener("loadedmetadata", (this.onLoadedMetadata = this.onLoadedMetadata.bind(this)));
+  }
+
+  private updateState(state: any) {
+    Object.keys(state).forEach((key) => {
+      if (this.state[key] !== undefined) {
+        this.state[key] = state[key];
+      }
+    });
+    this.emit(PlayerEvent.STATE_CHANGE, { state: this.state });
+  }
+
+  private onLoadedMetadata() {
+    this.updateState({
+      isLive: this.isLive
+    });
   }
 
   private onPlay() {
+    this.updateState({ playbackState: PlaybackState.PLAYING });
     this.emit(PlayerEvent.PLAY);
   }
 
   private onPause() {
+    this.updateState({ playbackState: PlaybackState.PAUSED });
     this.emit(PlayerEvent.PAUSE);
   }
 
-
   private onTimeUpdate() {
+    this.updateState({
+      currentTime: this.currentTime,
+      duration: this.duration,
+    });
     this.emit(PlayerEvent.TIME_UPDATE, {
       currentTime: this.currentTime,
-      duration: this.duration
+      duration: this.duration,
     });
+  }
+
+  private onWaiting() {
+    this.updateState({ playbackState: PlaybackState.BUFFERING });
+    this.emit(PlayerEvent.BUFFERING);
   }
 
   get isPlaying(): boolean {
@@ -63,16 +108,10 @@ export default class BaseTech extends EventEmitter implements IWebPlayerTech {
   }
 
   get duration(): number {
-    if (!this.isLive) {
-      return this.video.duration;
-    }
-    return NaN;
+    return this.video.duration;
   }
 
   get currentTime(): number {
-    if (this.isLive) {
-      return Infinity;
-    }
     return this.video.currentTime;
   }
 
@@ -113,7 +152,19 @@ export default class BaseTech extends EventEmitter implements IWebPlayerTech {
     });
   }
 
+  stop() {
+    this.video.src = "";
+    this.video.load();
+    this.updateState({
+      playbackState: PlaybackState.IDLE,
+      isLive: false,
+      currentTime: this.currentTime,
+      duration: this.duration,
+    });
+  }
+
   destroy() {
+    this.stop();
     this.video.removeEventListener("timeupdate", this.onTimeUpdate);
   }
 }

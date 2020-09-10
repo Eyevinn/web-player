@@ -6,3 +6,8 @@ header {
 video {
 	margin-bottom: 0;
 }
+
+.input-section {
+	display: flex;
+	flex-direction: column;
+}

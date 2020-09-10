@@ -1,6 +1,8 @@
 export interface IComponent {
 	element: HTMLElement,
-	update: Function
+	update: Function,
+	show?: Function,
+	hide?: Function
 }
 
 export function createElement(type, className) {

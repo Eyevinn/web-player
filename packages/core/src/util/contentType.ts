@@ -17,7 +17,7 @@ export function canPlayContentType(contentType): boolean {
 export function getManifestType(uri): Promise<ManifestType> {
   return fetch(uri)
     .then(resp => {
-      let type = CONTENT_TYPE_MAP[resp.headers["content-type"]];
+      let type = CONTENT_TYPE_MAP[resp.headers.get("content-type")];
       if (!type) {
         if (uri.match(/\.m3u8/)) {
           return ManifestType.HLS;
@@ -27,7 +27,8 @@ export function getManifestType(uri): Promise<ManifestType> {
           return ManifestType.MSS;
         }
         return ManifestType.UNKNOWN;
-      }
+      } 
+      return type;
     })
     .catch(() => {
 
