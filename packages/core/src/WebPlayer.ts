@@ -4,6 +4,7 @@ import { getManifestType } from "./util/contentType";
 import EventEmitter from "./util/EventEmitter";
 
 export { PlayerEvent } from "./util/constants";
+export { IPlayerState } from "./tech/BaseTech";
 
 export interface IWebPlayerOptions {
   video: HTMLVideoElement;

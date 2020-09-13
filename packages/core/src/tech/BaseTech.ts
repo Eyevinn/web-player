@@ -16,7 +16,7 @@ export enum PlaybackState {
   BUFFERING,
 }
 
-export interface ITechState {
+export interface IPlayerState {
   prevPlaybackState: PlaybackState;
   playbackState: PlaybackState;
   currentTime: number;
@@ -26,7 +26,7 @@ export interface ITechState {
 
 export default class BaseTech extends EventEmitter {
   protected video: HTMLVideoElement;
-  protected state: ITechState;
+  protected state: IPlayerState;
 
   constructor({ video }) {
     super();

@@ -6,8 +6,21 @@
   "author": "Benjamin Wallberg <me@bwallberg.com>",
   "homepage": "",
   "license": "Apache-2.0",
+  "scripts": {
+    "start": "parcel ./src/index.html --no-cache"
+  },
   "dependencies": {
     "@eyevinn/web-player-core": "^0.0.0",
     "@eyevinn/web-player-eyevinn-skin": "^0.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-proposal-optional-chaining": "^7.11.0",
+    "@babel/plugin-transform-react-jsx": "^7.10.4",
+    "@babel/plugin-transform-runtime": "^7.11.5",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/preset-typescript": "^7.10.4",
+    "parcel": "^2.0.0-beta.1"
   }
 }

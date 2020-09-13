@@ -3,24 +3,23 @@
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Benjamin Wallberg <me@bwallberg.com>",
-  "homepage": "",
-  "license": "Apache-2.0",
-  "main": "src/EyevinnSkin.ts",
-  "directories": {
-    "lib": "lib",
-    "test": "__tests__"
+  "homepage": "https://github.com/Eyevinn/web-player#readme",
+  "license": "ISC",
+  "main": "src/index.tsx",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eyevinn/web-player.git"
   },
-  "files": [
-    "lib"
-  ],
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
+  "bugs": {
+    "url": "https://github.com/Eyevinn/web-player/issues"
+  },
   "dependencies": {
-    "@eyevinn/web-player-core": "^0.0.0"
+    "preact": "^10.4.8"
   },
   "devDependencies": {
-    "postcss-modules": "^3.2.1",
-    "sass": "^1.26.10"
+    "postcss-modules": "^3.2.2"
   }
 }
