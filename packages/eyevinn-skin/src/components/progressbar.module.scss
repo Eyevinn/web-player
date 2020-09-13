@@ -3,6 +3,7 @@
 	width: 100%;
 	height: 0.5rem;
 	background: #141414;
+	cursor: pointer;
 	
 	.progress {
 		position: absolute;
@@ -15,7 +16,7 @@
 		.indicator {
 			position: absolute;
 			top: -0.15rem;
-			right: -0.15rem;
+			right: -0.8rem;
 			height: 0.8rem;
 			width: 0.8rem;
 			background: rgb(255, 255, 255);

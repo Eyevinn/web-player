@@ -42,7 +42,7 @@ export default class EyevinnSkin {
     this.playPauseButton = playPauseButton(() =>
       this.player.isPlaying ? this.player.pause() : this.player.play()
     );
-    this.progressbar = progressbar();
+    this.progressbar = progressbar((percentage) => this.player.seekTo({ percentage }));
 
     this.controls.appendChild(this.playPauseButton.element);
     this.controls.appendChild(this.progressbar.element);

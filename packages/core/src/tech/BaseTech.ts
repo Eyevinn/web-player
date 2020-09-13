@@ -12,10 +12,12 @@ export enum PlaybackState {
   READY,
   PLAYING,
   PAUSED,
+  SEEKING,
   BUFFERING,
 }
 
 export interface ITechState {
+  prevPlaybackState: PlaybackState;
   playbackState: PlaybackState;
   currentTime: number;
   duration: number;
@@ -30,6 +32,7 @@ export default class BaseTech extends EventEmitter {
     super();
 
     this.state = {
+      prevPlaybackState: PlaybackState.IDLE,
       playbackState: PlaybackState.IDLE,
       currentTime: 0,
       duration: 0,
@@ -39,6 +42,7 @@ export default class BaseTech extends EventEmitter {
     this.video = video;
 
     this.video.addEventListener("play", (this.onPlay = this.onPlay.bind(this)));
+    this.video.addEventListener("playing", (this.onPlaying = this.onPlaying.bind(this)));
     this.video.addEventListener(
       "pause",
       (this.onPause = this.onPause.bind(this))
@@ -51,12 +55,26 @@ export default class BaseTech extends EventEmitter {
       "waiting",
       (this.onWaiting = this.onWaiting.bind(this))
     );
-    this.video.addEventListener("loadedmetadata", (this.onLoadedMetadata = this.onLoadedMetadata.bind(this)));
+    this.video.addEventListener(
+      "seeking",
+      (this.onSeeking = this.onSeeking.bind(this))
+    );
+    this.video.addEventListener(
+      "seeked",
+      (this.onSeeked = this.onSeeked.bind(this))
+    );
+    this.video.addEventListener(
+      "loadedmetadata",
+      (this.onLoadedMetadata = this.onLoadedMetadata.bind(this))
+    );
   }
 
   private updateState(state: any) {
     Object.keys(state).forEach((key) => {
       if (this.state[key] !== undefined) {
+        if (key === "playbackState") {
+          this.state["prevPlaybackState"] = this.state.playbackState;
+        }
         this.state[key] = state[key];
       }
     });
@@ -65,7 +83,7 @@ export default class BaseTech extends EventEmitter {
 
   private onLoadedMetadata() {
     this.updateState({
-      isLive: this.isLive
+      isLive: this.isLive,
     });
   }
 
@@ -77,6 +95,13 @@ export default class BaseTech extends EventEmitter {
   private onPause() {
     this.updateState({ playbackState: PlaybackState.PAUSED });
     this.emit(PlayerEvent.PAUSE);
+  }
+
+  private onPlaying() {
+    if (this.state.playbackState !== PlaybackState.PLAYING) {
+      this.updateState({ playbackState: PlaybackState.PLAYING });
+    }
+    this.emit(PlayerEvent.PLAYING);
   }
 
   private onTimeUpdate() {
@@ -91,8 +116,21 @@ export default class BaseTech extends EventEmitter {
   }
 
   private onWaiting() {
-    this.updateState({ playbackState: PlaybackState.BUFFERING });
-    this.emit(PlayerEvent.BUFFERING);
+    if (this.state.playbackState !== PlaybackState.SEEKING) {
+      this.updateState({ playbackState: PlaybackState.BUFFERING });
+      this.emit(PlayerEvent.BUFFERING);
+    }
+    this.emit(PlayerEvent.WAITING);
+  }
+
+  private onSeeking() {
+    this.updateState({ playbackState: PlaybackState.SEEKING });
+    this.emit(PlayerEvent.SEEKING);
+  }
+
+  private onSeeked() {
+    this.updateState({ playbackState: this.state.prevPlaybackState });
+    this.emit(PlayerEvent.SEEKED);
   }
 
   get isPlaying(): boolean {
@@ -116,9 +154,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   set currentTime(newpos) {
-    if (!this.isLive) {
-      this.video.currentTime = newpos;
-    }
+    this.video.currentTime = newpos;
   }
 
   play(): Promise<boolean> {
