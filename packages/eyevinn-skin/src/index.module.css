@@ -1,8 +1,8 @@
 .skinWrapper {
 	position: relative;
 	user-select: none;
-
 }
+
 .skinWrapper video {
 	display: block;
 	width: 100%;
