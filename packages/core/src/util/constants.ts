@@ -19,5 +19,8 @@ export enum PlayerEvent {
 	SEEKED = "seeked",
 	WAITING = "waiting",
 	STALLED = "stalled",
-	BUFFERING = "buffering"
+	VOLUME_CHANGE = "volumechange",
+
+
+	BUFFERING = "buffering",
 }

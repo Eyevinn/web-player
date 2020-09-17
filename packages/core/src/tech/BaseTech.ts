@@ -22,13 +22,14 @@ export interface IPlayerState {
   currentTime: number;
   duration: number;
   isLive: boolean;
+  isMuted: boolean;
 }
 
 export default class BaseTech extends EventEmitter {
   protected video: HTMLVideoElement;
   protected state: IPlayerState;
 
-  constructor({ video }) {
+  constructor({ video }: { video: HTMLVideoElement }) {
     super();
 
     this.state = {
@@ -37,6 +38,7 @@ export default class BaseTech extends EventEmitter {
       currentTime: 0,
       duration: 0,
       isLive: false,
+      isMuted: video.muted
     };
 
     this.video = video;
@@ -66,6 +68,10 @@ export default class BaseTech extends EventEmitter {
     this.video.addEventListener(
       "loadedmetadata",
       (this.onLoadedMetadata = this.onLoadedMetadata.bind(this))
+    );
+    this.video.addEventListener(
+      "volumechange",
+      (this.onVolumeChange = this.onVolumeChange.bind(this))
     );
   }
 
@@ -131,6 +137,13 @@ export default class BaseTech extends EventEmitter {
   private onSeeked() {
     this.updateState({ playbackState: this.state.prevPlaybackState });
     this.emit(PlayerEvent.SEEKED);
+  }
+
+  private onVolumeChange() {
+    if (this.state.isMuted !== this.isMuted) {
+      this.updateState({ isMuted: this.isMuted })
+    }
+    this.emit(PlayerEvent.VOLUME_CHANGE, { volume: this.video.volume });
   }
 
   get isPlaying(): boolean {

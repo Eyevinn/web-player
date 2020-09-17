@@ -25,5 +25,10 @@
 }
 
 .controls {
-	margin-bottom: 0.5rem;
+	display: flex;
+	margin-bottom: 0.5em;
+}
+
+.divider {
+	flex: 1;
 }

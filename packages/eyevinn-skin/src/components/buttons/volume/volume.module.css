@@ -1,0 +1,12 @@
+.container {
+	width: 1em;
+	height: 1em;
+}
+.container svg {
+	width: 100%;
+	height: 100%;
+	fill: #ffffff;
+}
+.container svg:hover {
+	fill: rgb(30, 129, 160);
+}

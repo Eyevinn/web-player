@@ -4,8 +4,9 @@ import { PlayerEvent, IPlayerState } from '@eyevinn/web-player-core';
 import classNames from 'classnames';
 import Logo from './components/logo/Logo';
 import Timeline from './components/timeline/Timeline';
-import PlayPauseButton from './components/buttons/PlayPauseButton';
+import PlayPauseButton from './components/buttons/playPause/PlayPauseButton';
 import style from './skin.module.css';
+import VolumeButton from './components/buttons/volume/VolumeButton';
 
 function usePlayerState(player) {
 	const [state, setState] = useState<IPlayerState | null>(null);
@@ -25,6 +26,7 @@ export default function EyevinnSkin({ player }) {
 		() => (player.isPlaying ? player.pause() : player.play()),
 		[]
 	);
+	const toggleMute = useCallback(() => player.isMuted ? player.unmute() : player.mute(), []);
 
 	const timeoutRef = useRef(null);
 	const [isUserActive, setIsUserActive] = useState(true);
@@ -46,6 +48,8 @@ export default function EyevinnSkin({ player }) {
 						playbackState={playerState?.playbackState}
 						onClick={togglePlayPause}
 					/>
+					<div class={style.divider} />
+					<VolumeButton muted={playerState?.isMuted} onClick={toggleMute}/>
 				</div>
 				<Timeline
 					onSeek={seek}

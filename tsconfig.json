@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": "./packages",
     "paths": {
-      "@eyevinn/web-player-core": ["core/src"]
+      "@eyevinn/web-player-core": ["core/src/WebPlayer.ts"]
     }
   }
 }

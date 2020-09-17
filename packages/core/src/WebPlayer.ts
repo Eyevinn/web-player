@@ -54,6 +54,10 @@ export default class WebPlayer extends EventEmitter {
     return this.tech?.isPlaying ?? false;
   }
 
+  get isMuted(): boolean {
+    return this.tech?.isMuted ?? false;
+  }
+
   play(): Promise<boolean> {
     return this.tech?.play();
   }
@@ -71,6 +75,14 @@ export default class WebPlayer extends EventEmitter {
       position = position || (percentage / 100) *  this.tech.duration;
       this.tech.currentTime = position;
     }
+  }
+
+  mute() {
+    this.tech?.mute();
+  }
+
+  unmute() {
+    this.tech?.unmute();
   } 
 
   reset() {
