@@ -10,7 +10,7 @@ export enum ErrorCode {
 }
 
 export enum PlayerEvent {
-	STATE_CHANGE = "state_change",
+	// HTML5 Media Events 
 	PLAY = "play",
 	PAUSE = "pause",
 	PLAYING = "playing",
@@ -21,6 +21,8 @@ export enum PlayerEvent {
 	STALLED = "stalled",
 	VOLUME_CHANGE = "volumechange",
 
-
+	// WebPlayer Events
+	STATE_CHANGE = "state_change",
+	AUDIO_TRACK_CHANGE = "audio_track_change",
 	BUFFERING = "buffering",
 }

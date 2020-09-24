@@ -1,9 +1,16 @@
-import { PlayerEvent } from "../util/constants";
-import EventEmitter from "../util/EventEmitter";
+import { PlayerEvent } from '../util/constants';
+import EventEmitter from '../util/EventEmitter';
 
 export interface IBaseTechOptions {
   video: HTMLVideoElement;
   src: string;
+}
+
+export interface IAudioTrack {
+  id: string;
+  label: string;
+  language: string;
+  enabled: boolean;
 }
 
 export enum PlaybackState {
@@ -23,6 +30,7 @@ export interface IPlayerState {
   duration: number;
   isLive: boolean;
   isMuted: boolean;
+  audioTracks: IAudioTrack[];
 }
 
 export default class BaseTech extends EventEmitter {
@@ -38,48 +46,58 @@ export default class BaseTech extends EventEmitter {
       currentTime: 0,
       duration: 0,
       isLive: false,
-      isMuted: video.muted
+      isMuted: video.muted,
+      audioTracks: [],
     };
 
     this.video = video;
 
-    this.video.addEventListener("play", (this.onPlay = this.onPlay.bind(this)));
-    this.video.addEventListener("playing", (this.onPlaying = this.onPlaying.bind(this)));
+    this.video.addEventListener('play', (this.onPlay = this.onPlay.bind(this)));
     this.video.addEventListener(
-      "pause",
+      'playing',
+      (this.onPlaying = this.onPlaying.bind(this))
+    );
+    this.video.addEventListener(
+      'pause',
       (this.onPause = this.onPause.bind(this))
     );
     this.video.addEventListener(
-      "timeupdate",
+      'timeupdate',
       (this.onTimeUpdate = this.onTimeUpdate.bind(this))
     );
     this.video.addEventListener(
-      "waiting",
+      'waiting',
       (this.onWaiting = this.onWaiting.bind(this))
     );
     this.video.addEventListener(
-      "seeking",
+      'seeking',
       (this.onSeeking = this.onSeeking.bind(this))
     );
     this.video.addEventListener(
-      "seeked",
+      'seeked',
       (this.onSeeked = this.onSeeked.bind(this))
     );
     this.video.addEventListener(
-      "loadedmetadata",
+      'loadedmetadata',
       (this.onLoadedMetadata = this.onLoadedMetadata.bind(this))
     );
     this.video.addEventListener(
-      "volumechange",
+      'volumechange',
       (this.onVolumeChange = this.onVolumeChange.bind(this))
     );
+    if (this.video.audioTracks) {
+     this.video.audioTracks.addEventListener(
+      'change',
+      (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
+    ); 
+    }
   }
 
-  private updateState(state: any) {
+  protected updateState(state: any) {
     Object.keys(state).forEach((key) => {
       if (this.state[key] !== undefined) {
-        if (key === "playbackState") {
-          this.state["prevPlaybackState"] = this.state.playbackState;
+        if (key === 'playbackState') {
+          this.state['prevPlaybackState'] = this.state.playbackState;
         }
         this.state[key] = state[key];
       }
@@ -87,30 +105,31 @@ export default class BaseTech extends EventEmitter {
     this.emit(PlayerEvent.STATE_CHANGE, { state: this.state });
   }
 
-  private onLoadedMetadata() {
+  protected onLoadedMetadata() {
     this.updateState({
       isLive: this.isLive,
+      audioTracks: this.audioTracks,
     });
   }
 
-  private onPlay() {
+  protected onPlay() {
     this.updateState({ playbackState: PlaybackState.PLAYING });
     this.emit(PlayerEvent.PLAY);
   }
 
-  private onPause() {
+  protected onPause() {
     this.updateState({ playbackState: PlaybackState.PAUSED });
     this.emit(PlayerEvent.PAUSE);
   }
 
-  private onPlaying() {
+  protected onPlaying() {
     if (this.state.playbackState !== PlaybackState.PLAYING) {
       this.updateState({ playbackState: PlaybackState.PLAYING });
     }
     this.emit(PlayerEvent.PLAYING);
   }
 
-  private onTimeUpdate() {
+  protected onTimeUpdate() {
     this.updateState({
       currentTime: this.currentTime,
       duration: this.duration,
@@ -121,7 +140,7 @@ export default class BaseTech extends EventEmitter {
     });
   }
 
-  private onWaiting() {
+  protected onWaiting() {
     if (this.state.playbackState !== PlaybackState.SEEKING) {
       this.updateState({ playbackState: PlaybackState.BUFFERING });
       this.emit(PlayerEvent.BUFFERING);
@@ -129,21 +148,26 @@ export default class BaseTech extends EventEmitter {
     this.emit(PlayerEvent.WAITING);
   }
 
-  private onSeeking() {
+  protected onSeeking() {
     this.updateState({ playbackState: PlaybackState.SEEKING });
     this.emit(PlayerEvent.SEEKING);
   }
 
-  private onSeeked() {
+  protected onSeeked() {
     this.updateState({ playbackState: this.state.prevPlaybackState });
     this.emit(PlayerEvent.SEEKED);
   }
 
-  private onVolumeChange() {
+  protected onVolumeChange() {
     if (this.state.isMuted !== this.isMuted) {
-      this.updateState({ isMuted: this.isMuted })
+      this.updateState({ isMuted: this.isMuted });
     }
     this.emit(PlayerEvent.VOLUME_CHANGE, { volume: this.video.volume });
+  }
+
+  protected onAudioTrackChange() {
+    this.updateState({ audioTracks: this.audioTracks });
+    this.emit(PlayerEvent.AUDIO_TRACK_CHANGE);
   }
 
   get isPlaying(): boolean {
@@ -159,7 +183,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   get duration(): number {
-    return this.video.duration;
+    return this.video.duration || 0;
   }
 
   get currentTime(): number {
@@ -168,6 +192,33 @@ export default class BaseTech extends EventEmitter {
 
   set currentTime(newpos) {
     this.video.currentTime = newpos;
+  }
+
+  get audioTrack() {
+    const audioTrack = this.audioTracks.find(
+      (audioTrack) => audioTrack.enabled
+    );
+    return audioTrack?.id;
+  }
+
+  set audioTrack(id) {
+    if (this.video.audioTracks) {
+      const audioTrack = this.video.audioTracks.find(
+        (audioTrack) => audioTrack.id === id
+      );
+      audioTrack.enabled = true;
+    }
+  }
+
+  get audioTracks(): IAudioTrack[] {
+    return (
+      this.video.audioTracks?.map((audioTrack) => ({
+        id: audioTrack.id,
+        label: audioTrack.label,
+        language: audioTrack.language,
+        enabled: audioTrack.enabled,
+      })) || []
+    );
   }
 
   play(): Promise<boolean> {
@@ -202,7 +253,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   stop() {
-    this.video.src = "";
+    this.video.src = '';
     this.video.load();
     this.updateState({
       playbackState: PlaybackState.IDLE,
@@ -214,6 +265,6 @@ export default class BaseTech extends EventEmitter {
 
   destroy() {
     this.stop();
-    this.video.removeEventListener("timeupdate", this.onTimeUpdate);
+    this.video.removeEventListener('timeupdate', this.onTimeUpdate);
   }
 }

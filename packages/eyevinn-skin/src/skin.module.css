@@ -29,6 +29,10 @@
 	margin-bottom: 0.5em;
 }
 
+.controls > * {
+	margin-right: 0.5em;
+}
+
 .divider {
 	flex: 1;
 }

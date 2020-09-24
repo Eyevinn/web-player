@@ -1,0 +1,43 @@
+.container {
+	width: 1em;
+	height: 1em;
+
+	position: relative;
+}
+.container svg {
+	width: 100%;
+	height: 100%;
+	fill: #ffffff;
+}
+.container svg:hover {
+	fill: rgb(30, 129, 160);
+}
+
+.list {
+	list-style: none;
+	position: absolute;
+	bottom: 1em;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 0.5em;
+	white-space: nowrap;
+	background: rgba(20, 20, 20, 0.6);
+
+	display: none;
+}
+
+.list.open {
+	display:  block;
+}
+
+.list li {
+	margin: 0;
+}
+
+.list input {
+	margin-right: 0.25em;
+}
+
+.list :checked + span {
+	color: rgb(30, 129, 160);
+}

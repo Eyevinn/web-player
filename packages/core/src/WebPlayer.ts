@@ -77,6 +77,12 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
+  setAudioTrack(id) {
+    if (this.tech) {
+      this.tech.audioTrack = id;
+    }
+  }
+
   mute() {
     this.tech?.mute();
   }
