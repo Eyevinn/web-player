@@ -1,6 +1,6 @@
-import { Player } from "shaka-player";
-import { IWebPlayerOptions } from "../WebPlayer";
-import BaseTech from "./BaseTech";
+import { Player } from 'shaka-player';
+import { IWebPlayerOptions } from '../WebPlayer';
+import BaseTech from './BaseTech';
 
 export default class DashPlayer extends BaseTech {
   private shakaPlayer: any;
@@ -8,6 +8,10 @@ export default class DashPlayer extends BaseTech {
   constructor(opts: IWebPlayerOptions) {
     super(opts);
     this.shakaPlayer = new Player(this.video);
+    this.shakaPlayer.addEventListener(
+      'variantchanged',
+      (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
+    );
   }
 
   load(src: string): Promise<void> {
@@ -18,6 +22,26 @@ export default class DashPlayer extends BaseTech {
 
   get isLive() {
     return this.shakaPlayer.isLive();
+  }
+
+  get audioTrack() {
+    return this.shakaPlayer?.getVariantTracks()?.find((track) => track.active)
+      ?.language;
+  }
+
+  set audioTrack(id) {
+    if (this.shakaPlayer) {
+      this.shakaPlayer.selectAudioLanguage(id);
+    }
+  }
+
+  get audioTracks() {
+    return this.shakaPlayer?.getAudioLanguages().map((audioLang) => ({
+      id: audioLang,
+      language: audioLang,
+      label: audioLang,
+      enabled: this.audioTrack === audioLang,
+    }));
   }
 
   destroy() {

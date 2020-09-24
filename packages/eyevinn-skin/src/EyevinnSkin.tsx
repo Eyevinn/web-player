@@ -28,6 +28,7 @@ function usePlayerState(player) {
 }
 
 export default function EyevinnSkin({ player }) {
+	window.player = player;
 	const playerState = usePlayerState(player);
 	const togglePlayPause = useCallback(
 		() => (player.isPlaying ? player.pause() : player.play()),
@@ -75,10 +76,12 @@ export default function EyevinnSkin({ player }) {
 						onClick={togglePlayPause}
 					/>
 					<div class={style.divider} />
-					<AudioTrackButton
-						audioTracks={playerState?.audioTracks}
-						onChange={changeAudioTrack}
-					/>
+					{playerState?.audioTracks.length > 0 && (
+						<AudioTrackButton
+							audioTracks={playerState?.audioTracks}
+							onChange={changeAudioTrack}
+						/>
+					)}
 					<VolumeButton muted={playerState?.isMuted} onClick={toggleMute} />
 				</div>
 				<Timeline

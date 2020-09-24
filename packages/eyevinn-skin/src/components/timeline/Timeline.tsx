@@ -24,8 +24,6 @@ export default function Timeline({
 		onSeek((evt.offsetX / width) * 100);
 	}, []);
 
-	console.log(isLive);
-
 	const percentage = (currentTime / duration) * 100 || 0;
 	return (
 		<div class={style.container}>

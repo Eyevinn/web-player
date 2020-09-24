@@ -33,6 +33,10 @@
 	margin-right: 0.5em;
 }
 
+.controls > *:last-child {
+	margin-right: 0;
+}
+
 .divider {
 	flex: 1;
 }

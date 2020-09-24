@@ -54,7 +54,6 @@ export default class HlsJsPlayer extends BaseTech {
   }
 
   get audioTracks() {
-    console.log(this.hls?.audioTrack);
     return (
       this.hls?.audioTracks.map((audioTrack) => ({
         id: audioTrack.id,
