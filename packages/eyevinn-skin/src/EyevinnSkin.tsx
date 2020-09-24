@@ -13,6 +13,7 @@ import VolumeButton from './components/buttons/volume/VolumeButton';
 import AudioTrackButton from './components/buttons/audioTrack/AudioTrackButton';
 
 import style from './skin.module.css';
+import Loader from './components/loader/Loader';
 
 function usePlayerState(player) {
 	const [state, setState] = useState<IPlayerState | null>(null);
@@ -54,12 +55,19 @@ export default function EyevinnSkin({ player }) {
 		playerState?.playbackState !== PlaybackState.PAUSED;
 
 	const seek = useCallback((percentage) => player.seekTo({ percentage }), []);
+
+	const isLoading =
+		playerState?.playbackState === PlaybackState.LOADING ||
+		playerState?.playbackState === PlaybackState.BUFFERING ||
+		playerState?.playbackState === PlaybackState.SEEKING;
+
 	return (
 		<div
 			class={classNames(style.container, { [style.hidden]: isSkinHidden })}
 			onMouseMove={onMouseMove}
 		>
 			<Logo />
+			{isLoading && <Loader />}
 			<div class={style.bottomContainer}>
 				<div class={style.controls}>
 					<PlayPauseButton
@@ -74,6 +82,7 @@ export default function EyevinnSkin({ player }) {
 					<VolumeButton muted={playerState?.isMuted} onClick={toggleMute} />
 				</div>
 				<Timeline
+					isLive={playerState?.isLive}
 					onSeek={seek}
 					isLive={playerState?.isLive}
 					currentTime={playerState?.currentTime}
