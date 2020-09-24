@@ -1,12 +1,17 @@
 import { h } from 'preact';
 import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
-import { PlayerEvent, IPlayerState } from '@eyevinn/web-player-core';
+import {
+	PlayerEvent,
+	IPlayerState,
+	PlaybackState,
+} from '@eyevinn/web-player-core';
 import classNames from 'classnames';
 import Logo from './components/logo/Logo';
 import Timeline from './components/timeline/Timeline';
 import PlayPauseButton from './components/buttons/playPause/PlayPauseButton';
 import style from './skin.module.css';
 import VolumeButton from './components/buttons/volume/VolumeButton';
+import Loader from './components/loader/Loader';
 
 function usePlayerState(player) {
 	const [state, setState] = useState<IPlayerState | null>(null);
@@ -26,7 +31,10 @@ export default function EyevinnSkin({ player }) {
 		() => (player.isPlaying ? player.pause() : player.play()),
 		[]
 	);
-	const toggleMute = useCallback(() => player.isMuted ? player.unmute() : player.mute(), []);
+	const toggleMute = useCallback(
+		() => (player.isMuted ? player.unmute() : player.mute()),
+		[]
+	);
 
 	const timeoutRef = useRef(null);
 	const [isUserActive, setIsUserActive] = useState(true);
@@ -39,9 +47,19 @@ export default function EyevinnSkin({ player }) {
 	}, [isUserActive]);
 
 	const seek = useCallback((percentage) => player.seekTo({ percentage }), []);
+
+	const isLoading =
+		playerState?.playbackState === PlaybackState.LOADING ||
+		playerState?.playbackState === PlaybackState.BUFFERING ||
+		playerState?.playbackState === PlaybackState.SEEKING;
+
 	return (
-		<div class={classNames(style.container, { [style.hidden]: !isUserActive })} onMouseMove={onMouseMove}>
+		<div
+			class={classNames(style.container, { [style.hidden]: !isUserActive })}
+			onMouseMove={onMouseMove}
+		>
 			<Logo />
+			{isLoading && <Loader />}
 			<div class={style.bottomContainer}>
 				<div class={style.controls}>
 					<PlayPauseButton
@@ -49,9 +67,10 @@ export default function EyevinnSkin({ player }) {
 						onClick={togglePlayPause}
 					/>
 					<div class={style.divider} />
-					<VolumeButton muted={playerState?.isMuted} onClick={toggleMute}/>
+					<VolumeButton muted={playerState?.isMuted} onClick={toggleMute} />
 				</div>
 				<Timeline
+					isLive={playerState?.isLive}
 					onSeek={seek}
 					currentTime={playerState?.currentTime}
 					duration={playerState?.duration}
