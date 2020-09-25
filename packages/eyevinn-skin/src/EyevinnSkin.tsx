@@ -11,9 +11,12 @@ import Timeline from './components/timeline/Timeline';
 import PlayPauseButton from './components/buttons/playPause/PlayPauseButton';
 import VolumeButton from './components/buttons/volume/VolumeButton';
 import AudioTrackButton from './components/buttons/audioTrack/AudioTrackButton';
+import FullscreenButton from './components/buttons/fullscreen/FullscreenButton';
 
 import style from './skin.module.css';
 import Loader from './components/loader/Loader';
+import { exitFullscreen, isFullscreen, requestFullscreen } from './util/fullscreen';
+import TextTrackButton from './components/buttons/textTrack/textTrackButton';
 
 function usePlayerState(player) {
 	const [state, setState] = useState<IPlayerState | null>(null);
@@ -27,7 +30,7 @@ function usePlayerState(player) {
 	return state;
 }
 
-export default function EyevinnSkin({ player }) {
+export default function EyevinnSkin({ player, rootElement}) {
 	const playerState = usePlayerState(player);
 	const togglePlayPause = useCallback(
 		() => (player.isPlaying ? player.pause() : player.play()),
@@ -38,6 +41,9 @@ export default function EyevinnSkin({ player }) {
 		[]
 	);
 	const changeAudioTrack = useCallback((id) => player.setAudioTrack(id), []);
+	const changeTextTrack = useCallback((id) => player.setTextTrack(id), []);
+	const seek = useCallback((percentage) => player.seekTo({ percentage }), []);
+	const toggleFullscreen = useCallback(() => isFullscreen() ? exitFullscreen() : requestFullscreen(rootElement), []);
 
 	const timeoutRef = useRef(null);
 	const [isUserActive, setIsUserActive] = useState(true);
@@ -53,8 +59,6 @@ export default function EyevinnSkin({ player }) {
 		!isUserActive &&
 		playerState?.playbackState !== PlaybackState.READY &&
 		playerState?.playbackState !== PlaybackState.PAUSED;
-
-	const seek = useCallback((percentage) => player.seekTo({ percentage }), []);
 
 	const isLoading =
 		playerState?.playbackState === PlaybackState.LOADING ||
@@ -75,13 +79,20 @@ export default function EyevinnSkin({ player }) {
 						onClick={togglePlayPause}
 					/>
 					<div class={style.divider} />
-					{playerState?.audioTracks.length > 0 && (
+					{playerState?.textTracks.length > 1 && (
+						<TextTrackButton
+							textTracks={playerState?.textTracks}
+							onChange={changeTextTrack}
+						/>
+					)}
+					{playerState?.audioTracks.length > 1 && (
 						<AudioTrackButton
 							audioTracks={playerState?.audioTracks}
 							onChange={changeAudioTrack}
 						/>
 					)}
 					<VolumeButton muted={playerState?.isMuted} onClick={toggleMute} />
+					<FullscreenButton isFullscreen={isFullscreen()} onClick={toggleFullscreen} />
 				</div>
 				<Timeline
 					isLive={playerState?.isLive}

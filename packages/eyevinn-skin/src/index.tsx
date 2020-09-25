@@ -5,5 +5,5 @@ import style from './index.module.css';
 export { EyevinnSkin };
 export function renderEyevinnSkin({ root, player }) {
 	root.classList.add(style.skinWrapper);
-	render(<EyevinnSkin player={player} />, root);
+	render(<EyevinnSkin player={player} rootElement={root} />, root);
 }

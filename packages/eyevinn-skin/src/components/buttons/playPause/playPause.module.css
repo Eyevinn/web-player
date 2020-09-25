@@ -1,6 +1,8 @@
 .container {
 	width: 1em;
 	height: 1em;
+
+	cursor: pointer;
 }
 .container svg {
 	width: 100%;

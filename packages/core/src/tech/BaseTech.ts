@@ -6,7 +6,7 @@ export interface IBaseTechOptions {
   src: string;
 }
 
-export interface IAudioTrack {
+export interface ITrack {
   id: string;
   label: string;
   language: string;
@@ -30,7 +30,8 @@ export interface IPlayerState {
   duration: number;
   isLive: boolean;
   isMuted: boolean;
-  audioTracks: IAudioTrack[];
+  audioTracks: ITrack[];
+  textTracks: ITrack[];
 }
 
 export default class BaseTech extends EventEmitter {
@@ -48,6 +49,7 @@ export default class BaseTech extends EventEmitter {
       isLive: false,
       isMuted: video.muted,
       audioTracks: [],
+      textTracks: [],
     };
 
     this.video = video;
@@ -112,6 +114,7 @@ export default class BaseTech extends EventEmitter {
       duration: this.duration,
       isLive: this.isLive,
       audioTracks: this.audioTracks,
+      textTracks: this.textTracks,
     });
   }
 
@@ -208,13 +211,13 @@ export default class BaseTech extends EventEmitter {
     // @ts-ignore
     if (this.video.audioTracks) {
       // @ts-ignore
-      for (const audioTrack of (this.video.audioTracks || [])) {
+      for (const audioTrack of this.video.audioTracks || []) {
         audioTrack.enabled = audioTrack.id === id;
       }
     }
   }
 
-  get audioTracks(): IAudioTrack[] {
+  get audioTracks(): ITrack[] {
     return (
       // @ts-ignore
       Array.from(this.video.audioTracks ?? []).map((audioTrack: any) => ({
@@ -222,6 +225,33 @@ export default class BaseTech extends EventEmitter {
         label: audioTrack.label,
         language: audioTrack.language,
         enabled: audioTrack.enabled,
+      }))
+    );
+  }
+
+  get textTrack() {
+    const textTrack = this.textTrack.find((textTrack) => textTrack.enabled);
+    return textTrack?.id;
+  }
+
+  set textTrack(id) {
+    // @ts-ignore
+    if (this.video.textTracks) {
+      // @ts-ignore
+      for (const textTrack of this.video.textTracks || []) {
+        textTrack.enabled = textTrack.id === id;
+      }
+    }
+  }
+
+  get textTracks(): ITrack[] {
+    return (
+      // @ts-ignore
+      Array.from(this.video.textTracks ?? []).map((textTrack: any) => ({
+        id: textTrack.id,
+        label: textTrack.label,
+        language: textTrack.language,
+        enabled: textTrack.enabled,
       }))
     );
   }

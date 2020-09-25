@@ -21,7 +21,7 @@ module.exports = {
       template: './src/template.html',
     }),
   ],
-  devtool: 'cheap-source-map',
+  devtool: 'source-map',
   devServer: {
     contentBase: './src',
     compress: true,

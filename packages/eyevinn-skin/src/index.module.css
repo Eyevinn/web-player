@@ -1,6 +1,7 @@
 .skinWrapper {
 	position: relative;
 	user-select: none;
+	background: black;
 }
 
 .skinWrapper video {
