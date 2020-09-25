@@ -28,7 +28,6 @@ function usePlayerState(player) {
 }
 
 export default function EyevinnSkin({ player }) {
-	window.player = player;
 	const playerState = usePlayerState(player);
 	const togglePlayPause = useCallback(
 		() => (player.isPlaying ? player.pause() : player.play()),
@@ -87,7 +86,6 @@ export default function EyevinnSkin({ player }) {
 				<Timeline
 					isLive={playerState?.isLive}
 					onSeek={seek}
-					isLive={playerState?.isLive}
 					currentTime={playerState?.currentTime}
 					duration={playerState?.duration}
 				/>

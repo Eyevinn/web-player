@@ -18,7 +18,7 @@ export default class MssPlayer extends BaseTech {
         resolve();
       });
       this.mediaPlayer.on(MediaPlayer.events.ERROR, ev => {
-        reject(`Failed to load Mss Player: ${ev.error.message}`);
+        reject(`Failed to load Mss Player`);
       });
     });
   }

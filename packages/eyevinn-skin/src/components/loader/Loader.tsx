@@ -25,6 +25,7 @@ export default function Loader() {
               stroke="url(#a)"
               stroke-width="2"
             >
+              {/*@ts-ignore*/}
               <animateTransform
                 attributeName="transform"
                 type="rotate"
@@ -35,6 +36,7 @@ export default function Loader() {
               />
             </path>
             <circle fill="#fff" cx="36" cy="18" r="1">
+              {/*@ts-ignore*/}
               <animateTransform
                 attributeName="transform"
                 type="rotate"

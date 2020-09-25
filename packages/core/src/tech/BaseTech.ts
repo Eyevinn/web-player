@@ -78,18 +78,20 @@ export default class BaseTech extends EventEmitter {
       (this.onSeeked = this.onSeeked.bind(this))
     );
     this.video.addEventListener(
-      'loadedmetadata',
-      (this.onLoadedMetadata = this.onLoadedMetadata.bind(this))
+      'loadeddata',
+      (this.onLoadedData = this.onLoadedData.bind(this))
     );
     this.video.addEventListener(
       'volumechange',
       (this.onVolumeChange = this.onVolumeChange.bind(this))
     );
+    // @ts-ignore
     if (this.video.audioTracks) {
-     this.video.audioTracks.addEventListener(
-      'change',
-      (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
-    ); 
+      // @ts-ignore
+      this.video.audioTracks.addEventListener(
+        'change',
+        (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
+      );
     }
   }
 
@@ -105,8 +107,9 @@ export default class BaseTech extends EventEmitter {
     this.emit(PlayerEvent.STATE_CHANGE, { state: this.state });
   }
 
-  protected onLoadedMetadata() {
+  protected onLoadedData() {
     this.updateState({
+      duration: this.duration,
       isLive: this.isLive,
       audioTracks: this.audioTracks,
     });
@@ -202,22 +205,24 @@ export default class BaseTech extends EventEmitter {
   }
 
   set audioTrack(id) {
+    // @ts-ignore
     if (this.video.audioTracks) {
-      const audioTrack = this.video.audioTracks.find(
-        (audioTrack) => audioTrack.id === id
-      );
-      audioTrack.enabled = true;
+      // @ts-ignore
+      for (const audioTrack of (this.video.audioTracks || [])) {
+        audioTrack.enabled = audioTrack.id === id;
+      }
     }
   }
 
   get audioTracks(): IAudioTrack[] {
     return (
-      this.video.audioTracks?.map((audioTrack) => ({
+      // @ts-ignore
+      Array.from(this.video.audioTracks ?? []).map((audioTrack: any) => ({
         id: audioTrack.id,
         label: audioTrack.label,
         language: audioTrack.language,
         enabled: audioTrack.enabled,
-      })) || []
+      }))
     );
   }
 

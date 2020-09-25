@@ -1,7 +1,7 @@
 import BaseTech, { IBaseTechOptions, PlaybackState } from './BaseTech';
 import Hls from 'hls.js';
 
-export default class HlsJsPlayer extends BaseTech {
+export default class HlsJsTech extends BaseTech {
   static isSupported() {
     return Hls.isSupported();
   }
@@ -49,14 +49,14 @@ export default class HlsJsPlayer extends BaseTech {
 
   set audioTrack(id) {
     if (this.hls) {
-      this.hls.audioTrack = id;
+      this.hls.audioTrack = parseInt(id);
     }
   }
 
   get audioTracks() {
     return (
       this.hls?.audioTracks.map((audioTrack) => ({
-        id: audioTrack.id,
+        id: audioTrack.id.toString(),
         label: audioTrack.name,
         language: audioTrack.lang,
         enabled: this.audioTrack === audioTrack.id.toString(),

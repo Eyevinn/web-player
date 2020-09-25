@@ -1,5 +1,7 @@
 import WebPlayer from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
+import { debugEvents } from '@eyevinn/web-player-debug';
+import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 
 async function main() {
   const hlsButton = document.querySelector('#hls-button');
@@ -10,6 +12,9 @@ async function main() {
   const loadButton = document.querySelector('#load-button');
 
   const video = document.querySelector('video');
+  if (new URL(window.location.href).searchParams.get('debug') === 'true') {
+    debugEvents(video);
+  }
   const player = new WebPlayer({ video });
   renderEyevinnSkin({
     root: document.querySelector('#player'),

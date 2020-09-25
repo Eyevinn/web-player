@@ -1,10 +1,10 @@
-import BaseTech, { PlaybackState } from "./tech/BaseTech";
-import { ErrorCode, ManifestType } from "./util/constants";
-import { getManifestType } from "./util/contentType";
-import EventEmitter from "./util/EventEmitter";
+import BaseTech, { PlaybackState } from './tech/BaseTech';
+import { ErrorCode, ManifestType } from './util/constants';
+import { canPlayManifestType, getManifestType } from './util/contentType';
+import EventEmitter from './util/EventEmitter';
 
-export { PlayerEvent } from "./util/constants";
-export { IPlayerState } from "./tech/BaseTech";
+export { PlayerEvent } from './util/constants';
+export { IPlayerState } from './tech/BaseTech';
 
 export interface IWebPlayerOptions {
   video: HTMLVideoElement;
@@ -31,17 +31,21 @@ export default class WebPlayer extends EventEmitter {
     let Tech;
     switch (manifestType) {
       case ManifestType.HLS:
-        Tech = (await import("./tech/HlsJsTech")).default;
+        if (canPlayManifestType(ManifestType.HLS)) {
+          Tech = BaseTech;
+        } else {
+          Tech = (await import('./tech/HlsJsTech')).default;
+        }
         break;
       case ManifestType.DASH:
-        Tech = (await import("./tech/ShakaTech")).default;
+        Tech = (await import('./tech/ShakaTech')).default;
         break;
       case ManifestType.MSS:
-        Tech = (await import("./tech/DashJsTech")).default;
+        Tech = (await import('./tech/DashJsTech')).default;
         break;
     }
     this.tech = new Tech({ video: this.video });
-    this.tech.on("*", this.onEvent.bind(this));
+    this.tech.on('*', this.onEvent.bind(this));
 
     return this.tech.load(src);
   }
@@ -70,9 +74,9 @@ export default class WebPlayer extends EventEmitter {
     return this.tech?.stop();
   }
 
-  seekTo({ position, percentage }: { position?: number, percentage?: number }) {
+  seekTo({ position, percentage }: { position?: number; percentage?: number }) {
     if (this.tech) {
-      position = position || (percentage / 100) *  this.tech.duration;
+      position = position || (percentage / 100) * this.tech.duration;
       this.tech.currentTime = position;
     }
   }
@@ -89,7 +93,7 @@ export default class WebPlayer extends EventEmitter {
 
   unmute() {
     this.tech?.unmute();
-  } 
+  }
 
   reset() {
     if (this.tech) {

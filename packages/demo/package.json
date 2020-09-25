@@ -3,24 +3,23 @@
   "name": "@eyevinn/web-player-demo",
   "version": "0.0.0",
   "description": "> TODO: description",
-  "author": "Benjamin Wallberg <me@bwallberg.com>",
+  "author": "Benjamin Wallberg <benjamin.wallberg@eyevinn.se>",
   "homepage": "",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "parcel ./src/index.html --no-cache"
+    "dev": "webpack-dev-server --hot --progress"
   },
   "dependencies": {
     "@eyevinn/web-player-core": "^0.0.0",
+    "@eyevinn/web-player-debug": "^0.0.0",
     "@eyevinn/web-player-eyevinn-skin": "^0.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.11.6",
-    "@babel/plugin-proposal-class-properties": "^7.10.4",
-    "@babel/plugin-proposal-optional-chaining": "^7.11.0",
-    "@babel/plugin-transform-react-jsx": "^7.10.4",
-    "@babel/plugin-transform-runtime": "^7.11.5",
-    "@babel/preset-env": "^7.11.5",
-    "@babel/preset-typescript": "^7.10.4",
-    "parcel": "^2.0.0-beta.1"
+    "css-loader": "^4.3.0",
+    "html-webpack-plugin": "^4.5.0",
+    "style-loader": "^1.2.1",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   }
 }

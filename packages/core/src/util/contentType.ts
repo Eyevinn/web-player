@@ -10,8 +10,14 @@ const CONTENT_TYPE_MAP = {
   "application/vnd.ms-sstr+xml": ManifestType.MSS
 };
 
-export function canPlayContentType(contentType): boolean {
-  return !!document.createElement('video').canPlayType(contentType);
+export const MANIFEST_TYPE_MAP = {
+  [ManifestType.HLS]: 'application/vnd.apple.mpegurl',
+  [ManifestType.DASH]: 'application/dash+xml',
+  [ManifestType.MSS]: 'application/vnd.ms-sstr+xml'
+}
+
+export function canPlayManifestType(manifestType: ManifestType): boolean {
+  return !!document.createElement('video').canPlayType(MANIFEST_TYPE_MAP[manifestType]);
 }
 
 export function getManifestType(uri): Promise<ManifestType> {
@@ -31,7 +37,6 @@ export function getManifestType(uri): Promise<ManifestType> {
       return type;
     })
     .catch(() => {
-
       return ManifestType.UNKNOWN;
     });
 }
