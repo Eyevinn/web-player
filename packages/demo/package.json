@@ -10,6 +10,7 @@
     "dev": "webpack-dev-server --hot --progress"
   },
   "dependencies": {
+    "@eyevinn/web-player": "^0.0.0",
     "@eyevinn/web-player-core": "^0.0.0",
     "@eyevinn/web-player-debug": "^0.0.0",
     "@eyevinn/web-player-eyevinn-skin": "^0.0.0"
