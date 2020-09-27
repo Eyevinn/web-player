@@ -25,13 +25,14 @@ export default function Timeline({
 	}, []);
 
 	const percentage = (currentTime / duration) * 100 || 0;
+	const isDVR = isLive && currentTime < (duration - 20);
 	return (
 		<div class={style.container}>
 			<span class={style.time}>{formatPlayerTime(currentTime)}</span>
 			<div class={style.progressbarContainer} onClick={onProgressClick}>
 				<div class={style.progress} style={{ width: `${percentage}%` }} />
 			</div>
-			<span class={classNames(style.time, { [style.live]: isLive })} onClick={useCallback(() => onSeek(100), [isLive])}>
+			<span class={classNames(style.time, { [style.live]: isLive, [style.dvr]: isDVR })} onClick={useCallback(() => onSeek(100), [isLive])}>
 				{isLive ? 'LIVE' : formatPlayerTime(duration)}
 			</span>
 		</div>

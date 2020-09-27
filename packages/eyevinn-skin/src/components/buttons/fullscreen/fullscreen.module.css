@@ -1,14 +1,14 @@
 .container {
-	width: 1em;
-	height: 1em;
+	width: 1.5em;
+	height: 1.5em;
 
 	cursor: pointer;
 }
 .container svg {
 	width: 100%;
 	height: 100%;
-	fill: #ffffff;
+	fill: rgba(255, 255, 255, 0.8);
 }
 .container svg:hover {
-	fill: rgb(30, 129, 160);
+	fill: rgba(255, 255, 255, 1);
 }

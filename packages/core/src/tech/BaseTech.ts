@@ -1,6 +1,8 @@
 import { PlayerEvent } from '../util/constants';
 import EventEmitter from '../util/EventEmitter';
 
+const LIVE_EDGE = 10; // minimum seconds from edge 
+
 export interface IBaseTechOptions {
   video: HTMLVideoElement;
   src: string;
@@ -197,7 +199,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   set currentTime(newpos) {
-    this.video.currentTime = newpos;
+    this.video.currentTime = this.isLive ? Math.min(newpos, this.duration - LIVE_EDGE) : newpos;
   }
 
   get audioTrack() {

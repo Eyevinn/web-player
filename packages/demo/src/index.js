@@ -11,8 +11,15 @@ async function main() {
   const manifestInput = document.querySelector('#manifest-input');
   const loadButton = document.querySelector('#load-button');
 
+
+  const searchParams = new URL(window.location.href).searchParams;
+
+  if (searchParams.get('manifest')) {
+    manifestInput.value = searchParams.get('manifest');
+  }
+
   const video = document.querySelector('video');
-  if (new URL(window.location.href).searchParams.get('debug') === 'true') {
+  if (searchParams.get('debug') === 'true') {
     debugEvents(video);
   }
   const player = new WebPlayer({ video });
