@@ -74,9 +74,21 @@ export default class WebPlayer extends EventEmitter {
     return this.tech?.stop();
   }
 
-  seekTo({ position, percentage }: { position?: number; percentage?: number }) {
+  seekTo({
+    position,
+    change,
+    percentage,
+  }: {
+    position?: number;
+    change?: number;
+    percentage?: number;
+  }) {
     if (this.tech) {
-      position = position || (percentage / 100) * this.tech.duration;
+      if (percentage) {
+        position = (percentage / 100) * this.tech.duration;
+      } else if (change) {
+        position = this.tech.currentTime + change;
+      }
       this.tech.currentTime = position;
     }
   }

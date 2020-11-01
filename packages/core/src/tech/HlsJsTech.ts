@@ -1,6 +1,8 @@
 import BaseTech, { IBaseTechOptions, PlaybackState } from './BaseTech';
 import Hls from 'hls.js';
 
+const DEFAULT_CONFIG = {};
+
 export default class HlsJsTech extends BaseTech {
   static isSupported() {
     return Hls.isSupported();
@@ -12,7 +14,7 @@ export default class HlsJsTech extends BaseTech {
 
   constructor(opts: IBaseTechOptions) {
     super(opts);
-    this.hls = new Hls();
+    this.hls = new Hls(DEFAULT_CONFIG);
 
     this.hls.attachMedia(this.video);
 
