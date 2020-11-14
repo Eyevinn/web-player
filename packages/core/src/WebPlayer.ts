@@ -14,7 +14,8 @@ export { PlaybackState };
 
 export default class WebPlayer extends EventEmitter {
   private tech: BaseTech;
-  private video: HTMLVideoElement;
+
+  public video: HTMLVideoElement;
 
   constructor({ video }: IWebPlayerOptions) {
     super();

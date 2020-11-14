@@ -1,10 +1,17 @@
 import { h } from 'preact';
-import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
+import {
+	useState,
+	useEffect,
+	useCallback,
+	useRef,
+	useMemo,
+} from 'preact/hooks';
 import {
 	PlayerEvent,
 	IPlayerState,
 	PlaybackState,
 } from '@eyevinn/web-player-core';
+import { AirPlay, AirPlayEvent } from '@eyevinn/web-player-airplay';
 import classNames from 'classnames';
 import Logo from './components/logo/Logo';
 import Timeline from './components/timeline/Timeline';
@@ -21,6 +28,7 @@ import {
 	requestFullscreen,
 } from './util/fullscreen';
 import TextTrackButton from './components/buttons/textTrack/textTrackButton';
+import AirPlayButton from './components/buttons/airplayButton/AirPlayButton';
 
 function usePlayerState(player) {
 	const [state, setState] = useState<IPlayerState | null>(null);
@@ -34,9 +42,23 @@ function usePlayerState(player) {
 	return state;
 }
 
+function useAirPlay(player) {
+	const [available, setAvailable] = useState(false);
+	const airplay = useMemo(() => new AirPlay(player.video), []);
+	const toggleAirPlay = useCallback(() => airplay.toggleAirPlay(), []);
+	
+	useEffect(() => {
+		airplay.on(AirPlayEvent.AVAILABILITY_CHANGED, ({ available }) =>
+			setAvailable(available)
+		);
+	}, []);
+	return [available, toggleAirPlay];
+}
+
 export default function EyevinnSkin({ player, rootElement }) {
 	const skinContainerRef = useRef<HTMLDivElement>();
 	const playerState = usePlayerState(player);
+	const [airplayAvailable, toggleAirPlay] = useAirPlay(player);
 
 	// Setup click handlers
 	const togglePlayPause = useCallback(
@@ -125,6 +147,7 @@ export default function EyevinnSkin({ player, rootElement }) {
 						onClick={togglePlayPause}
 					/>
 					<div class={style.divider} />
+					{airplayAvailable && <AirPlayButton onClick={toggleAirPlay} />}
 					{playerState?.textTracks.length > 1 && (
 						<TextTrackButton
 							textTracks={playerState?.textTracks}

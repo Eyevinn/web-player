@@ -191,6 +191,9 @@ export default class BaseTech extends EventEmitter {
   }
 
   get duration(): number {
+    if (this.isLive) {
+      return this.video.seekable.end(0);
+    }
     return this.video.duration || 0;
   }
 

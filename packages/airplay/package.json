@@ -1,35 +1,31 @@
 {
-  "name": "@eyevinn/web-player-eyevinn-skin",
+  "name": "@eyevinn/web-player-airplay",
   "version": "0.0.0",
   "description": "> TODO: description",
-  "author": "Benjamin Wallberg <benjamin.wallberg@eyevinn.se>",
+  "author": "Benjamin Wallberg <me@bwallberg.com>",
   "homepage": "https://github.com/Eyevinn/web-player#readme",
-  "license": "Apache-2.0",
-  "source": "./src/index.tsx",
+  "license": "ISC",
+  "source": "./src/index.ts",
   "main": "dist/index.js",
   "module": "dist/index.m.js",
   "esmodule": "dist/index.modern.js",
   "types": "dist/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Eyevinn/web-player.git"
-  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "prepare": "npm run build",
     "build": "microbundle --no-sourcemap --format modern,es,cjs",
     "dev": "microbundle --watch --format modern,es,cjs"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eyevinn/web-player.git"
+  },
   "bugs": {
     "url": "https://github.com/Eyevinn/web-player/issues"
   },
   "dependencies": {
-    "@eyevinn/web-player-core": "^0.0.0",
-    "@eyevinn/web-player-airplay": "^0.0.0",
-    "classnames": "^2.2.6",
-    "preact": "^10.4.8"
-  },
-  "devDependencies": {
-    "@types/classnames": "^2.2.10",
-    "postcss-modules": "^3.2.2"
+    "mitt": "^2.1.0"
   }
 }

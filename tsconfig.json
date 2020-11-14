@@ -4,7 +4,8 @@
     "baseUrl": "./packages",
     "paths": {
       "@eyevinn/web-player-core": ["core/src/WebPlayer.ts"],
-      "@eyevinn/web-player-eyevinn-skin": ["eyevinn-skin/src/index.tsx"]
+      "@eyevinn/web-player-eyevinn-skin": ["eyevinn-skin/src/index.tsx"],
+      "@eyevinn/web-player-airplay": ["airplay/src/index.ts"]
     }
   }
 }
