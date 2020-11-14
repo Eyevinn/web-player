@@ -1,5 +1,5 @@
 {
-  "name": "@eyevinn/cast",
+  "name": "@eyevinn/web-player-cast",
   "version": "0.0.0",
   "description": "> TODO: description",
   "author": "Benjamin Wallberg <me@bwallberg.com>",
@@ -14,7 +14,9 @@
     "dist"
   ],
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "prepare": "npm run build",
+    "build": "microbundle --no-sourcemap --format modern,es,cjs",
+    "dev": "microbundle --watch --format modern,es,cjs"
   },
   "repository": {
     "type": "git",

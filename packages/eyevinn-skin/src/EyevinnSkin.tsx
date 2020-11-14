@@ -12,6 +12,7 @@ import {
 	PlaybackState,
 } from '@eyevinn/web-player-core';
 import { AirPlay, AirPlayEvent } from '@eyevinn/web-player-airplay';
+import { CastPlayer, CastPlayerEvent } from '@eyevinn/web-player-cast';
 import classNames from 'classnames';
 import Logo from './components/logo/Logo';
 import Timeline from './components/timeline/Timeline';
@@ -29,6 +30,7 @@ import {
 } from './util/fullscreen';
 import TextTrackButton from './components/buttons/textTrack/textTrackButton';
 import AirPlayButton from './components/buttons/airplayButton/AirPlayButton';
+import CastButton from './components/buttons/castButton/CastButton';
 
 function usePlayerState(player) {
 	const [state, setState] = useState<IPlayerState | null>(null);
@@ -55,10 +57,23 @@ function useAirPlay(player) {
 	return [available, toggleAirPlay];
 }
 
+function useCast(player) {
+	const [state, setState] = useState(false);
+	const castPlayer = useMemo(() => new CastPlayer("050D9FF7"), []);
+	useEffect(() => {
+		castPlayer.on(CastPlayerEvent.CONNECTED, () => {
+			console.log("bwallberg load", player.currentSrc);
+			castPlayer.load(player.currentSrc);
+		})
+	} , []);
+	return [state];
+}
+
 export default function EyevinnSkin({ player, rootElement }) {
 	const skinContainerRef = useRef<HTMLDivElement>();
 	const playerState = usePlayerState(player);
 	const [airplayAvailable, toggleAirPlay] = useAirPlay(player);
+	const [castState] = useCast(player);
 
 	// Setup click handlers
 	const togglePlayPause = useCallback(
@@ -147,6 +162,7 @@ export default function EyevinnSkin({ player, rootElement }) {
 						onClick={togglePlayPause}
 					/>
 					<div class={style.divider} />
+					<CastButton />
 					{airplayAvailable && <AirPlayButton onClick={toggleAirPlay} />}
 					{playerState?.textTracks.length > 1 && (
 						<TextTrackButton

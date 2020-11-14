@@ -16,6 +16,7 @@ export default class WebPlayer extends EventEmitter {
   private tech: BaseTech;
 
   public video: HTMLVideoElement;
+  public currentSrc: string;
 
   constructor({ video }: IWebPlayerOptions) {
     super();
@@ -24,6 +25,8 @@ export default class WebPlayer extends EventEmitter {
 
   async load(src: string) {
     this.reset();
+
+    this.currentSrc = src;
 
     const manifestType = await getManifestType(src);
     if (manifestType === ManifestType.UNKNOWN) {

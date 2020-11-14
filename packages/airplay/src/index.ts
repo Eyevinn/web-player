@@ -14,7 +14,6 @@ export class AirPlay extends EventEmitter {
 		if (!(window as any).WebKitPlaybackTargetAvailabilityEvent) {
 			this.emit(AirPlayEvent.AVAILABILITY_CHANGED, { available: false });
 		} else {
-			console.log("bwallberg adding listeners")
 			video.addEventListener('webkitplaybacktargetavailabilitychanged', this.onAvailabilityChanged = this.onAvailabilityChanged.bind(this));
 			video.addEventListener('webkitcurrentplaybacktargetiswirelesschanged', this.onTargetChanged = this.onTargetChanged.bind(this));
 		}

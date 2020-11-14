@@ -9,6 +9,9 @@
 	opacity: 1;
 	transition: opacity 0.2s;
 	outline: none;
+
+	font-family: Helvetica, Arial;
+	line-height: 1.5;
 }
 
 .container.hidden {
@@ -21,6 +24,7 @@
 	bottom: 0;
 	left: 0;
 	width: calc(100% - 16px);
+	box-sizing: content-box;
 
 	padding: 8px;
 
