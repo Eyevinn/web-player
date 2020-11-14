@@ -63,7 +63,14 @@ export default class HlsJsTech extends BaseTech {
         language: audioTrack.lang,
         enabled: this.audioTrack === audioTrack.id.toString(),
       })) || []
-    );
+    )
+      .reverse() // if there are duplicate languages the latest should be kept
+      .filter(
+        (track, index, arr) =>
+          arr.findIndex(
+            (comparisonTrack) => track.language === comparisonTrack.language
+          ) === index
+      );
   }
 
   destroy() {
