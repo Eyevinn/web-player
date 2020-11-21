@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@types/chromecast-caf-sender": "^1.0.3",
-    "mitt": "^2.1.0"
+    "mitt": "^2.1.0",
+    "@eyevinn/web-player-core": "^0.0.0"
   }
 }

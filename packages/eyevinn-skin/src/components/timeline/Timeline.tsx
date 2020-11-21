@@ -22,7 +22,7 @@ export default function Timeline({
 	const onProgressClick = useCallback((evt: MouseEvent) => {
 		const width = (evt.currentTarget as HTMLDivElement).offsetWidth;
 		onSeek((evt.offsetX / width) * 100);
-	}, []);
+	}, [onSeek]);
 
 	const percentage = (currentTime / duration) * 100 || 0;
 	const isDVR = isLive && currentTime < (duration - 20);
@@ -32,7 +32,7 @@ export default function Timeline({
 			<div class={style.progressbarContainer} onClick={onProgressClick}>
 				<div class={style.progress} style={{ width: `${percentage}%` }} />
 			</div>
-			<div class={classNames(style.time, { [style.live]: isLive, [style.dvr]: isDVR })} onClick={useCallback(() => onSeek(100), [isLive])}>
+			<div class={classNames(style.time, { [style.live]: isLive, [style.dvr]: isDVR })} onClick={useCallback(() => onSeek(100), [isLive, onSeek])}>
 				{isLive ? 'LIVE' : formatPlayerTime(duration)}
 			</div>
 		</div>

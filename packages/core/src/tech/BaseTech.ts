@@ -1,7 +1,7 @@
 import { PlayerEvent } from '../util/constants';
 import EventEmitter from '../util/EventEmitter';
 
-const LIVE_EDGE = 10; // minimum seconds from edge 
+const LIVE_EDGE = 10; // minimum seconds from edge
 
 export interface IBaseTechOptions {
   video: HTMLVideoElement;
@@ -26,7 +26,6 @@ export enum PlaybackState {
 }
 
 export interface IPlayerState {
-  prevPlaybackState: PlaybackState;
   playbackState: PlaybackState;
   currentTime: number;
   duration: number;
@@ -44,7 +43,6 @@ export default class BaseTech extends EventEmitter {
     super();
 
     this.state = {
-      prevPlaybackState: PlaybackState.IDLE,
       playbackState: PlaybackState.IDLE,
       currentTime: 0,
       duration: 0,
@@ -102,9 +100,6 @@ export default class BaseTech extends EventEmitter {
   protected updateState(state: any) {
     Object.keys(state).forEach((key) => {
       if (this.state[key] !== undefined) {
-        if (key === 'playbackState') {
-          this.state['prevPlaybackState'] = this.state.playbackState;
-        }
         this.state[key] = state[key];
       }
     });
@@ -162,7 +157,11 @@ export default class BaseTech extends EventEmitter {
   }
 
   protected onSeeked() {
-    this.updateState({ playbackState: this.state.prevPlaybackState });
+    this.updateState({
+      playbackState: this.video.paused
+        ? PlaybackState.PAUSED
+        : PlaybackState.PLAYING,
+    });
     this.emit(PlayerEvent.SEEKED);
   }
 
@@ -202,7 +201,9 @@ export default class BaseTech extends EventEmitter {
   }
 
   set currentTime(newpos) {
-    this.video.currentTime = this.isLive ? Math.min(newpos, this.duration - LIVE_EDGE) : newpos;
+    this.video.currentTime = this.isLive
+      ? Math.min(newpos, this.duration - LIVE_EDGE)
+      : newpos;
   }
 
   get audioTrack() {
