@@ -1,6 +1,14 @@
 header {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+header > *,
+header >:last-child {
+	padding-top: 0;
+	margin-bottom: 1rem;
 }
 
 video {
