@@ -20,6 +20,7 @@ import TextTrackButton from './components/buttons/textTrack/textTrackButton';
 import AirPlayButton from './components/buttons/airplayButton/AirPlayButton';
 import CastButton from './components/buttons/castButton/CastButton';
 import { useAirPlay, usePlayer } from './util/hooks';
+import ContextMenu from './components/contextMenu/ContextMenu';
 
 export default function EyevinnSkin({ player, castAppId, rootElement }) {
 	const skinContainerRef = useRef<HTMLDivElement>();
@@ -38,6 +39,44 @@ export default function EyevinnSkin({ player, castAppId, rootElement }) {
 		() => (isFullscreen() ? exitFullscreen() : requestFullscreen(rootElement)),
 		[]
 	);
+
+	const [contextMenuState, setContextMenuState] = useState({
+		visible: false,
+		x: 0,
+		y: 0,
+	});
+	const onContextMenu = useCallback((evt) => {
+		evt.stopPropagation();
+		evt.preventDefault();
+		if (evt.target === evt.currentTarget) {
+			setContextMenuState({
+				visible: true,
+				x: evt.offsetX,
+				y: evt.offsetY,
+			});
+		} else {
+			setContextMenuState({
+				visible: false,
+				x: 0, 
+				y: 0,
+			});
+		}
+	}, []);
+
+	useEffect(() => {
+		let onClick;
+		document.addEventListener(
+			'click',
+			(onClick = () => {
+				setContextMenuState({
+					visible: false,
+					x: 0,
+					y: 0,
+				});
+			})
+		);
+		() => document.removeEventListener('click', onClick);
+	}, []);
 
 	// Setup keyboard listener
 	useEffect(() => {
@@ -88,6 +127,7 @@ export default function EyevinnSkin({ player, castAppId, rootElement }) {
 			tabIndex={0}
 			class={classNames(style.container, { [style.hidden]: isSkinHidden })}
 			onMouseMove={onMouseMove}
+			onContextMenu={onContextMenu}
 			onClick={useCallback(
 				(evt) => {
 					if (!isSkinHidden && evt.currentTarget === evt.target) {
@@ -99,7 +139,9 @@ export default function EyevinnSkin({ player, castAppId, rootElement }) {
 				[isSkinHidden]
 			)}
 		>
-			<Logo />
+			{contextMenuState.visible && (
+				<ContextMenu x={contextMenuState.x} y={contextMenuState.y} />
+			)}
 			{isLoading && <Loader />}
 			<div class={style.bottomContainer}>
 				<div class={style.controls}>
