@@ -81,6 +81,10 @@ export class CastPlayer extends EventEmitter {
 		}
 	}
 
+	private getDuration() {
+		return this.player.liveSeekableRange ? this.player.liveSeekableRange.end : this.player.duration;
+	}
+
 	setupListeners() {
 		const context = cast.framework.CastContext.getInstance();
 		context.addEventListener(
@@ -108,7 +112,6 @@ export class CastPlayer extends EventEmitter {
 		this.playerController.addEventListener(
 			cast.framework.RemotePlayerEventType.ANY_CHANGE,
 			({ field, value }) => {
-				console.log(field, value);
 				switch (field) {
 					case 'currentTime':
 						this.setState({ currentTime: value });
@@ -183,8 +186,9 @@ export class CastPlayer extends EventEmitter {
 		change?: number;
 		percentage?: number;
 	}) {
+
 		if (percentage) {
-			position = (percentage / 100) * this.player.duration;
+			position = (Math.min(percentage, 99.9) / 100) * this.getDuration();
 		} else if (change) {
 			position = this.player.currentTime + change;
 		}

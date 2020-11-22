@@ -89,8 +89,14 @@ export default function EyevinnSkin({ player, castAppId, rootElement }) {
 			class={classNames(style.container, { [style.hidden]: isSkinHidden })}
 			onMouseMove={onMouseMove}
 			onClick={useCallback(
-				(evt) => evt.currentTarget === evt.target && togglePlayPause(),
-				[]
+				(evt) => {
+					if (!isSkinHidden && evt.currentTarget === evt.target) {
+						togglePlayPause();
+					} else {
+						setIsUserActive(true);
+					}
+				},
+				[isSkinHidden]
 			)}
 		>
 			<Logo />

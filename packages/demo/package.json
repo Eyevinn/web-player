@@ -7,7 +7,8 @@
   "homepage": "",
   "license": "Apache-2.0",
   "scripts": {
-    "dev": "webpack-dev-server --hot --progress"
+    "dev": "webpack-dev-server --hot --progress",
+    "build": "webpack"
   },
   "dependencies": {
     "@eyevinn/web-player": "^0.0.0",
