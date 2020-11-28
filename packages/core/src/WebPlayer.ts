@@ -1,4 +1,5 @@
 import BaseTech, { PlaybackState } from './tech/BaseTech';
+import { isSafari } from './util/browser';
 import { ErrorCode, ManifestType } from './util/constants';
 import { canPlayManifestType, getManifestType } from './util/contentType';
 import EventEmitter from './util/EventEmitter';
@@ -35,7 +36,7 @@ export default class WebPlayer extends EventEmitter {
     let Tech;
     switch (manifestType) {
       case ManifestType.HLS:
-        if (canPlayManifestType(ManifestType.HLS)) {
+        if (canPlayManifestType(ManifestType.HLS) && isSafari()) {
           Tech = BaseTech;
         } else {
           Tech = (await import('./tech/HlsJsTech')).default;

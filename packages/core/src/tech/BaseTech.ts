@@ -35,6 +35,13 @@ export interface IPlayerState {
   textTracks: ITrack[];
 }
 
+function getTextTrackId(textTrack) {
+  if (!textTrack) {
+    return null;
+  }
+  return `${textTrack.id}|${textTrack.label}|${textTrack.language}`;
+}
+
 export default class BaseTech extends EventEmitter {
   protected video: HTMLVideoElement;
   protected state: IPlayerState;
@@ -80,7 +87,7 @@ export default class BaseTech extends EventEmitter {
       (this.onSeeked = this.onSeeked.bind(this))
     );
     this.video.addEventListener(
-      'loadeddata',
+      'canplay',
       (this.onLoadedData = this.onLoadedData.bind(this))
     );
     this.video.addEventListener(
@@ -236,8 +243,8 @@ export default class BaseTech extends EventEmitter {
   }
 
   get textTrack() {
-    const textTrack = this.textTrack.find((textTrack) => textTrack.enabled);
-    return textTrack?.id;
+    const textTrack = this.textTracks.find((textTrack) => textTrack.enabled);
+    return getTextTrackId(textTrack);
   }
 
   set textTrack(id) {
@@ -245,7 +252,7 @@ export default class BaseTech extends EventEmitter {
     if (this.video.textTracks) {
       // @ts-ignore
       for (const textTrack of this.video.textTracks || []) {
-        textTrack.enabled = textTrack.id === id;
+        textTrack.enabled = getTextTrackId(textTrack) === id;
       }
     }
   }
@@ -254,7 +261,7 @@ export default class BaseTech extends EventEmitter {
     return (
       // @ts-ignore
       Array.from(this.video.textTracks ?? []).map((textTrack: any) => ({
-        id: textTrack.id,
+        id: getTextTrackId(textTrack),
         label: textTrack.label,
         language: textTrack.language,
         enabled: textTrack.enabled,

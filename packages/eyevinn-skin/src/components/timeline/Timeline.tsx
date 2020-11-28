@@ -19,20 +19,31 @@ export default function Timeline({
 	onSeek,
 	isLive,
 }) {
-	const onProgressClick = useCallback((evt: MouseEvent) => {
-		const width = (evt.currentTarget as HTMLDivElement).offsetWidth;
-		onSeek((evt.offsetX / width) * 100);
-	}, [onSeek]);
+	const onProgressClick = useCallback(
+		(evt: MouseEvent) => {
+			const width = (evt.currentTarget as HTMLDivElement).offsetWidth;
+			onSeek((evt.offsetX / width) * 100);
+		},
+		[onSeek]
+	);
 
 	const percentage = (currentTime / duration) * 100 || 0;
-	const isDVR = isLive && currentTime < (duration - 20);
+	const isDVR = isLive && currentTime < duration - 20;
 	return (
 		<div class={style.container}>
 			<div class={style.time}>{formatPlayerTime(currentTime)}</div>
-			<div class={style.progressbarContainer} onClick={onProgressClick}>
-				<div class={style.progress} style={{ width: `${percentage}%` }} />
+			<div class={style.progressbarWrapper} onClick={onProgressClick}>
+				<div class={style.progressbarContainer}>
+					<div class={style.progress} style={{ width: `${percentage}%` }} />
+				</div>
 			</div>
-			<div class={classNames(style.time, { [style.live]: isLive, [style.dvr]: isDVR })} onClick={useCallback(() => onSeek(100), [isLive, onSeek])}>
+			<div
+				class={classNames(style.time, {
+					[style.live]: isLive,
+					[style.dvr]: isDVR,
+				})}
+				onClick={useCallback(() => onSeek(100), [isLive, onSeek])}
+			>
 				{isLive ? 'LIVE' : formatPlayerTime(duration)}
 			</div>
 		</div>

@@ -1,15 +1,14 @@
 import { h } from 'preact';
 import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
-import { PlaybackState } from '@eyevinn/web-player-core';
+import WebPlayer, { PlaybackState } from '@eyevinn/web-player-core';
 import classNames from 'classnames';
-import Logo from './components/logo/Logo';
 import Timeline from './components/timeline/Timeline';
 import PlayPauseButton from './components/buttons/playPause/PlayPauseButton';
 import VolumeButton from './components/buttons/volume/VolumeButton';
 import AudioTrackButton from './components/buttons/audioTrack/AudioTrackButton';
 import FullscreenButton from './components/buttons/fullscreen/FullscreenButton';
 
-import style from './skin.module.css';
+import style from './skin.module.scss';
 import Loader from './components/loader/Loader';
 import {
 	exitFullscreen,
@@ -22,7 +21,15 @@ import CastButton from './components/buttons/castButton/CastButton';
 import { useAirPlay, usePlayer } from './util/hooks';
 import ContextMenu from './components/contextMenu/ContextMenu';
 
-export default function EyevinnSkin({ player, castAppId, rootElement }) {
+export default function EyevinnSkin({
+	player,
+	castAppId,
+	rootElement,
+}: {
+	player: WebPlayer;
+	castAppId: string;
+	rootElement: HTMLElement;
+}) {
 	const skinContainerRef = useRef<HTMLDivElement>();
 	const [
 		state,
@@ -36,7 +43,10 @@ export default function EyevinnSkin({ player, castAppId, rootElement }) {
 	const [airplayAvailable, toggleAirPlay] = useAirPlay(player);
 
 	const toggleFullscreen = useCallback(
-		() => (isFullscreen() ? exitFullscreen() : requestFullscreen(rootElement)),
+		() =>
+			isFullscreen()
+				? exitFullscreen()
+				: requestFullscreen(rootElement, player.video),
 		[]
 	);
 
@@ -57,7 +67,7 @@ export default function EyevinnSkin({ player, castAppId, rootElement }) {
 		} else {
 			setContextMenuState({
 				visible: false,
-				x: 0, 
+				x: 0,
 				y: 0,
 			});
 		}
@@ -125,10 +135,10 @@ export default function EyevinnSkin({ player, castAppId, rootElement }) {
 		<div
 			ref={skinContainerRef}
 			tabIndex={0}
-			class={classNames(style.container, { [style.hidden]: isSkinHidden })}
+			class={classNames(style.container)}
 			onMouseMove={onMouseMove}
 			onContextMenu={onContextMenu}
-			onClick={useCallback(
+			onPointerUp={useCallback(
 				(evt) => {
 					if (!isSkinHidden && evt.currentTarget === evt.target) {
 						togglePlayPause();
@@ -143,7 +153,11 @@ export default function EyevinnSkin({ player, castAppId, rootElement }) {
 				<ContextMenu x={contextMenuState.x} y={contextMenuState.y} />
 			)}
 			{isLoading && <Loader />}
-			<div class={style.bottomContainer}>
+			<div
+				class={classNames(style.bottomContainer, {
+					[style.hidden]: isSkinHidden,
+				})}
+			>
 				<div class={style.controls}>
 					<PlayPauseButton
 						playbackState={state?.playbackState}

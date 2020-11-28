@@ -4,10 +4,16 @@ export function isFullscreen() {
 	);
 }
 
-export function requestFullscreen(element: HTMLElement) {
-	(element.requestFullscreen || (element as any).webkitRequestFullscreen)?.call(
-		element
-	);
+export function requestFullscreen(skinElement: any, videoElement: any) {
+	const element =
+		skinElement.requestFullscreen || skinElement.webkitRequestFullscreen
+			? skinElement
+			: videoElement;
+	(
+		element.requestFullscreen ||
+		(element as any).webkitRequestFullscreen ||
+		(element as any).webkitEnterFullscreen
+	)?.call(element);
 }
 
 export function exitFullscreen() {

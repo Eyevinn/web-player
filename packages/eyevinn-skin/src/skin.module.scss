@@ -14,11 +14,6 @@
 	line-height: 1.5;
 }
 
-.container.hidden {
-	cursor: none;
-	opacity: 0;
-}
-
 .bottomContainer {
 	position: absolute;
 	bottom: 0;
@@ -33,6 +28,10 @@
 		rgba(0, 0, 0, 1) 0%,
 		rgba(0, 0, 0, 0) 100%
 	);
+
+	&.hidden {
+		display: none;
+	}
 }
 
 .controls {
