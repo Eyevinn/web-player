@@ -1,0 +1,33 @@
+{
+  "name": "@eyevinn/web-player-cast",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "author": "Benjamin Wallberg <me@bwallberg.com>",
+  "homepage": "https://github.com/Eyevinn/web-player#readme",
+  "license": "ISC",
+  "source": "./src/index.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.m.js",
+  "esmodule": "dist/index.modern.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "microbundle --no-sourcemap --format modern,es,cjs",
+    "dev": "microbundle --watch --format modern,es,cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eyevinn/web-player.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Eyevinn/web-player/issues"
+  },
+  "dependencies": {
+    "@types/chromecast-caf-sender": "^1.0.3",
+    "mitt": "^2.1.0",
+    "@eyevinn/web-player-core": "^0.0.0"
+  }
+}

@@ -7,7 +7,8 @@
   "homepage": "",
   "license": "Apache-2.0",
   "scripts": {
-    "dev": "webpack-dev-server --hot --progress"
+    "dev": "webpack-dev-server --hot --progress",
+    "build": "webpack"
   },
   "dependencies": {
     "@eyevinn/web-player": "^0.0.0",
@@ -16,8 +17,10 @@
     "@eyevinn/web-player-eyevinn-skin": "^0.0.0"
   },
   "devDependencies": {
+    "copy-webpack-plugin": "^6.3.2",
     "css-loader": "^4.3.0",
     "html-webpack-plugin": "^4.5.0",
+    "source-map-loader": "^1.1.2",
     "style-loader": "^1.2.1",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",

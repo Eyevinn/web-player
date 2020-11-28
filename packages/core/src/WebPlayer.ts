@@ -1,4 +1,5 @@
 import BaseTech, { PlaybackState } from './tech/BaseTech';
+import { isSafari } from './util/browser';
 import { ErrorCode, ManifestType } from './util/constants';
 import { canPlayManifestType, getManifestType } from './util/contentType';
 import EventEmitter from './util/EventEmitter';
@@ -14,7 +15,9 @@ export { PlaybackState };
 
 export default class WebPlayer extends EventEmitter {
   private tech: BaseTech;
-  private video: HTMLVideoElement;
+
+  public video: HTMLVideoElement;
+  public currentSrc: string;
 
   constructor({ video }: IWebPlayerOptions) {
     super();
@@ -24,6 +27,8 @@ export default class WebPlayer extends EventEmitter {
   async load(src: string) {
     this.reset();
 
+    this.currentSrc = src;
+
     const manifestType = await getManifestType(src);
     if (manifestType === ManifestType.UNKNOWN) {
       throw { errorCode: ErrorCode.UNKNOWN_MANIFEST_TYPE };
@@ -31,7 +36,7 @@ export default class WebPlayer extends EventEmitter {
     let Tech;
     switch (manifestType) {
       case ManifestType.HLS:
-        if (canPlayManifestType(ManifestType.HLS)) {
+        if (canPlayManifestType(ManifestType.HLS) && isSafari()) {
           Tech = BaseTech;
         } else {
           Tech = (await import('./tech/HlsJsTech')).default;
@@ -60,6 +65,10 @@ export default class WebPlayer extends EventEmitter {
 
   get isMuted(): boolean {
     return this.tech?.isMuted ?? false;
+  }
+
+  get currentTime(): number {
+    return this.tech?.currentTime;
   }
 
   play(): Promise<boolean> {

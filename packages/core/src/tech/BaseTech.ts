@@ -1,7 +1,7 @@
 import { PlayerEvent } from '../util/constants';
 import EventEmitter from '../util/EventEmitter';
 
-const LIVE_EDGE = 10; // minimum seconds from edge 
+const LIVE_EDGE = 10; // minimum seconds from edge
 
 export interface IBaseTechOptions {
   video: HTMLVideoElement;
@@ -26,7 +26,6 @@ export enum PlaybackState {
 }
 
 export interface IPlayerState {
-  prevPlaybackState: PlaybackState;
   playbackState: PlaybackState;
   currentTime: number;
   duration: number;
@@ -34,6 +33,13 @@ export interface IPlayerState {
   isMuted: boolean;
   audioTracks: ITrack[];
   textTracks: ITrack[];
+}
+
+function getTextTrackId(textTrack) {
+  if (!textTrack) {
+    return null;
+  }
+  return `${textTrack.id}|${textTrack.label}|${textTrack.language}`;
 }
 
 export default class BaseTech extends EventEmitter {
@@ -44,7 +50,6 @@ export default class BaseTech extends EventEmitter {
     super();
 
     this.state = {
-      prevPlaybackState: PlaybackState.IDLE,
       playbackState: PlaybackState.IDLE,
       currentTime: 0,
       duration: 0,
@@ -82,7 +87,7 @@ export default class BaseTech extends EventEmitter {
       (this.onSeeked = this.onSeeked.bind(this))
     );
     this.video.addEventListener(
-      'loadeddata',
+      'canplay',
       (this.onLoadedData = this.onLoadedData.bind(this))
     );
     this.video.addEventListener(
@@ -102,9 +107,6 @@ export default class BaseTech extends EventEmitter {
   protected updateState(state: any) {
     Object.keys(state).forEach((key) => {
       if (this.state[key] !== undefined) {
-        if (key === 'playbackState') {
-          this.state['prevPlaybackState'] = this.state.playbackState;
-        }
         this.state[key] = state[key];
       }
     });
@@ -162,7 +164,11 @@ export default class BaseTech extends EventEmitter {
   }
 
   protected onSeeked() {
-    this.updateState({ playbackState: this.state.prevPlaybackState });
+    this.updateState({
+      playbackState: this.video.paused
+        ? PlaybackState.PAUSED
+        : PlaybackState.PLAYING,
+    });
     this.emit(PlayerEvent.SEEKED);
   }
 
@@ -191,6 +197,9 @@ export default class BaseTech extends EventEmitter {
   }
 
   get duration(): number {
+    if (this.isLive && this.video.seekable.length) {
+      return this.video.seekable.end(0);
+    }
     return this.video.duration || 0;
   }
 
@@ -199,7 +208,9 @@ export default class BaseTech extends EventEmitter {
   }
 
   set currentTime(newpos) {
-    this.video.currentTime = this.isLive ? Math.min(newpos, this.duration - LIVE_EDGE) : newpos;
+    this.video.currentTime = this.isLive
+      ? Math.min(newpos, this.duration - LIVE_EDGE)
+      : newpos;
   }
 
   get audioTrack() {
@@ -232,8 +243,8 @@ export default class BaseTech extends EventEmitter {
   }
 
   get textTrack() {
-    const textTrack = this.textTrack.find((textTrack) => textTrack.enabled);
-    return textTrack?.id;
+    const textTrack = this.textTracks.find((textTrack) => textTrack.enabled);
+    return getTextTrackId(textTrack);
   }
 
   set textTrack(id) {
@@ -241,7 +252,7 @@ export default class BaseTech extends EventEmitter {
     if (this.video.textTracks) {
       // @ts-ignore
       for (const textTrack of this.video.textTracks || []) {
-        textTrack.enabled = textTrack.id === id;
+        textTrack.enabled = getTextTrackId(textTrack) === id;
       }
     }
   }
@@ -250,7 +261,7 @@ export default class BaseTech extends EventEmitter {
     return (
       // @ts-ignore
       Array.from(this.video.textTracks ?? []).map((textTrack: any) => ({
-        id: textTrack.id,
+        id: getTextTrackId(textTrack),
         label: textTrack.label,
         language: textTrack.language,
         enabled: textTrack.enabled,

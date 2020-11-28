@@ -9,11 +9,9 @@
 	opacity: 1;
 	transition: opacity 0.2s;
 	outline: none;
-}
 
-.container.hidden {
-	cursor: none;
-	opacity: 0;
+	font-family: Helvetica, Arial;
+	line-height: 1.5;
 }
 
 .bottomContainer {
@@ -21,6 +19,7 @@
 	bottom: 0;
 	left: 0;
 	width: calc(100% - 16px);
+	box-sizing: content-box;
 
 	padding: 8px;
 
@@ -29,6 +28,10 @@
 		rgba(0, 0, 0, 1) 0%,
 		rgba(0, 0, 0, 0) 100%
 	);
+
+	&.hidden {
+		display: none;
+	}
 }
 
 .controls {

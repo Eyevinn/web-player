@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@eyevinn/web-player-core": "^0.0.0",
+    "@eyevinn/web-player-airplay": "^0.0.0",
+    "@eyevinn/web-player-cast": "^0.0.0",
     "classnames": "^2.2.6",
     "preact": "^10.4.8"
   },

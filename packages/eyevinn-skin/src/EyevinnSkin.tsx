@@ -1,19 +1,14 @@
 import { h } from 'preact';
 import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
-import {
-	PlayerEvent,
-	IPlayerState,
-	PlaybackState,
-} from '@eyevinn/web-player-core';
+import WebPlayer, { PlaybackState } from '@eyevinn/web-player-core';
 import classNames from 'classnames';
-import Logo from './components/logo/Logo';
 import Timeline from './components/timeline/Timeline';
 import PlayPauseButton from './components/buttons/playPause/PlayPauseButton';
 import VolumeButton from './components/buttons/volume/VolumeButton';
 import AudioTrackButton from './components/buttons/audioTrack/AudioTrackButton';
 import FullscreenButton from './components/buttons/fullscreen/FullscreenButton';
 
-import style from './skin.module.css';
+import style from './skin.module.scss';
 import Loader from './components/loader/Loader';
 import {
 	exitFullscreen,
@@ -21,46 +16,78 @@ import {
 	requestFullscreen,
 } from './util/fullscreen';
 import TextTrackButton from './components/buttons/textTrack/textTrackButton';
+import AirPlayButton from './components/buttons/airplayButton/AirPlayButton';
+import CastButton from './components/buttons/castButton/CastButton';
+import { useAirPlay, usePlayer } from './util/hooks';
+import ContextMenu from './components/contextMenu/ContextMenu';
+import CastOverlay from './components/castOverlay/CastOverlay';
 
-function usePlayerState(player) {
-	const [state, setState] = useState<IPlayerState | null>(null);
-	useEffect(() => {
-		player.on(PlayerEvent.STATE_CHANGE, ({ state }) => {
-			setState({
-				...state,
-			});
-		});
-	}, []);
-	return state;
-}
-
-export default function EyevinnSkin({ player, rootElement }) {
+export default function EyevinnSkin({
+	player,
+	castAppId,
+	rootElement,
+}: {
+	player: WebPlayer;
+	castAppId: string;
+	rootElement: HTMLElement;
+}) {
 	const skinContainerRef = useRef<HTMLDivElement>();
-	const playerState = usePlayerState(player);
+	const [
+		state,
+		togglePlayPause,
+		toggleMute,
+		changeAudioTrack,
+		changeTextTrack,
+		seekByPercentage,
+		seekByChange,
+	] = usePlayer(player, castAppId);
+	const [airplayAvailable, toggleAirPlay] = useAirPlay(player);
 
-	// Setup click handlers
-	const togglePlayPause = useCallback(
-		() => (player.isPlaying ? player.pause() : player.play()),
-		[]
-	);
-	const toggleMute = useCallback(
-		() => (player.isMuted ? player.unmute() : player.mute()),
-		[]
-	);
-	const changeAudioTrack = useCallback((id) => player.setAudioTrack(id), []);
-	const changeTextTrack = useCallback((id) => player.setTextTrack(id), []);
-	const seekByPercentage = useCallback(
-		(percentage: number) => player.seekTo({ percentage }),
-		[]
-	);
-	const seekByChange = useCallback(
-		(change: number) => player.seekTo({ change }),
-		[]
-	);
 	const toggleFullscreen = useCallback(
-		() => (isFullscreen() ? exitFullscreen() : requestFullscreen(rootElement)),
+		() =>
+			isFullscreen()
+				? exitFullscreen()
+				: requestFullscreen(rootElement, player.video),
 		[]
 	);
+
+	const [contextMenuState, setContextMenuState] = useState({
+		visible: false,
+		x: 0,
+		y: 0,
+	});
+	const onContextMenu = useCallback((evt) => {
+		evt.stopPropagation();
+		evt.preventDefault();
+		if (evt.target === evt.currentTarget) {
+			setContextMenuState({
+				visible: true,
+				x: evt.offsetX,
+				y: evt.offsetY,
+			});
+		} else {
+			setContextMenuState({
+				visible: false,
+				x: 0,
+				y: 0,
+			});
+		}
+	}, []);
+
+	useEffect(() => {
+		let onClick;
+		document.addEventListener(
+			'click',
+			(onClick = () => {
+				setContextMenuState({
+					visible: false,
+					x: 0,
+					y: 0,
+				});
+			})
+		);
+		() => document.removeEventListener('click', onClick);
+	}, []);
 
 	// Setup keyboard listener
 	useEffect(() => {
@@ -97,57 +124,73 @@ export default function EyevinnSkin({ player, rootElement }) {
 
 	const isSkinHidden =
 		!isUserActive &&
-		playerState?.playbackState !== PlaybackState.READY &&
-		playerState?.playbackState !== PlaybackState.PAUSED;
+		state?.playbackState !== PlaybackState.READY &&
+		state?.playbackState !== PlaybackState.PAUSED;
 
 	const isLoading =
-		playerState?.playbackState === PlaybackState.LOADING ||
-		playerState?.playbackState === PlaybackState.BUFFERING ||
-		playerState?.playbackState === PlaybackState.SEEKING;
+		state?.playbackState === PlaybackState.LOADING ||
+		state?.playbackState === PlaybackState.BUFFERING ||
+		state?.playbackState === PlaybackState.SEEKING;
 
 	return (
 		<div
 			ref={skinContainerRef}
 			tabIndex={0}
-			class={classNames(style.container, { [style.hidden]: isSkinHidden })}
+			class={classNames(style.container)}
 			onMouseMove={onMouseMove}
-			onClick={useCallback(
-				(evt) => evt.currentTarget === evt.target && togglePlayPause(),
-				[]
+			onContextMenu={onContextMenu}
+			onPointerUp={useCallback(
+				(evt) => {
+					if (!isSkinHidden && evt.currentTarget === evt.target) {
+						togglePlayPause();
+					} else {
+						setIsUserActive(true);
+					}
+				},
+				[isSkinHidden]
 			)}
 		>
-			<Logo />
+			{contextMenuState.visible && (
+				<ContextMenu x={contextMenuState.x} y={contextMenuState.y} />
+			)}
 			{isLoading && <Loader />}
-			<div class={style.bottomContainer}>
+			{state?.isCasting && <CastOverlay />}
+			<div
+				class={classNames(style.bottomContainer, {
+					[style.hidden]: isSkinHidden,
+				})}
+			>
 				<div class={style.controls}>
 					<PlayPauseButton
-						playbackState={playerState?.playbackState}
+						playbackState={state?.playbackState}
 						onClick={togglePlayPause}
 					/>
 					<div class={style.divider} />
-					{playerState?.textTracks.length > 1 && (
+					<CastButton />
+					{airplayAvailable && <AirPlayButton onClick={toggleAirPlay} />}
+					{state?.isCasting === false && state?.textTracks.length > 1 && (
 						<TextTrackButton
-							textTracks={playerState?.textTracks}
+							textTracks={state?.textTracks}
 							onChange={changeTextTrack}
 						/>
 					)}
-					{playerState?.audioTracks.length > 1 && (
+					{state?.isCasting === false && state?.audioTracks.length > 1 && (
 						<AudioTrackButton
-							audioTracks={playerState?.audioTracks}
+							audioTracks={state?.audioTracks}
 							onChange={changeAudioTrack}
 						/>
 					)}
-					<VolumeButton muted={playerState?.isMuted} onClick={toggleMute} />
+					<VolumeButton muted={state?.isMuted} onClick={toggleMute} />
 					<FullscreenButton
 						isFullscreen={isFullscreen()}
 						onClick={toggleFullscreen}
 					/>
 				</div>
 				<Timeline
-					isLive={playerState?.isLive}
+					isLive={state?.isLive}
 					onSeek={seekByPercentage}
-					currentTime={playerState?.currentTime}
-					duration={playerState?.duration}
+					currentTime={state?.currentTime}
+					duration={state?.duration}
 				/>
 			</div>
 		</div>
