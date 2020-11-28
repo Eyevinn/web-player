@@ -20,6 +20,7 @@ import AirPlayButton from './components/buttons/airplayButton/AirPlayButton';
 import CastButton from './components/buttons/castButton/CastButton';
 import { useAirPlay, usePlayer } from './util/hooks';
 import ContextMenu from './components/contextMenu/ContextMenu';
+import CastOverlay from './components/castOverlay/CastOverlay';
 
 export default function EyevinnSkin({
 	player,
@@ -153,6 +154,7 @@ export default function EyevinnSkin({
 				<ContextMenu x={contextMenuState.x} y={contextMenuState.y} />
 			)}
 			{isLoading && <Loader />}
+			{state?.isCasting && <CastOverlay />}
 			<div
 				class={classNames(style.bottomContainer, {
 					[style.hidden]: isSkinHidden,

@@ -17,7 +17,7 @@ export function initializeCast(
 				});
 				resolve();
 			} else {
-				reject();
+				reject(new Error('[Cast] not available'));
 			}
 		};
 
@@ -82,7 +82,9 @@ export class CastPlayer extends EventEmitter {
 	}
 
 	private getDuration() {
-		return this.player.liveSeekableRange ? this.player.liveSeekableRange.end : this.player.duration;
+		return this.player.liveSeekableRange
+			? this.player.liveSeekableRange.end
+			: this.player.duration;
 	}
 
 	setupListeners() {
@@ -131,21 +133,28 @@ export class CastPlayer extends EventEmitter {
 						}
 						break;
 					case 'liveSeekableRange':
-						this.setState({
-							isLive: true,
-							duration: value.end,
-						});
+						if (value) {
+							this.setState({
+								isLive: true,
+								duration: value.end,
+							});
+						} else {
+							this.setState({ isLive: false });
+						}
 						break;
 				}
 			}
 		);
 	}
 
-	load(src: string) {
+	load(src: string, startTime: number = null) {
 		const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
 
 		const mediaInfo = new chrome.cast.media.MediaInfo(src, 'video/mp4');
 		const request = new chrome.cast.media.LoadRequest(mediaInfo);
+		if (startTime) {
+			request.currentTime = startTime;
+		}
 		return castSession.loadMedia(request);
 	}
 
@@ -186,7 +195,6 @@ export class CastPlayer extends EventEmitter {
 		change?: number;
 		percentage?: number;
 	}) {
-
 		if (percentage) {
 			position = (Math.min(percentage, 99.9) / 100) * this.getDuration();
 		} else if (change) {

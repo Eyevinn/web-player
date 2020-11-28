@@ -36,7 +36,7 @@ export function useCastPlayer(
 		if (castPlayer) {
 			castPlayer.on(CastPlayerEvent.CONNECTED, () => {
 				if (player.currentSrc) {
-					castPlayer.load(player.currentSrc);
+					castPlayer.load(player.currentSrc, player.currentTime);
 				}
 			});
 			castPlayer.on(CastPlayerEvent.DISCONNECTED, () => {
