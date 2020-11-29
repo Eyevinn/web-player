@@ -296,6 +296,9 @@ export default class BaseTech extends EventEmitter {
   }
 
   load(src): Promise<void> {
+    this.updateState({
+      playbackState: PlaybackState.LOADING
+    });
     return new Promise((resolve, reject) => {
       this.video.src = src;
       this.video.load();

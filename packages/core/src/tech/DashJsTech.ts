@@ -1,23 +1,26 @@
-import { MediaPlayer, MediaPlayerClass } from "dashjs";
-import BaseTech, {IBaseTechOptions} from "./BaseTech";
+import { MediaPlayer, MediaPlayerClass } from 'dashjs';
+import BaseTech, { IBaseTechOptions, PlaybackState } from './BaseTech';
 
 export default class MssPlayer extends BaseTech {
   private mediaPlayer: MediaPlayerClass;
 
   constructor(opts: IBaseTechOptions) {
     super(opts);
-    this.mediaPlayer = MediaPlayer().create()
+    this.mediaPlayer = MediaPlayer().create();
     this.mediaPlayer.initialize();
     this.mediaPlayer.attachView(this.video);
   }
 
   load(src: string): Promise<void> {
+    this.updateState({
+      playbackState: PlaybackState.LOADING,
+    });
     return new Promise((resolve, reject) => {
       this.mediaPlayer.attachSource(src);
       this.mediaPlayer.on(MediaPlayer.events.MANIFEST_LOADED, () => {
         resolve();
       });
-      this.mediaPlayer.on(MediaPlayer.events.ERROR, ev => {
+      this.mediaPlayer.on(MediaPlayer.events.ERROR, (ev) => {
         reject(`Failed to load Mss Player`);
       });
     });

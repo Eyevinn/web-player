@@ -1,6 +1,6 @@
 import { Player } from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
-import BaseTech from './BaseTech';
+import BaseTech, { PlaybackState } from './BaseTech';
 
 export default class DashPlayer extends BaseTech {
   private shakaPlayer: any;
@@ -15,6 +15,9 @@ export default class DashPlayer extends BaseTech {
   }
 
   load(src: string): Promise<void> {
+    this.updateState({
+      playbackState: PlaybackState.LOADING,
+    });
     return this.shakaPlayer.load(src).catch(() => {
       // TODO error handling
     });

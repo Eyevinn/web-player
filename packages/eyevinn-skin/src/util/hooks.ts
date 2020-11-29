@@ -13,7 +13,6 @@ import {
 	PlaybackState,
 } from '@eyevinn/web-player-core';
 import type WebPlayer from '@eyevinn/web-player-core';
-import { exitFullscreen, isFullscreen, requestFullscreen } from './fullscreen';
 
 interface ISkinState extends IPlayerState {
 	isCasting: boolean;
