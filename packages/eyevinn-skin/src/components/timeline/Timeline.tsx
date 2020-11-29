@@ -18,6 +18,7 @@ export default function Timeline({
 	duration = 0,
 	onSeek,
 	isLive,
+	isAtLiveEdge
 }) {
 	const onProgressClick = useCallback(
 		(evt: MouseEvent) => {
@@ -27,8 +28,7 @@ export default function Timeline({
 		[onSeek]
 	);
 
-	const percentage = (currentTime / duration) * 100 || 0;
-	const isDVR = isLive && currentTime < duration - 20;
+	const percentage = isLive && isAtLiveEdge ? 100 : (currentTime / duration) * 100 || 0;
 	return (
 		<div class={style.container}>
 			<div class={style.time}>{formatPlayerTime(currentTime)}</div>
@@ -40,7 +40,7 @@ export default function Timeline({
 			<div
 				class={classNames(style.time, {
 					[style.live]: isLive,
-					[style.dvr]: isDVR,
+					[style.dvr]: !isAtLiveEdge,
 				})}
 				onClick={useCallback(() => onSeek(100), [isLive, onSeek])}
 			>

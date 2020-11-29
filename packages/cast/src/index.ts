@@ -2,6 +2,8 @@ import EventEmitter from './util/EventEmitter';
 import { PlaybackState } from '@eyevinn/web-player-core';
 import type { IPlayerState } from '@eyevinn/web-player-core';
 
+const LIVE_EDGE = 20; // seconds from edge considered live
+
 export function initializeCast(
 	appId?: string,
 	autoJoinPolicy?: chrome.cast.AutoJoinPolicy
@@ -40,6 +42,7 @@ export class CastPlayer extends EventEmitter {
 		currentTime: 0,
 		duration: 0,
 		isLive: false,
+		isAtLiveEdge: false,
 		isMuted: false,
 		audioTracks: [],
 		textTracks: [],
@@ -116,7 +119,10 @@ export class CastPlayer extends EventEmitter {
 			({ field, value }) => {
 				switch (field) {
 					case 'currentTime':
-						this.setState({ currentTime: value });
+						this.setState({
+							currentTime: value,
+							isAtLiveEdge: value >= this.state.duration - LIVE_EDGE,
+						});
 						break;
 					case 'duration':
 						this.setState({ duration: value });
@@ -135,7 +141,7 @@ export class CastPlayer extends EventEmitter {
 					case 'liveSeekableRange':
 						if (value) {
 							this.setState({
-								isLive: true,
+								isLive: !value.isLiveDone,
 								duration: value.end,
 							});
 						} else {

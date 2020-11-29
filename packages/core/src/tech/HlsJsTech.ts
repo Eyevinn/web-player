@@ -1,7 +1,10 @@
 import BaseTech, { IBaseTechOptions, PlaybackState } from './BaseTech';
 import Hls from 'hls.js';
+import { PlayerEvent } from '../util/constants';
 
 const DEFAULT_CONFIG = {};
+
+const LIVE_EDGE = 3; // seconds from liveEdge
 
 export default class HlsJsTech extends BaseTech {
   static isSupported() {
@@ -35,6 +38,28 @@ export default class HlsJsTech extends BaseTech {
         resolve();
       });
     });
+  }
+
+  protected onTimeUpdate() {
+    this.updateState({
+      currentTime: this.currentTime,
+      duration: this.duration,
+      isAtLiveEdge: this.currentTime >= this.hls.liveSyncPosition - LIVE_EDGE,
+    });
+    this.emit(PlayerEvent.TIME_UPDATE, {
+      currentTime: this.currentTime,
+      duration: this.duration,
+    });
+  }
+
+  get currentTime() {
+    return this.video.currentTime;
+  }
+
+  set currentTime(newpos: number) {
+    this.video.currentTime = this.isLive
+      ? Math.min(newpos, this.hls.liveSyncPosition)
+      : newpos;
   }
 
   get isLive() {
@@ -71,6 +96,10 @@ export default class HlsJsTech extends BaseTech {
             (comparisonTrack) => track.language === comparisonTrack.language
           ) === index
       );
+  }
+
+  seekToLive() {
+    this.currentTime = this.hls.liveSyncPosition;
   }
 
   destroy() {

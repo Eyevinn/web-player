@@ -102,6 +102,10 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
+  seekToLive() {
+    return this.tech?.seekToLive();
+  }
+
   setAudioTrack(id) {
     if (this.tech) {
       this.tech.audioTrack = id;

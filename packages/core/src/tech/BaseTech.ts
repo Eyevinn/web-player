@@ -30,6 +30,7 @@ export interface IPlayerState {
   currentTime: number;
   duration: number;
   isLive: boolean;
+  isAtLiveEdge: boolean;
   isMuted: boolean;
   audioTracks: ITrack[];
   textTracks: ITrack[];
@@ -54,6 +55,7 @@ export default class BaseTech extends EventEmitter {
       currentTime: 0,
       duration: 0,
       isLive: false,
+      isAtLiveEdge: false,
       isMuted: video.muted,
       audioTracks: [],
       textTracks: [],
@@ -143,6 +145,7 @@ export default class BaseTech extends EventEmitter {
     this.updateState({
       currentTime: this.currentTime,
       duration: this.duration,
+      isAtLiveEdge: this.currentTime >= this.duration - LIVE_EDGE
     });
     this.emit(PlayerEvent.TIME_UPDATE, {
       currentTime: this.currentTime,
@@ -207,7 +210,7 @@ export default class BaseTech extends EventEmitter {
     return this.video.currentTime;
   }
 
-  set currentTime(newpos) {
+  set currentTime(newpos: number) {
     this.video.currentTime = this.isLive
       ? Math.min(newpos, this.duration - LIVE_EDGE)
       : newpos;
@@ -309,6 +312,10 @@ export default class BaseTech extends EventEmitter {
       currentTime: this.currentTime,
       duration: this.duration,
     });
+  }
+
+  seekToLive() {
+    this.currentTime = this.duration;
   }
 
   destroy() {
