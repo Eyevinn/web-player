@@ -117,6 +117,7 @@ export default class BaseTech extends EventEmitter {
 
   protected onLoadedData() {
     this.updateState({
+      playbackState: this.video.paused ? PlaybackState.PAUSED : PlaybackState.PLAYING,
       duration: this.duration,
       isLive: this.isLive,
       audioTracks: this.audioTracks,
@@ -295,13 +296,14 @@ export default class BaseTech extends EventEmitter {
     this.video.muted = false;
   }
 
-  load(src): Promise<void> {
+  load(src: string): Promise<void> {
     this.updateState({
       playbackState: PlaybackState.LOADING
     });
     return new Promise((resolve, reject) => {
       this.video.src = src;
       this.video.load();
+
       resolve();
     });
   }
@@ -318,7 +320,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   seekToLive() {
-    this.currentTime = this.duration;
+    this.currentTime = this.duration - LIVE_EDGE;
   }
 
   destroy() {
