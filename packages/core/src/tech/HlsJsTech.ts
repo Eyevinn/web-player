@@ -2,7 +2,10 @@ import BaseTech, { IBaseTechOptions, PlaybackState } from './BaseTech';
 import Hls from 'hls.js';
 import { PlayerEvent } from '../util/constants';
 
-const DEFAULT_CONFIG = {};
+const DEFAULT_CONFIG = {
+  capLevelOnFPSDrop: true,
+  capLevelToPlayerSize: true
+};
 
 const LIVE_EDGE = 3; // seconds from liveEdge
 

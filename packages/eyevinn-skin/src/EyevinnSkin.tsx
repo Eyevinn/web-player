@@ -113,14 +113,15 @@ export default function EyevinnSkin({
 
 	// setup detection of user activity, used to toggle overlay visiblity
 	const timeoutRef = useRef(null);
-	const [isUserActive, setIsUserActive] = useState(true);
-	const onMouseMove = useCallback(() => setIsUserActive(true), []);
-	useEffect(() => {
-		if (isUserActive) {
-			timeoutRef.current = setTimeout(() => setIsUserActive(false), 2500);
-			return () => clearTimeout(timeoutRef.current);
-		}
-	}, [isUserActive]);
+	const [isUserActive, setIsUserActive] = useState(false);
+	const onMouseMove = useCallback(() => {
+		clearTimeout(timeoutRef.current);
+		setIsUserActive(true);
+		timeoutRef.current = setTimeout(
+			() => setIsUserActive(false),
+			2500
+		);
+	}, []);
 
 	const isSkinHidden =
 		!isUserActive &&
