@@ -1,2 +1,5 @@
 import WebPlayer from '@eyevinn/web-player-core';
-export default function webplayer(wrapper: HTMLElement): WebPlayer;
+interface WebPlayerOptions {
+  castAppId?: string
+}
+export default function webplayer(wrapper: HTMLElement, options: WebPlayerOptions): WebPlayer;
