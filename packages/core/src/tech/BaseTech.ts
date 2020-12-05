@@ -2,6 +2,7 @@ import { PlayerEvent } from '../util/constants';
 import EventEmitter from '../util/EventEmitter';
 
 const LIVE_EDGE = 10; // minimum seconds from edge
+const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
 export interface IBaseTechOptions {
   video: HTMLVideoElement;
@@ -31,6 +32,7 @@ export interface IPlayerState {
   duration: number;
   isLive: boolean;
   isAtLiveEdge: boolean;
+  isSeekable: boolean;
   isMuted: boolean;
   audioTracks: ITrack[];
   textTracks: ITrack[];
@@ -56,6 +58,7 @@ export default class BaseTech extends EventEmitter {
       duration: 0,
       isLive: false,
       isAtLiveEdge: false,
+      isSeekable: true,
       isMuted: video.muted,
       audioTracks: [],
       textTracks: [],
@@ -96,6 +99,11 @@ export default class BaseTech extends EventEmitter {
       'volumechange',
       (this.onVolumeChange = this.onVolumeChange.bind(this))
     );
+    this.video.addEventListener(
+      'ended',
+      (this.onEnded = this.onEnded.bind(this))
+    )
+
     // @ts-ignore
     if (this.video.audioTracks) {
       // @ts-ignore
@@ -146,7 +154,8 @@ export default class BaseTech extends EventEmitter {
     this.updateState({
       currentTime: this.currentTime,
       duration: this.duration,
-      isAtLiveEdge: this.currentTime >= this.duration - LIVE_EDGE
+      isAtLiveEdge: this.currentTime >= this.duration - LIVE_EDGE,
+      isSeekable: this.isLive ? this.duration >= LIVE_SEEKABLE_MIN_DURATION : true
     });
     this.emit(PlayerEvent.TIME_UPDATE, {
       currentTime: this.currentTime,
@@ -188,6 +197,13 @@ export default class BaseTech extends EventEmitter {
     this.emit(PlayerEvent.AUDIO_TRACK_CHANGE);
   }
 
+  protected onEnded() {
+    this.emit(PlayerEvent.ENDED);
+    this.updateState({
+      playbackState: PlaybackState.IDLE
+    });
+  }
+
   get isPlaying(): boolean {
     return !this.video.paused;
   }
@@ -212,9 +228,11 @@ export default class BaseTech extends EventEmitter {
   }
 
   set currentTime(newpos: number) {
-    this.video.currentTime = this.isLive
-      ? Math.min(newpos, this.duration - LIVE_EDGE)
-      : newpos;
+    if (this.state.isSeekable) {
+      this.video.currentTime = this.isLive
+        ? Math.min(newpos, this.duration - LIVE_EDGE)
+        : newpos;
+    }
   }
 
   get audioTrack() {

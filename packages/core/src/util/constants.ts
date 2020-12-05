@@ -20,9 +20,11 @@ export enum PlayerEvent {
 	WAITING = "waiting",
 	STALLED = "stalled",
 	VOLUME_CHANGE = "volumechange",
+	ENDED = "ended",
 
 	// WebPlayer Events
 	STATE_CHANGE = "state_change",
 	AUDIO_TRACK_CHANGE = "audio_track_change",
 	BUFFERING = "buffering",
+	LIVE_ENDED = "live_ended"
 }

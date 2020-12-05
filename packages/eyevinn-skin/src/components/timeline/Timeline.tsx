@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useCallback } from 'preact/hooks';
 import classNames from 'classnames';
-import style from './timeline.module.css';
+import style from './timeline.module.scss';
 
 function formatPlayerTime(sec = 0) {
 	let h = Math.floor(sec / 3600) % 24;
@@ -16,21 +16,24 @@ function formatPlayerTime(sec = 0) {
 export default function Timeline({
 	currentTime = 0,
 	duration = 0,
-	onSeek,
+	handleSeek,
 	isLive,
-	isAtLiveEdge
+	isAtLiveEdge,
+	isSeekable
 }) {
 	const onProgressClick = useCallback(
 		(evt: MouseEvent) => {
-			const width = (evt.currentTarget as HTMLDivElement).offsetWidth;
-			onSeek((evt.offsetX / width) * 100);
+			if (isSeekable) {
+				const width = (evt.currentTarget as HTMLDivElement).offsetWidth;
+				handleSeek((evt.offsetX / width) * 100);
+			}
 		},
-		[onSeek]
+		[handleSeek, isSeekable]
 	);
 
-	const percentage = isLive && isAtLiveEdge ? 100 : (currentTime / duration) * 100 || 0;
+	const percentage = isLive && (isAtLiveEdge || !isSeekable) ? 100 : (currentTime / duration) * 100 || 0;
 	return (
-		<div class={style.container}>
+		<div class={classNames(style.container, { [style.seekDisabled]: !isSeekable })}>
 			<div class={style.time}>{formatPlayerTime(currentTime)}</div>
 			<div class={style.progressbarWrapper} onClick={onProgressClick}>
 				<div class={style.progressbarContainer}>
@@ -40,9 +43,9 @@ export default function Timeline({
 			<div
 				class={classNames(style.time, {
 					[style.live]: isLive,
-					[style.dvr]: !isAtLiveEdge,
+					[style.dvr]: !isAtLiveEdge && isSeekable
 				})}
-				onClick={useCallback(() => onSeek(100), [isLive, onSeek])}
+				onClick={useCallback(() => isSeekable && handleSeek(100), [handleSeek, isSeekable])}
 			>
 				{isLive ? 'LIVE' : formatPlayerTime(duration)}
 			</div>

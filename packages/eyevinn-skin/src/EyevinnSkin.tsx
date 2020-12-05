@@ -190,7 +190,8 @@ export default function EyevinnSkin({
 				<Timeline
 					isLive={state?.isLive}
 					isAtLiveEdge={state?.isAtLiveEdge}
-					onSeek={seekByPercentage}
+					isSeekable={state?.isSeekable}
+					handleSeek={seekByPercentage}
 					currentTime={state?.currentTime}
 					duration={state?.duration}
 				/>

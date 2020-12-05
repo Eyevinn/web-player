@@ -7,7 +7,8 @@ const DEFAULT_CONFIG = {
   capLevelToPlayerSize: true
 };
 
-const LIVE_EDGE = 3; // seconds from liveEdge
+const LIVE_EDGE = 5; // seconds from liveEdge
+const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
 export default class HlsJsTech extends BaseTech {
   static isSupported() {
@@ -26,8 +27,9 @@ export default class HlsJsTech extends BaseTech {
 
     this.hls.on(
       Hls.Events.AUDIO_TRACK_SWITCHED,
-      (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
+      this.onAudioTrackChange.bind(this)
     );
+    this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this))
   }
 
   load(src: string): Promise<void> {
@@ -39,10 +41,9 @@ export default class HlsJsTech extends BaseTech {
     });
     return new Promise((resolve) => {
       this.hls.loadSource(src);
-      this.hls.once(Hls.Events.LEVEL_LOADED, (event, data) => {
-        this.isLiveFlag = data.details.live;
+      this.hls.once(Hls.Events.MANIFEST_PARSED, () => {
         resolve();
-      });
+      })
     });
   }
 
@@ -51,6 +52,7 @@ export default class HlsJsTech extends BaseTech {
       currentTime: this.currentTime,
       duration: this.duration,
       isAtLiveEdge: this.currentTime >= this.hls.liveSyncPosition - LIVE_EDGE,
+      isSeekable: this.isLive ? this.duration >= LIVE_SEEKABLE_MIN_DURATION : true
     });
     this.emit(PlayerEvent.TIME_UPDATE, {
       currentTime: this.currentTime,
@@ -58,14 +60,26 @@ export default class HlsJsTech extends BaseTech {
     });
   }
 
+  private onLevelLoaded(event, data) {
+    const isLive = data?.details?.live;
+    if (this.isLiveFlag !== isLive) {
+      this.isLiveFlag = isLive;
+      this.updateState({
+        isLive
+      });
+    }
+  }
+
   get currentTime() {
     return this.video.currentTime;
   }
 
   set currentTime(newpos: number) {
-    this.video.currentTime = this.isLive
-      ? Math.min(newpos, this.hls.liveSyncPosition)
-      : newpos;
+    if (this.state.isSeekable) {
+      this.video.currentTime = this.isLive
+        ? Math.min(newpos, this.hls.liveSyncPosition ?? newpos)
+        : newpos;
+    }
   }
 
   get isLive() {
