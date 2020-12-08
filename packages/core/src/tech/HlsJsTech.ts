@@ -18,6 +18,7 @@ export default class HlsJsTech extends BaseTech {
   private hls: Hls;
 
   private isLiveFlag: boolean;
+  private playlistDuration = 0;
 
   constructor(opts: IBaseTechOptions) {
     super(opts);
@@ -53,7 +54,7 @@ export default class HlsJsTech extends BaseTech {
       duration: this.duration,
       isAtLiveEdge: this.currentTime >= this.hls.liveSyncPosition - LIVE_EDGE,
       isSeekable: this.isLive
-        ? this.duration >= LIVE_SEEKABLE_MIN_DURATION
+        ? this.playlistDuration >= LIVE_SEEKABLE_MIN_DURATION
         : true,
     });
     this.emit(PlayerEvent.TIME_UPDATE, {
@@ -70,6 +71,8 @@ export default class HlsJsTech extends BaseTech {
         isLive,
       });
     }
+
+    this.playlistDuration = data?.details?.totalduration;
   }
 
   get currentTime() {
