@@ -12,7 +12,7 @@ export default function ContextMenu({ x, y }: { x: number; y: number }) {
       }}
     >
       <a href="https://www.eyevinntechnology.se/" target="_blank">
-        <span>Powered by</span>
+        <span>Powered by the Eyevinn WebPlayer</span>
         <Logo className={style.logo} />
       </a>
     </div>

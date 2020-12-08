@@ -1,0 +1,12 @@
+.liveButton {
+  cursor: pointer;
+  background: #9f1e2b;
+  color: #ffffff;
+  padding: 0 0.5em 0 0.5em;
+  border-radius: 0.25em;
+  white-space: nowrap;
+
+  &.dvr {
+    opacity: 0.5;
+  }
+}

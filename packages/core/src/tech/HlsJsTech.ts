@@ -4,7 +4,7 @@ import { PlayerEvent } from '../util/constants';
 
 const DEFAULT_CONFIG = {
   capLevelOnFPSDrop: true,
-  capLevelToPlayerSize: true
+  capLevelToPlayerSize: true,
 };
 
 const LIVE_EDGE = 5; // seconds from liveEdge
@@ -29,7 +29,7 @@ export default class HlsJsTech extends BaseTech {
       Hls.Events.AUDIO_TRACK_SWITCHED,
       this.onAudioTrackChange.bind(this)
     );
-    this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this))
+    this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this));
   }
 
   load(src: string): Promise<void> {
@@ -43,7 +43,7 @@ export default class HlsJsTech extends BaseTech {
       this.hls.loadSource(src);
       this.hls.once(Hls.Events.MANIFEST_PARSED, () => {
         resolve();
-      })
+      });
     });
   }
 
@@ -52,7 +52,9 @@ export default class HlsJsTech extends BaseTech {
       currentTime: this.currentTime,
       duration: this.duration,
       isAtLiveEdge: this.currentTime >= this.hls.liveSyncPosition - LIVE_EDGE,
-      isSeekable: this.isLive ? this.duration >= LIVE_SEEKABLE_MIN_DURATION : true
+      isSeekable: this.isLive
+        ? this.duration >= LIVE_SEEKABLE_MIN_DURATION
+        : true,
     });
     this.emit(PlayerEvent.TIME_UPDATE, {
       currentTime: this.currentTime,
@@ -65,7 +67,7 @@ export default class HlsJsTech extends BaseTech {
     if (this.isLiveFlag !== isLive) {
       this.isLiveFlag = isLive;
       this.updateState({
-        isLive
+        isLive,
       });
     }
   }

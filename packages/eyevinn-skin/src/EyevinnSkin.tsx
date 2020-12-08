@@ -21,6 +21,7 @@ import CastButton from './components/buttons/castButton/CastButton';
 import { useAirPlay, usePlayer } from './util/hooks';
 import ContextMenu from './components/contextMenu/ContextMenu';
 import CastOverlay from './components/castOverlay/CastOverlay';
+import LiveButton from './components/buttons/liveButton/LiveButton';
 
 export default function EyevinnSkin({
 	player,
@@ -40,6 +41,7 @@ export default function EyevinnSkin({
 		changeTextTrack,
 		seekByPercentage,
 		seekByChange,
+		seekToLive,
 	] = usePlayer(player, castAppId);
 	const [airplayAvailable, toggleAirPlay] = useAirPlay(player);
 
@@ -117,10 +119,7 @@ export default function EyevinnSkin({
 	const onMouseMove = useCallback(() => {
 		clearTimeout(timeoutRef.current);
 		setIsUserActive(true);
-		timeoutRef.current = setTimeout(
-			() => setIsUserActive(false),
-			2500
-		);
+		timeoutRef.current = setTimeout(() => setIsUserActive(false), 2500);
 	}, []);
 
 	const isSkinHidden =
@@ -166,6 +165,13 @@ export default function EyevinnSkin({
 						playbackState={state?.playbackState}
 						onClick={togglePlayPause}
 					/>
+					{state?.isLive && !state?.isSeekable && (
+						<LiveButton
+							onClick={seekToLive}
+							isAtLiveEdge={state?.isAtLiveEdge}
+							isSeekable={state?.isSeekable}
+						/>
+					)}
 					<div class={style.divider} />
 					<CastButton />
 					{airplayAvailable && <AirPlayButton onClick={toggleAirPlay} />}
@@ -187,14 +193,17 @@ export default function EyevinnSkin({
 						onClick={toggleFullscreen}
 					/>
 				</div>
-				<Timeline
-					isLive={state?.isLive}
-					isAtLiveEdge={state?.isAtLiveEdge}
-					isSeekable={state?.isSeekable}
-					handleSeek={seekByPercentage}
-					currentTime={state?.currentTime}
-					duration={state?.duration}
-				/>
+				{(!state?.isLive || state?.isSeekable) && (
+					<Timeline
+						isLive={state?.isLive}
+						isAtLiveEdge={state?.isAtLiveEdge}
+						isSeekable={state?.isSeekable}
+						handleSeek={seekByPercentage}
+						handleSeekToLive={seekToLive}
+						currentTime={state?.currentTime}
+						duration={state?.duration}
+					/>
+				)}
 			</div>
 		</div>
 	);

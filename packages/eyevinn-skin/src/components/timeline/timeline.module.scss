@@ -2,56 +2,51 @@
 	position: relative;
 	display: flex;
 	align-items: center;
-}
 
-.container > * {
-	margin-right: 1em;
-}
+	& > * {
+		margin-right: 1em;
 
-.container > *:last-child {
-	margin-right: 0;
-}
+		&*:last-child {
+			margin-right: 0;
+		}
+	}
 
-.time {
-	color: #ffffff;
-	white-space: nowrap;
-}
+	&.seekDisabled {
+		.time,
+		.progressbarWrapper {
+			visibility: hidden;
+		}
+	}
 
-.time.live {
-	cursor: pointer;
-	background: #9F1E2B;
-	color: #ffffff;
-	padding: 0 0.5em 0 0.5em;
-	border-radius: 0.25em;
-}
+	.time {
+		color: #ffffff;
+		white-space: nowrap;
+	}
 
-.time.live.dvr {
-	opacity: 0.5;
-}
+	.progressbarWrapper {
+		display: flex;
+		justify-content: center;
+		align-items: center;
 
-.progressbarWrapper {
-	display: flex;
-	justify-content: center;
-	align-items: center;
+		width: 100%;
+		padding: 0.5em 0;
 
-	width:  100%;
-	padding:  0.5em 0;
+		cursor: pointer;
+	}
 
-	cursor: pointer;
-}
+	.progressbarContainer {
+		position: relative;
+		width: 100%;
+		height: 0.25em;
+		background: rgba(255, 255, 255, 0.3);
+	}
 
-.progressbarContainer {
-	position: relative;
-	width: 100%;
-	height: 0.25em;
-	background: rgba(255, 255, 255, 0.3);
-}
-
-.progress {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 0%;
-	height: 100%;
-	background: rgba(255, 255, 255, 1);
+	.progress {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 0%;
+		height: 100%;
+		background: rgba(255, 255, 255, 1);
+	}
 }

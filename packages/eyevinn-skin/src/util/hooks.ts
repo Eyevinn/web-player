@@ -103,6 +103,10 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		(change: number) => player.seekTo({ change }),
 		[player]
 	);
+	const seekToLive = useCallback(
+		() => player.seekToLive(),
+		[player]
+	);
 
 	return [
 		state,
@@ -112,6 +116,7 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		changeTextTrack,
 		seekByPercentage,
 		seekByChange,
+		seekToLive
 	];
 }
 
