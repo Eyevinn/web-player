@@ -102,7 +102,7 @@ export default class BaseTech extends EventEmitter {
     this.video.addEventListener(
       'ended',
       (this.onEnded = this.onEnded.bind(this))
-    )
+    );
 
     // @ts-ignore
     if (this.video.audioTracks) {
@@ -125,7 +125,9 @@ export default class BaseTech extends EventEmitter {
 
   protected onLoadedData() {
     this.updateState({
-      playbackState: this.video.paused ? PlaybackState.PAUSED : PlaybackState.PLAYING,
+      playbackState: this.video.paused
+        ? PlaybackState.PAUSED
+        : PlaybackState.PLAYING,
       duration: this.duration,
       isLive: this.isLive,
       audioTracks: this.audioTracks,
@@ -155,7 +157,9 @@ export default class BaseTech extends EventEmitter {
       currentTime: this.currentTime,
       duration: this.duration,
       isAtLiveEdge: this.currentTime >= this.duration - LIVE_EDGE,
-      isSeekable: this.isLive ? this.duration >= LIVE_SEEKABLE_MIN_DURATION : true
+      isSeekable: this.isLive
+        ? this.duration >= LIVE_SEEKABLE_MIN_DURATION
+        : true,
     });
     this.emit(PlayerEvent.TIME_UPDATE, {
       currentTime: this.currentTime,
@@ -200,7 +204,7 @@ export default class BaseTech extends EventEmitter {
   protected onEnded() {
     this.emit(PlayerEvent.ENDED);
     this.updateState({
-      playbackState: PlaybackState.IDLE
+      playbackState: PlaybackState.IDLE,
     });
   }
 
@@ -282,12 +286,14 @@ export default class BaseTech extends EventEmitter {
   get textTracks(): ITrack[] {
     return (
       // @ts-ignore
-      Array.from(this.video.textTracks ?? []).map((textTrack: any) => ({
-        id: getTextTrackId(textTrack),
-        label: textTrack.label,
-        language: textTrack.language,
-        enabled: textTrack.enabled,
-      }))
+      Array.from(this.video.textTracks ?? [])
+        .filter((textTrack: any) => textTrack.kind !== 'metadata')
+        .map((textTrack: any) => ({
+          id: getTextTrackId(textTrack),
+          label: textTrack.label,
+          language: textTrack.language,
+          enabled: textTrack.enabled,
+        }))
     );
   }
 
@@ -316,7 +322,7 @@ export default class BaseTech extends EventEmitter {
 
   load(src: string): Promise<void> {
     this.updateState({
-      playbackState: PlaybackState.LOADING
+      playbackState: PlaybackState.LOADING,
     });
     return new Promise((resolve, reject) => {
       this.video.src = src;
