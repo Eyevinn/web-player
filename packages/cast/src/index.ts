@@ -3,6 +3,7 @@ import { PlaybackState } from '@eyevinn/web-player-core';
 import type { IPlayerState } from '@eyevinn/web-player-core';
 
 const LIVE_EDGE = 20; // seconds from edge considered live
+const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
 export function initializeCast(
 	appId?: string,
@@ -43,6 +44,7 @@ export class CastPlayer extends EventEmitter {
 		duration: 0,
 		isLive: false,
 		isAtLiveEdge: false,
+		isSeekable: true,
 		isMuted: false,
 		audioTracks: [],
 		textTracks: [],
@@ -142,7 +144,8 @@ export class CastPlayer extends EventEmitter {
 						if (value) {
 							this.setState({
 								isLive: !value.isLiveDone,
-								duration: value.end,
+								duration: value.end - value.start,
+								isSeekable: value.end - value.start > LIVE_SEEKABLE_MIN_DURATION
 							});
 						} else {
 							this.setState({ isLive: false });
