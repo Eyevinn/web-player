@@ -1,11 +1,5 @@
-# `demo`
+# Demo
 
-> TODO: description
+A simple demo implementation of the different packages that make up the Eyevinn WebPlayer.
 
-## Usage
-
-```
-const demo = require('demo');
-
-// TODO: DEMONSTRATE API
-```
+Run `npm run dev` in the root of this repository to see it in action!

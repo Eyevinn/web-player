@@ -6,7 +6,7 @@ import {
 	useRef,
 } from 'preact/hooks';
 import { AirPlay, AirPlayEvent } from '@eyevinn/web-player-airplay';
-import { CastPlayer, CastPlayerEvent } from '@eyevinn/web-player-cast';
+import { CastSender, CastSenderEvent } from '@eyevinn/web-player-cast';
 import {
 	PlayerEvent,
 	IPlayerState,
@@ -18,13 +18,13 @@ interface ISkinState extends IPlayerState {
 	isCasting: boolean;
 }
 
-export function useCastPlayer(
+export function useCastSender(
 	player: WebPlayer,
 	castAppId?: string
-): [CastPlayer, ISkinState] {
+): [CastSender, ISkinState] {
 	const [state, setState] = useState<ISkinState>(null);
-	const castPlayer = useMemo(
-		() => castAppId !== null && new CastPlayer(castAppId),
+	const castSender = useMemo(
+		() => castAppId !== null && new CastSender(castAppId),
 		[]
 	);
 
@@ -32,17 +32,17 @@ export function useCastPlayer(
 	castStateRef.current = state;
 
 	useEffect(() => {
-		if (castPlayer) {
-			castPlayer.on(CastPlayerEvent.CONNECTED, () => {
+		if (castSender) {
+			castSender.on(CastSenderEvent.CONNECTED, () => {
 				if (player.currentSrc) {
-					castPlayer.load(player.currentSrc, player.currentTime);
+					castSender.load(player.currentSrc, player.currentTime);
 				}
 			});
-			castPlayer.on(CastPlayerEvent.DISCONNECTED, () => {
+			castSender.on(CastSenderEvent.DISCONNECTED, () => {
 				setState((prevState) => ({ ...prevState, isCasting: false }));
 				player.seekTo({ position: castStateRef.current?.currentTime });
 			});
-			castPlayer.on(CastPlayerEvent.STATE_CHANGE, ({ state }) => {
+			castSender.on(CastSenderEvent.STATE_CHANGE, ({ state }) => {
 				setState({
 					isCasting: state.playbackState !== PlaybackState.IDLE,
 					...state,
@@ -50,12 +50,12 @@ export function useCastPlayer(
 			});
 		}
 	}, []);
-	return [castPlayer, state];
+	return [castSender, state];
 }
 
 export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 	const [playerState, setPlayerState] = useState<ISkinState>(null);
-	const [castPlayer, castState] = useCastPlayer(webPlayer, castAppId);
+	const [castSender, castState] = useCastSender(webPlayer, castAppId);
 	const isCastingRef = useRef<boolean>(false);
 
 	isCastingRef.current = castState?.isCasting ?? false;
@@ -74,7 +74,7 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 
 	let state, player;
 	if (castState && castState.playbackState !== PlaybackState.IDLE) {
-		player = castPlayer;
+		player = castSender;
 		state = castState;
 	} else {
 		player = webPlayer;

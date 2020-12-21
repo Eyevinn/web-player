@@ -8,18 +8,14 @@ module.exports = {
   output: {
     library: 'webplayer',
     libraryExport: 'default',
-    libraryTarget: 'umd',
+    libraryTarget: 'commonjs2',
     filename: 'webplayer.min.js',
     path: path.resolve(__dirname, 'dist'),
   },
   plugins: [
     new MiniCssExtractPlugin({
       filename: 'webplayer.css',
-    }),
-    // disable dynamic imports, it doesn't work well with the umd output
-    new webpack.optimize.LimitChunkCountPlugin({
-      maxChunks: 1,
-    }),
+    })
   ],
   module: {
     rules: [
