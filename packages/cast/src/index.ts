@@ -31,13 +31,13 @@ export function initializeCast(
 	});
 }
 
-export enum CastPlayerEvent {
+export enum CastSenderEvent {
 	CONNECTED = 'cast:connected',
 	DISCONNECTED = 'cast:disconnected',
 	STATE_CHANGE = 'cast:state_change',
 }
 
-export class CastPlayer extends EventEmitter {
+export class CastSender extends EventEmitter {
 	private state: IPlayerState = {
 		playbackState: PlaybackState.IDLE,
 		currentTime: 0,
@@ -70,7 +70,7 @@ export class CastPlayer extends EventEmitter {
 
 	private setState(newState) {
 		this.state = Object.assign({}, this.state, newState);
-		this.emit(CastPlayerEvent.STATE_CHANGE, { state: this.state });
+		this.emit(CastSenderEvent.STATE_CHANGE, { state: this.state });
 	}
 
 	private getPlaybackStateFromPlayerState(playerState: string): PlaybackState {
@@ -100,14 +100,14 @@ export class CastPlayer extends EventEmitter {
 				switch (event.sessionState) {
 					case cast.framework.SessionState.SESSION_STARTED:
 					case cast.framework.SessionState.SESSION_RESUMED:
-						this.emit(CastPlayerEvent.CONNECTED);
+						this.emit(CastSenderEvent.CONNECTED);
 						this.setState({
 							playbackState: PlaybackState.READY,
 							isMuted: this.player.isMuted,
 						});
 						break;
 					case cast.framework.SessionState.SESSION_ENDED:
-						this.emit(CastPlayerEvent.DISCONNECTED);
+						this.emit(CastSenderEvent.DISCONNECTED);
 						this.setState({
 							playbackState: PlaybackState.IDLE,
 						});

@@ -1,7 +1,6 @@
 {
   "name": "@eyevinn/web-player",
   "version": "0.0.0",
-  "description": "> TODO: description",
   "author": "Benjamin Wallberg <benjamin.wallberg@eyevinn.se>",
   "homepage": "https://github.com/Eyevinn/web-player#readme",
   "license": "Apache-2.0",
@@ -13,7 +12,8 @@
   ],
   "scripts": {
     "prepare": "npm run build",
-    "build": "rm -rf dist && webpack"
+    "build:umd": "rm -rf build/ webpack -c webpack.umd.config.js",
+    "build:npm": "rm -rf dist/ webpack -c webpack.npm.config.js" 
   },
   "repository": {
     "type": "git",

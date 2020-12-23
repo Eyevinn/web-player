@@ -2,7 +2,7 @@
   "name": "@eyevinn/web-player-airplay",
   "version": "0.0.0",
   "description": "> TODO: description",
-  "author": "Benjamin Wallberg <me@bwallberg.com>",
+  "author": "Benjamin Wallberg <benjamin.wallberg@eyevinn.se>",
   "homepage": "https://github.com/Eyevinn/web-player#readme",
   "license": "ISC",
   "source": "./src/index.ts",
