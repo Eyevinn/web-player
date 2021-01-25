@@ -4,7 +4,8 @@
   "scripts": {
     "postinstall": "lerna bootstrap",
     "build": "lerna run build",
-    "dev": "lerna run dev --stream --parallel"
+    "dev": "lerna run dev --stream --parallel",
+    "lerna:version": "lerna version --conventional-commits",
   },
   "devDependencies": {
     "lerna": "^3.22.1",
