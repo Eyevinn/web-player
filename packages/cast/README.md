@@ -7,3 +7,7 @@ The developer is expected to use the `<google-cast-launcher />` web component to
 
 ## Usage
 TODO...
+
+## TODO
+[ ] - Add support for switching audio tracks
+[ ] - Add support for switching text tracks

@@ -27,18 +27,9 @@ const MEDIA_EVENTS = [
   'waiting',
 ];
 
-export function getMediaStats(media: HTMLMediaElement) {
-    return {
-        currentTime: media.currentTime,
-        duration: media.duration,
-        audioTracks: (media as any).audioTracks,
-        textTracks: media.textTracks
-    }
-}
-
 export function debugEvents(media: HTMLMediaElement) {
     MEDIA_EVENTS.forEach((evt) => {
         const log = evt === 'timeupdate' || evt === 'progress' ? console.debug : console.info;
-        media.addEventListener(evt, () => log(`[Debug] Event: '${evt}'`, getMediaStats(media)));
+        media.addEventListener(evt, () => log(`[Debug] Event: '${evt}'`));
     });
 }

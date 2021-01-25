@@ -3,7 +3,7 @@
   "name": "@eyevinn/web-player-demo",
   "version": "0.0.0",
   "author": "Benjamin Wallberg <benjamin.wallberg@eyevinn.se>",
-  "homepage": "",
+  "homepage": "https://github.com/Eyevinn/web-player#readme",
   "license": "Apache-2.0",
   "scripts": {
     "dev": "webpack-dev-server --hot --progress",

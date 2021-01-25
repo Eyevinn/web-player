@@ -16,7 +16,7 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: 'webplayer.css',
     }),
-    // disable dynamic imports, it doesn't work well with the umd output
+    // disable dynamic imports, it doesn't work with the umd output
     new webpack.optimize.LimitChunkCountPlugin({
       maxChunks: 1,
     }),
