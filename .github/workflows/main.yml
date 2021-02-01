@@ -17,6 +17,6 @@ jobs:
       - name: publish
         run: |
           npm ci
-          npm run publish
+          lerna publish from-git
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
