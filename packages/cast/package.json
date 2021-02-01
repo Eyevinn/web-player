@@ -1,6 +1,6 @@
 {
   "name": "@eyevinn/web-player-cast",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "author": "Benjamin Wallberg <benjamin.wallberg@eyevinn.se>",
   "homepage": "https://github.com/Eyevinn/web-player#readme",
   "license": "Apache-2.0",
@@ -25,8 +25,8 @@
     "url": "https://github.com/Eyevinn/web-player/issues"
   },
   "dependencies": {
+    "@eyevinn/web-player-core": "^0.1.0",
     "@types/chromecast-caf-sender": "^1.0.3",
-    "mitt": "^2.1.0",
-    "@eyevinn/web-player-core": "^0.0.0"
+    "mitt": "^2.1.0"
   }
 }
