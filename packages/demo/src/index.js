@@ -1,7 +1,12 @@
+// Comment out these imports if you want to demo the player package
 import WebPlayer from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
+
+// Uncomment this to demo the player package
+// import webplayer from '@eyevinn/web-player';
+// import '@eyevinn/web-player/dist/webplayer.css';
 
 async function main() {
   const hlsButton = document.querySelector('#hls-button');
@@ -18,15 +23,23 @@ async function main() {
     manifestInput.value = searchParams.get('manifest');
   }
 
-  const video = document.querySelector('video');
+  const root = document.querySelector('#player');
+  const video = document.createElement('video');
+  root.appendChild(video);
+
   if (searchParams.get('debug') === 'true') {
     debugEvents(video);
   }
+
+  // Comment out this if you want to demo the player package
   const player = new WebPlayer({ video });
   renderEyevinnSkin({
-    root: document.querySelector('#player'),
+    root,
     player,
   });
+
+  // Uncomment out this if you want to demo the player package
+  // const player = webplayer(root);
 
   function load() {
     player.load(manifestInput.value);

@@ -12,9 +12,7 @@
   ],
   "scripts": {
     "prepare": "npm run build",
-    "build": "npm run build:umd && npm run build:npm",
-    "build:umd": "rm -rf umd_dist/ && webpack --config webpack.umd.config.js",
-    "build:npm": "rm -rf dist/ && webpack --config webpack.npm.config.js" 
+    "build": "rm -rf dist/ && webpack --config webpack.config.js"
   },
   "repository": {
     "type": "git",
