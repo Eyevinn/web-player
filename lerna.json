@@ -3,8 +3,5 @@
   "version": "independent",
   "command": {
     "version": { "allowBranch": "master", "message": "chore(release): publish" }
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

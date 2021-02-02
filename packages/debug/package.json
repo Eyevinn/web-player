@@ -23,5 +23,9 @@
   },
   "bugs": {
     "url": "https://github.com/Eyevinn/web-player/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
+
 }

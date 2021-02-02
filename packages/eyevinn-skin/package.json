@@ -31,5 +31,9 @@
   "devDependencies": {
     "@types/classnames": "^2.2.10",
     "postcss-modules": "^3.2.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
+
 }

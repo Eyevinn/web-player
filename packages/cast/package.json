@@ -28,5 +28,9 @@
     "@eyevinn/web-player-core": "^0.1.0",
     "@types/chromecast-caf-sender": "^1.0.3",
     "mitt": "^2.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
+
 }
