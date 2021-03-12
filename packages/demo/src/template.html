@@ -18,12 +18,12 @@
   <body>
     <header>
       <img src="./logo.png" />
-      <h1>WebPlayer</h1>
+      <h1>WebPlayer@<%= htmlWebpackPlugin.options.title %></h1>
     </header>
     <section>
       <button id="hls-button">HLS</button>
       <button id="dash-button">MPEG-DASH</button>
-      <button id="mss-button">SmoothStreaming</button>
+      <button id="mss-button" disabled>SmoothStreaming</button>
     </section>
     <section class="input-section">
       <input type="text" name="manifest-url" id="manifest-input" />
