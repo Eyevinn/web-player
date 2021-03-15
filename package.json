@@ -8,6 +8,19 @@
     "lerna:version": "lerna version --conventional-commits",
     "publish": "lerna publish from-package --yes --ignore-scripts --no-verify-access"
   },
+  "author": "Eyevinn Technology <work@eyevinn.se>",
+  "contributors": [
+    "Benjamin Wallberg <benjamin.wallberg@eyevinn.se> (Eyevinn Technology AB)"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eyevinn/web-player.git"
+  },
+  "keywords": [
+    "html-player",
+    "video-player"
+  ],
   "devDependencies": {
     "lerna": "^3.22.1",
     "microbundle": "^0.12.4",
