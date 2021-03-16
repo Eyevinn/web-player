@@ -1,5 +1,5 @@
 # Eyevinn WebPlayer
-The Eyevinn WebPlayer is a simplistic video (audio is on the roadmap) player for playback of ABR streams. It is free-to-use and currently supports the ABR streaming formats Apple HLS, MPEG-DASH and Microsoft Smooth Streaming.
+The Eyevinn WebPlayer is a simplistic video (audio is on the roadmap) player for playback of ABR streams. It is free-to-use and currently supports the ABR streaming formats Apple HLS, MPEG-DASH.
 The player is built using a modular approach which means that a lot of functionality is put into separate modules and can be used independently from each other, we also provide a player module that bundles it all together in a neat package.
 
 Demo: https://web.player.eyevinn.technology/

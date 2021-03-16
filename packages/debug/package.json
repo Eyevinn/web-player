@@ -1,9 +1,16 @@
 {
   "name": "@eyevinn/web-player-debug",
   "version": "0.2.0",
-  "author": "Benjamin Wallberg <benjamin.wallberg@eyevinn.se>",
+  "author": "Eyevinn Technology <work@eyevinn.se>",
+  "contributors": [
+    "Benjamin Wallberg <benjamin.wallberg@eyevinn.se> (Eyevinn Technology AB)"
+  ],
   "homepage": "https://github.com/Eyevinn/web-player#readme",
   "license": "Apache-2.0",
+  "keywords": [
+    "html-player",
+    "video-player"
+  ],
   "source": "./src/index.ts",
   "main": "dist/index.js",
   "module": "dist/index.m.js",
