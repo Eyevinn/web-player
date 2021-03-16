@@ -1,6 +1,6 @@
 {
   "name": "@eyevinn/web-player-eyevinn-skin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Eyevinn Technology <work@eyevinn.se>",
   "contributors": [
     "Benjamin Wallberg <benjamin.wallberg@eyevinn.se> (Eyevinn Technology AB)"
@@ -29,9 +29,9 @@
     "url": "https://github.com/Eyevinn/web-player/issues"
   },
   "dependencies": {
-    "@eyevinn/web-player-airplay": "^0.2.0",
-    "@eyevinn/web-player-cast": "^0.2.0",
-    "@eyevinn/web-player-core": "^0.2.0",
+    "@eyevinn/web-player-airplay": "^0.2.1",
+    "@eyevinn/web-player-cast": "^0.2.1",
+    "@eyevinn/web-player-core": "^0.2.1",
     "classnames": "^2.2.6",
     "preact": "^10.4.8"
   },
