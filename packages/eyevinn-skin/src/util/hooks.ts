@@ -54,6 +54,7 @@ export function useCastSender(
 }
 
 export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
+	const [ready, setReady] = useState<boolean>(null);
 	const [playerState, setPlayerState] = useState<ISkinState>(null);
 	const [castSender, castState] = useCastSender(webPlayer, castAppId);
 	const isCastingRef = useRef<boolean>(false);
@@ -61,6 +62,16 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 	isCastingRef.current = castState?.isCasting ?? false;
 
 	useEffect(() => {
+		webPlayer.on(PlayerEvent.UNREADY, () => {
+			setReady(null);
+			setPlayerState(null);
+		});
+		webPlayer.on(PlayerEvent.READYING, () => {
+			setReady(false);
+		});
+		webPlayer.on(PlayerEvent.READY, () => {
+			setReady(true);
+		});
 		webPlayer.on(PlayerEvent.STATE_CHANGE, ({ state }) => {
 			if (isCastingRef.current && webPlayer.isPlaying) {
 				webPlayer.pause();
@@ -103,12 +114,10 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		(change: number) => player.seekTo({ change }),
 		[player]
 	);
-	const seekToLive = useCallback(
-		() => player.seekToLive(),
-		[player]
-	);
+	const seekToLive = useCallback(() => player.seekToLive(), [player]);
 
 	return [
+		ready,
 		state,
 		togglePlayPause,
 		toggleMute,
@@ -116,7 +125,7 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		changeTextTrack,
 		seekByPercentage,
 		seekByChange,
-		seekToLive
+		seekToLive,
 	];
 }
 

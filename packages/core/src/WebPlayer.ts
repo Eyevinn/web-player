@@ -1,6 +1,6 @@
 import BaseTech, { PlaybackState } from './tech/BaseTech';
 import { isSafari } from './util/browser';
-import { ErrorCode, ManifestType } from './util/constants';
+import { ErrorCode, ManifestType, PlayerEvent } from './util/constants';
 import { canPlayManifestType, getManifestType } from './util/contentType';
 import EventEmitter from './util/EventEmitter';
 
@@ -25,6 +25,7 @@ export default class WebPlayer extends EventEmitter {
   }
 
   async load(src: string) {
+    this.emit(PlayerEvent.READYING);
     this.reset();
 
     this.currentSrc = src;
@@ -52,6 +53,7 @@ export default class WebPlayer extends EventEmitter {
     this.tech = new Tech({ video: this.video });
     this.tech.on('*', this.onEvent.bind(this));
 
+    this.emit(PlayerEvent.READY);
     return this.tech.load(src);
   }
 
@@ -80,7 +82,7 @@ export default class WebPlayer extends EventEmitter {
   }
 
   stop() {
-    return this.tech?.stop();
+    return this.destroy();
   }
 
   seekTo({
@@ -130,6 +132,7 @@ export default class WebPlayer extends EventEmitter {
     if (this.tech) {
       this.tech.destroy();
       this.tech = null;
+      this.emit(PlayerEvent.UNREADY);
     }
   }
 }

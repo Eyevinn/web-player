@@ -2,29 +2,33 @@ export enum ManifestType {
 	UNKNOWN,
 	HLS,
 	DASH,
-	MSS,	
-};
+	MSS,
+}
 
 export enum ErrorCode {
-	UNKNOWN_MANIFEST_TYPE	
+	UNKNOWN_MANIFEST_TYPE,
 }
 
 export enum PlayerEvent {
-	// HTML5 Media Events 
-	PLAY = "play",
-	PAUSE = "pause",
-	PLAYING = "playing",
-	TIME_UPDATE = "timeupdate",
-	SEEKING = "seeking",
-	SEEKED = "seeked",
-	WAITING = "waiting",
-	STALLED = "stalled",
-	VOLUME_CHANGE = "volumechange",
-	ENDED = "ended",
+	// HTML5 Media Events
+	PLAY = 'play',
+	PAUSE = 'pause',
+	PLAYING = 'playing',
+	TIME_UPDATE = 'timeupdate',
+	SEEKING = 'seeking',
+	SEEKED = 'seeked',
+	WAITING = 'waiting',
+	STALLED = 'stalled',
+	VOLUME_CHANGE = 'volumechange',
+	ENDED = 'ended',
 
 	// WebPlayer Events
-	STATE_CHANGE = "state_change",
-	AUDIO_TRACK_CHANGE = "audio_track_change",
-	BUFFERING = "buffering",
-	LIVE_ENDED = "live_ended"
+	UNREADY = 'unready',
+	READYING = 'readying',
+	READY = 'ready',
+
+	STATE_CHANGE = 'state_change',
+	AUDIO_TRACK_CHANGE = 'audio_track_change',
+	BUFFERING = 'buffering',
+	LIVE_ENDED = 'live_ended',
 }

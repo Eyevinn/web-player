@@ -34,6 +34,7 @@ export default function EyevinnSkin({
 }) {
 	const skinContainerRef = useRef<HTMLDivElement>();
 	const [
+		ready,
 		state,
 		togglePlayPause,
 		toggleMute,
@@ -132,6 +133,11 @@ export default function EyevinnSkin({
 		state?.playbackState === PlaybackState.BUFFERING ||
 		state?.playbackState === PlaybackState.SEEKING;
 
+	if (ready === null) {
+		// the player has no content and cannot play anything
+		return null;
+	}
+
 	return (
 		<div
 			ref={skinContainerRef}
@@ -153,7 +159,7 @@ export default function EyevinnSkin({
 			{contextMenuState.visible && (
 				<ContextMenu x={contextMenuState.x} y={contextMenuState.y} />
 			)}
-			{isLoading && <Loader />}
+			{(isLoading || !ready) && <Loader />}
 			{state?.isCasting && <CastOverlay />}
 			<div
 				class={classNames(style.bottomContainer, {
