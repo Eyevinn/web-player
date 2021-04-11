@@ -219,7 +219,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   get currentLevel(){
-    return NaN;
+    return -1;
   }
 
   get isPlaying(): boolean {

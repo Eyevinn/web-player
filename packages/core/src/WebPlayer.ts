@@ -5,8 +5,7 @@ import { canPlayManifestType, getManifestType } from './util/contentType';
 import EventEmitter from './util/EventEmitter';
 
 export { PlayerEvent } from './util/constants';
-export { IPlayerState } from './tech/BaseTech';
-export { IVideoQuality } from './tech/BaseTech';
+export { IPlayerState, IVideoQuality } from './tech/BaseTech';
 
 export interface IWebPlayerOptions {
   video: HTMLVideoElement;
@@ -75,10 +74,8 @@ export default class WebPlayer extends EventEmitter {
   } 
 
   set currentLevel(level: number){
-    // This sets the level for video element of an HLS manifest.
     if(this.tech){
       this.tech.currentLevel=level;
-      //console.log(`Level before: ${this.tech.currentLevel}`); // HLS doen't update fast enough.
     }
   }
   
