@@ -112,11 +112,6 @@ export default class HlsJsTech extends BaseTech {
     return this.video.currentTime;
   }
 
-  get funkytime(){
-return 0;
-  }
-
-
   set currentTime(newpos: number) {
     if (this.state.isSeekable) {
       this.video.currentTime = this.isLive
