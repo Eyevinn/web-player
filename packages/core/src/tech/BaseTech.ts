@@ -26,12 +26,6 @@ export enum PlaybackState {
   BUFFERING,
 }
 
-export interface IVideoQuality{
-  width: number;
-  height: number;
-  bitrate: number;
-}
-
 export interface IPlayerState {
   playbackState: PlaybackState;
   currentTime: number;
@@ -214,14 +208,6 @@ export default class BaseTech extends EventEmitter {
     });
   }
 
-  set currentLevel(level: number){
-    // Base tech does not do quality levels.
-  }
-
-  get currentLevel(){
-    return -1;
-  }
-
   get isPlaying(): boolean {
     return !this.video.paused;
   }
@@ -359,11 +345,6 @@ export default class BaseTech extends EventEmitter {
 
   seekToLive() {
     this.currentTime = this.duration - LIVE_EDGE;
-  }
-
-  getVideoQualities(){
-    let videoQualities: IVideoQuality[];
-    return videoQualities;
   }
 
   destroy() {
