@@ -63,7 +63,8 @@ async function main() {
     });
 
   }
- // fails with: https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8 
+ // Quality picker fails with:
+ // https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8 
   hlsButton.onclick = async () => {
     manifestInput.value =
       'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8';
