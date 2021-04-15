@@ -66,7 +66,7 @@ export default class DashPlayer extends BaseTech {
       const currentTrack = this.shakaPlayer.getVariantTracks().find(track => track.active == true);
     return currentTrack.id;
     }
-    return NaN;
+    return -1;
   }
 
   getVideoQualities(){

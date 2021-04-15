@@ -77,24 +77,21 @@ export default class HlsJsTech extends BaseTech {
 
   getVideoQualities(){
     if(this.hls){
-      const videoQualities: IVideoQuality[] = [];
-      const levels = this.hls.levels;
-      levels.forEach(level => {
+      return this.hls.levels.map(level => {
         const quality: IVideoQuality = {
           width: level['width'],
           height: level['height'],
           bitrate: level['bitrate'],
         }
-        videoQualities.push(quality);
+        return quality;
       });
-      return videoQualities;
     }
   }
 
   get currentLevel(){
     if(this.hls)
       return this.hls.currentLevel;
-    return NaN;
+    return -1;
   }
 
   set currentLevel(level: number){
