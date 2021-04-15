@@ -26,16 +26,21 @@
       <button id="mss-button" disabled>SmoothStreaming</button>
     </section>
     <section class="input-section">
-      <input type="text" name="manifest-url" id="manifest-input" placeholder="Paste a Stream URI Here..." />
+      <input
+        type="text"
+        name="manifest-url"
+        id="manifest-input"
+        placeholder="Paste a Stream URI Here..."
+      />
       <button id="load-button">LOAD</button>
     </section>
     <div>
       <label>Video Quality</label>
-      <select id="state" label="Quality"> Video Quality
+      <select id="level" label="Quality">
+        Video Quality
         <option value="-1">AUTO</option>
       </select>
     </div>
-    <div id="player">
-    </div>
+    <div id="player"></div>
   </body>
 </html>

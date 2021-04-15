@@ -26,7 +26,7 @@ export enum PlaybackState {
   BUFFERING,
 }
 
-export interface IVideoQuality{
+export interface IVideoQuality {
   width: number;
   height: number;
   bitrate: number;
@@ -214,11 +214,11 @@ export default class BaseTech extends EventEmitter {
     });
   }
 
-  set currentLevel(level: number){
+  set currentLevel(level: number) {
     // Base tech does not do quality levels.
   }
 
-  get currentLevel(){
+  get currentLevel() {
     return -1;
   }
 
@@ -361,7 +361,7 @@ export default class BaseTech extends EventEmitter {
     this.currentTime = this.duration - LIVE_EDGE;
   }
 
-  getVideoQualities(){
+  getVideoQualities() {
     let videoQualities: IVideoQuality[];
     return videoQualities;
   }

@@ -47,44 +47,46 @@ export default class DashPlayer extends BaseTech {
     }));
   }
 
-  set currentLevel(level: number){
+  set currentLevel(level: number) {
     // Base tech does not do levels.
-    if(this.shakaPlayer){
-      if(level == -1){
+    if (this.shakaPlayer) {
+      if (level == -1) {
         this.shakaPlayer.configure({ abr: { enabled: true } });
-      }
-      else{
+      } else {
         this.shakaPlayer.configure({ abr: { enabled: false } });
-        const variantTrack = this.shakaPlayer.getVariantTracks().find(track => track.id == level);
-        this.shakaPlayer.selectVariantTrack(variantTrack, true)
+        const variantTrack = this.shakaPlayer
+          .getVariantTracks()
+          .find((track) => track.id == level);
+        this.shakaPlayer.selectVariantTrack(variantTrack, true);
       }
     }
   }
 
-  get currentLevel(){
-    if(this.shakaPlayer){
-      const currentTrack = this.shakaPlayer.getVariantTracks().find(track => track.active == true);
-    return currentTrack.id;
+  get currentLevel() {
+    if (this.shakaPlayer) {
+      const currentTrack = this.shakaPlayer
+        .getVariantTracks()
+        .find((track) => track.active == true);
+      return currentTrack.id;
     }
     return -1;
   }
 
-  getVideoQualities(){
-    if(this.shakaPlayer){
+  getVideoQualities() {
+    if (this.shakaPlayer) {
       const videoQualities: IVideoQuality[] = [];
       const tracks = this.shakaPlayer.getVariantTracks();
-      tracks.forEach(track => {
+      tracks.forEach((track) => {
         const quality: IVideoQuality = {
           width: track.width,
           height: track.height,
           bitrate: track.bandwidth,
-        }
+        };
         videoQualities.push(quality);
       });
       return videoQualities;
     }
   }
-
 
   destroy() {
     if (this.shakaPlayer) {

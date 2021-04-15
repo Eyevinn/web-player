@@ -71,16 +71,16 @@ export default class WebPlayer extends EventEmitter {
 
   get currentTime(): number {
     return this.tech?.currentTime;
-  } 
+  }
 
-  set currentLevel(level: number){
-    if(this.tech){
-      this.tech.currentLevel=level;
+  set currentLevel(level: number) {
+    if (this.tech) {
+      this.tech.currentLevel = level;
     }
   }
-  
-  getAllVideoQualities(){
-    if(this.tech){
+
+  getAllVideoQualities() {
+    if (this.tech) {
       const videoQualities: IVideoQuality[] = this.tech.getVideoQualities();
       return videoQualities;
     }
