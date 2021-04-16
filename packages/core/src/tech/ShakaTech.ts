@@ -1,6 +1,6 @@
 import { Player } from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
-import BaseTech, { PlaybackState, IVideoQuality } from './BaseTech';
+import BaseTech, { PlaybackState, IVideoLevel } from './BaseTech';
 
 export default class DashPlayer extends BaseTech {
   private shakaPlayer: any;
@@ -47,44 +47,50 @@ export default class DashPlayer extends BaseTech {
     }));
   }
 
-  set currentLevel(level: number) {
+  set currentLevel(level: IVideoLevel) {
     // Base tech does not do levels.
     if (this.shakaPlayer) {
-      if (level == -1) {
-        this.shakaPlayer.configure({ abr: { enabled: true } });
-      } else {
-        this.shakaPlayer.configure({ abr: { enabled: false } });
-        const variantTrack = this.shakaPlayer
-          .getVariantTracks()
-          .find((track) => track.id == level);
-        this.shakaPlayer.selectVariantTrack(variantTrack, true);
-      }
+      this.shakaPlayer.configure({ abr: { enabled: false } });
+      const variantTrack = this.shakaPlayer
+        .getVariantTracks()
+        .find((track) => track.id == level.id);
+      this.shakaPlayer.selectVariantTrack(variantTrack, true);
     }
   }
 
   get currentLevel() {
+    let level: IVideoLevel;
     if (this.shakaPlayer) {
       const currentTrack = this.shakaPlayer
         .getVariantTracks()
         .find((track) => track.active == true);
-      return currentTrack.id;
+      return (level = {
+        id: currentTrack.id,
+        width: currentTrack.width,
+        height: currentTrack.height,
+        bitrate: currentTrack.bandwidth,
+      });
     }
-    return -1;
+    return level;
   }
 
-  getVideoQualities() {
+  getVideoLevels() {
     if (this.shakaPlayer) {
-      const videoQualities: IVideoQuality[] = [];
-      const tracks = this.shakaPlayer.getVariantTracks();
-      tracks.forEach((track) => {
-        const quality: IVideoQuality = {
+      const levels: IVideoLevel[] = this.shakaPlayer
+        .getVariantTracks()
+        .map((track) => ({
+          id: track.id,
           width: track.width,
           height: track.height,
           bitrate: track.bandwidth,
-        };
-        videoQualities.push(quality);
-      });
-      return videoQualities;
+        }));
+      return levels;
+    }
+  }
+
+  enableAutoLevel() {
+    if (this.shakaPlayer) {
+      this.shakaPlayer.configure({ abr: { enabled: true } });
     }
   }
 

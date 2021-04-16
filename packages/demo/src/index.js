@@ -52,13 +52,13 @@ async function main() {
       if (qualityPicker.options[i].value != '-1') qualityPicker.remove(i);
     }
 
-    const videoQualities = player.getAllVideoQualities();
-    videoQualities.forEach((element, level) => {
+    const videoLevels = player.getVideoLevels();
+    videoLevels.forEach((level) => {
       const option = document.createElement('option');
-      option.text = `${element['width']}x${element['height']}, ${Math.round(
-        element['bitrate'] / 1024
+      option.text = `${level.width}x${level.height}, ${Math.round(
+        level.bitrate / 1024
       )}kbps`;
-      option.value = level;
+      option.value = level.id;
       qualityPicker.add(option);
     });
   }
@@ -84,7 +84,14 @@ async function main() {
   loadButton.onclick = () => load();
 
   qualityPicker.onchange = () => {
-    player.currentLevel = qualityPicker.value;
+    if (qualityPicker.value == -1) {
+      player.enableAutoLevel();
+    } else {
+      const selectedLevel = player
+        .getVideoLevels()
+        .find((level) => level.id == qualityPicker.value);
+      player.currentLevel = selectedLevel;
+    }
   };
 }
 

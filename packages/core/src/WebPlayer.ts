@@ -1,11 +1,11 @@
-import BaseTech, { PlaybackState, IVideoQuality } from './tech/BaseTech';
+import BaseTech, { PlaybackState, IVideoLevel } from './tech/BaseTech';
 import { isSafari } from './util/browser';
 import { ErrorCode, ManifestType, PlayerEvent } from './util/constants';
 import { canPlayManifestType, getManifestType } from './util/contentType';
 import EventEmitter from './util/EventEmitter';
 
 export { PlayerEvent } from './util/constants';
-export { IPlayerState, IVideoQuality } from './tech/BaseTech';
+export { IPlayerState, IVideoLevel } from './tech/BaseTech';
 
 export interface IWebPlayerOptions {
   video: HTMLVideoElement;
@@ -73,16 +73,28 @@ export default class WebPlayer extends EventEmitter {
     return this.tech?.currentTime;
   }
 
-  set currentLevel(level: number) {
+  get currentLevel(): IVideoLevel {
+    if (this.tech) {
+      return this.tech.currentLevel;
+    }
+  }
+
+  set currentLevel(level: IVideoLevel) {
     if (this.tech) {
       this.tech.currentLevel = level;
     }
   }
 
-  getAllVideoQualities() {
+  enableAutoLevel() {
     if (this.tech) {
-      const videoQualities: IVideoQuality[] = this.tech.getVideoQualities();
-      return videoQualities;
+      this.tech.enableAutoLevel();
+    }
+  }
+
+  getVideoLevels() {
+    if (this.tech) {
+      const videoLevels: IVideoLevel[] = this.tech.getVideoLevels();
+      return videoLevels;
     }
   }
 

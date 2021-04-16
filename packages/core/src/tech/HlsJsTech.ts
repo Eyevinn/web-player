@@ -1,6 +1,6 @@
 import BaseTech, {
   IBaseTechOptions,
-  IVideoQuality,
+  IVideoLevel,
   PlaybackState,
 } from './BaseTech';
 import Hls from 'hls.js';
@@ -79,31 +79,42 @@ export default class HlsJsTech extends BaseTech {
     this.playlistDuration = data?.details?.totalduration;
   }
 
-  getVideoQualities() {
+  enableAutoLevel() {
     if (this.hls) {
-      return this.hls.levels.map((level) => {
-        const quality: IVideoQuality = {
-          width: level['width'],
-          height: level['height'],
-          bitrate: level['bitrate'],
-        };
-        return quality;
-      });
+      this.hls.nextLevel = -1;
+    }
+  }
+
+  getVideoLevels() {
+    if (this.hls) {
+      const levels: IVideoLevel[] = this.hls.levels.map((level, id) => ({
+        id: id,
+        width: level.width,
+        height: level.height,
+        bitrate: level.bitrate,
+      }));
+      return levels;
     }
   }
 
   get currentLevel() {
-    if (this.hls) return this.hls.currentLevel;
-    return -1;
+    let videoLevel: IVideoLevel;
+    if (this.hls) {
+      const currentLevel = this.hls.levels.find(
+        (level, index) => index == this.hls.currentLevel
+      );
+      return (videoLevel = {
+        id: this.hls.currentLevel,
+        width: currentLevel.width,
+        height: currentLevel.height,
+        bitrate: currentLevel.bitrate,
+      });
+    }
   }
 
-  set currentLevel(level: number) {
+  set currentLevel(level: IVideoLevel) {
     if (this.hls) {
-      if (level == -1) {
-        this.hls.nextLevel = -1;
-      } else {
-        this.hls.currentLevel = level;
-      }
+      this.hls.currentLevel = level.id;
     }
   }
 
