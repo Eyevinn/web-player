@@ -85,12 +85,6 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
-  enableAutoLevel() {
-    if (this.tech) {
-      this.tech.enableAutoLevel();
-    }
-  }
-
   getVideoLevels() {
     if (this.tech) {
       const videoLevels: IVideoLevel[] = this.tech.getVideoLevels();

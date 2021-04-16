@@ -368,10 +368,6 @@ export default class BaseTech extends EventEmitter {
     return videoLevels;
   }
 
-  enableAutoLevel() {
-    // Base tech does not do ABR.
-  }
-
   destroy() {
     this.stop();
     this.video.removeEventListener('timeupdate', this.onTimeUpdate);

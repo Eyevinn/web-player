@@ -79,12 +79,6 @@ export default class HlsJsTech extends BaseTech {
     this.playlistDuration = data?.details?.totalduration;
   }
 
-  enableAutoLevel() {
-    if (this.hls) {
-      this.hls.nextLevel = -1;
-    }
-  }
-
   getVideoLevels() {
     if (this.hls) {
       const levels: IVideoLevel[] = this.hls.levels.map((level, id) => ({
@@ -114,7 +108,8 @@ export default class HlsJsTech extends BaseTech {
 
   set currentLevel(level: IVideoLevel) {
     if (this.hls) {
-      this.hls.currentLevel = level.id;
+      if (!level) this.hls.nextLevel = -1;
+      else this.hls.currentLevel = level.id;
     }
   }
 

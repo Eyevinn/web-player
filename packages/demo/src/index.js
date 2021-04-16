@@ -84,9 +84,8 @@ async function main() {
   loadButton.onclick = () => load();
 
   qualityPicker.onchange = () => {
-    if (qualityPicker.value == -1) {
-      player.enableAutoLevel();
-    } else {
+    if (qualityPicker.value == -1) player.currentLevel = null;
+    else {
       const selectedLevel = player
         .getVideoLevels()
         .find((level) => level.id == qualityPicker.value);

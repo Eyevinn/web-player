@@ -50,11 +50,14 @@ export default class DashPlayer extends BaseTech {
   set currentLevel(level: IVideoLevel) {
     // Base tech does not do levels.
     if (this.shakaPlayer) {
-      this.shakaPlayer.configure({ abr: { enabled: false } });
-      const variantTrack = this.shakaPlayer
-        .getVariantTracks()
-        .find((track) => track.id == level.id);
-      this.shakaPlayer.selectVariantTrack(variantTrack, true);
+      if (!level) this.shakaPlayer.configure({ abr: { enabled: true } });
+      else {
+        this.shakaPlayer.configure({ abr: { enabled: false } });
+        const variantTrack = this.shakaPlayer
+          .getVariantTracks()
+          .find((track) => track.id == level.id);
+        this.shakaPlayer.selectVariantTrack(variantTrack, true);
+      }
     }
   }
 
@@ -85,12 +88,6 @@ export default class DashPlayer extends BaseTech {
           bitrate: track.bandwidth,
         }));
       return levels;
-    }
-  }
-
-  enableAutoLevel() {
-    if (this.shakaPlayer) {
-      this.shakaPlayer.configure({ abr: { enabled: true } });
     }
   }
 
