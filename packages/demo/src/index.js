@@ -89,6 +89,9 @@ async function main() {
       const selectedLevel = player
         .getVideoLevels()
         .find((level) => level.id == qualityPicker.value);
+      console.log(
+        `Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`
+      );
       player.currentLevel = selectedLevel;
     }
   };
