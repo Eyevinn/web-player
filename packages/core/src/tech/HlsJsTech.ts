@@ -103,8 +103,11 @@ export default class HlsJsTech extends BaseTech {
 
   set currentLevel(level: IVideoLevel) {
     if (this.hls) {
-      if (!level) this.hls.nextLevel = -1;
-      else this.hls.currentLevel = level.id;
+      if (!level) {
+        this.hls.nextLevel = -1;
+      } else {
+        this.hls.currentLevel = level.id;
+      }
     }
   }
 

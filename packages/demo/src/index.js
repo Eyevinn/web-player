@@ -49,7 +49,9 @@ async function main() {
   function populateQualityPicker() {
     // Reset/Clear-out the drop down menu.
     for (var i = qualityPicker.options.length - 1; i >= 0; i--) {
-      if (qualityPicker.options[i].value != '-1') qualityPicker.remove(i);
+      if (qualityPicker.options[i].value != '-1') {
+        qualityPicker.remove(i);
+      }
     }
 
     const videoLevels = player.getVideoLevels();
@@ -62,8 +64,6 @@ async function main() {
       qualityPicker.add(option);
     });
   }
-  // Quality picker fails with:
-  // https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
   hlsButton.onclick = async () => {
     manifestInput.value =
       'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8';
@@ -89,7 +89,9 @@ async function main() {
       player.currentLevel = null;
     } else {
       const selectedLevel = player.getVideoLevels()[qualityPicker.value];
-      console.log(`Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`);
+      console.log(
+        `Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`
+      );
       player.currentLevel = selectedLevel;
     }
   };

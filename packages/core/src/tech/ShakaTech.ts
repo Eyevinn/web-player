@@ -49,8 +49,9 @@ export default class DashPlayer extends BaseTech {
 
   set currentLevel(level: IVideoLevel) {
     if (this.shakaPlayer) {
-      if (!level) this.shakaPlayer.configure({ abr: { enabled: true } });
-      else {
+      if (!level) {
+        this.shakaPlayer.configure({ abr: { enabled: true } });
+      } else {
         this.shakaPlayer.configure({ abr: { enabled: false } });
         const variantTrack = this.shakaPlayer
           .getVariantTracks()
@@ -65,7 +66,7 @@ export default class DashPlayer extends BaseTech {
       const currentTrack = this.shakaPlayer
         .getVariantTracks()
         .find((track) => track.active == true);
-      return  {
+      return {
         id: currentTrack.id,
         width: currentTrack.width,
         height: currentTrack.height,
