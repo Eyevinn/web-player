@@ -1,7 +1,7 @@
 //@ts-ignore
 import { Player } from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
-import BaseTech, { PlaybackState } from './BaseTech';
+import BaseTech, { PlaybackState, IVideoLevel } from './BaseTech';
 
 export default class DashPlayer extends BaseTech {
   private shakaPlayer: any;
@@ -46,6 +46,48 @@ export default class DashPlayer extends BaseTech {
       label: audioLang,
       enabled: this.audioTrack === audioLang,
     }));
+  }
+
+  set currentLevel(level: IVideoLevel) {
+    if (this.shakaPlayer) {
+      if (!level) {
+        this.shakaPlayer.configure({ abr: { enabled: true } });
+      } else {
+        this.shakaPlayer.configure({ abr: { enabled: false } });
+        const variantTrack = this.shakaPlayer
+          .getVariantTracks()
+          .find((track) => track.id == level.id);
+        this.shakaPlayer.selectVariantTrack(variantTrack, true);
+      }
+    }
+  }
+
+  get currentLevel() {
+    if (this.shakaPlayer) {
+      const currentTrack = this.shakaPlayer
+        .getVariantTracks()
+        .find((track) => track.active == true);
+      return {
+        id: currentTrack.id,
+        width: currentTrack.width,
+        height: currentTrack.height,
+        bitrate: currentTrack.bandwidth,
+      };
+    }
+  }
+
+  getVideoLevels() {
+    if (this.shakaPlayer) {
+      const levels: IVideoLevel[] = this.shakaPlayer
+        .getVariantTracks()
+        .map((track) => ({
+          id: track.id,
+          width: track.width,
+          height: track.height,
+          bitrate: track.bandwidth,
+        }));
+      return levels;
+    }
   }
 
   destroy() {

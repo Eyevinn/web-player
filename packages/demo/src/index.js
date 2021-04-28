@@ -15,7 +15,7 @@ async function main() {
 
   const manifestInput = document.querySelector('#manifest-input');
   const loadButton = document.querySelector('#load-button');
-
+  const qualityPicker = document.getElementById('level');
 
   const searchParams = new URL(window.location.href).searchParams;
 
@@ -41,10 +41,29 @@ async function main() {
   // Uncomment out this if you want to demo the player package
   // const player = webplayer(root);
 
-  function load() {
-    player.load(manifestInput.value);
+  async function load() {
+    await player.load(manifestInput.value);
+    populateQualityPicker();
   }
 
+  function populateQualityPicker() {
+    // Reset/Clear-out the drop down menu.
+    for (var i = qualityPicker.options.length - 1; i >= 0; i--) {
+      if (qualityPicker.options[i].value != '-1') {
+        qualityPicker.remove(i);
+      }
+    }
+
+    const videoLevels = player.getVideoLevels();
+    videoLevels.forEach((level, index) => {
+      const option = document.createElement('option');
+      option.text = `${level.width}x${level.height}, ${Math.round(
+        level.bitrate / 1024
+      )}kbps`;
+      option.value = index;
+      qualityPicker.add(option);
+    });
+  }
   hlsButton.onclick = async () => {
     manifestInput.value =
       'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8';
@@ -63,6 +82,19 @@ async function main() {
   };
 
   loadButton.onclick = () => load();
+
+  qualityPicker.onchange = () => {
+    if (qualityPicker.value == -1) {
+      console.log(`Switching from level ${player.currentLevel.id} to ABR`);
+      player.currentLevel = null;
+    } else {
+      const selectedLevel = player.getVideoLevels()[qualityPicker.value];
+      console.log(
+        `Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`
+      );
+      player.currentLevel = selectedLevel;
+    }
+  };
 }
 
 window.onload = main;

@@ -1,4 +1,8 @@
-import BaseTech, { IBaseTechOptions, PlaybackState } from './BaseTech';
+import BaseTech, {
+  IBaseTechOptions,
+  IVideoLevel,
+  PlaybackState,
+} from './BaseTech';
 import Hls from 'hls.js';
 import { PlayerEvent } from '../util/constants';
 
@@ -73,6 +77,38 @@ export default class HlsJsTech extends BaseTech {
     }
 
     this.playlistDuration = data?.details?.totalduration;
+  }
+
+  getVideoLevels() {
+    if (this.hls) {
+      const levels: IVideoLevel[] = this.hls.levels.map((level, idx) => ({
+        id: idx,
+        width: level.width,
+        height: level.height,
+        bitrate: level.bitrate,
+      }));
+      return levels;
+    }
+  }
+
+  get currentLevel() {
+    let videoLevel: IVideoLevel;
+    if (this.hls) {
+      videoLevel = this.getVideoLevels().find(
+        (level) => level.id === this.hls.currentLevel
+      );
+      return videoLevel;
+    }
+  }
+
+  set currentLevel(level: IVideoLevel) {
+    if (this.hls) {
+      if (!level) {
+        this.hls.nextLevel = -1;
+      } else {
+        this.hls.currentLevel = level.id;
+      }
+    }
   }
 
   get currentTime() {
