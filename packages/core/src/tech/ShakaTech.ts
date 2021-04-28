@@ -1,3 +1,4 @@
+//@ts-ignore
 import { Player } from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
 import BaseTech, { PlaybackState } from './BaseTech';
