@@ -5,8 +5,8 @@ import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 
 // Uncomment this to demo the player package
-//import webplayer from '@eyevinn/web-player';
-//import '@eyevinn/web-player/dist/webplayer.css';
+// import webplayer from '@eyevinn/web-player';
+// import '@eyevinn/web-player/dist/webplayer.css';
 
 async function main() {
   const hlsButton = document.querySelector('#hls-button');
@@ -39,7 +39,7 @@ async function main() {
   });
 
   // Uncomment out this if you want to demo the player package
-  //const player = webplayer(root);
+  // const player = webplayer(root);
 
   async function load() {
     await player.load(manifestInput.value);
