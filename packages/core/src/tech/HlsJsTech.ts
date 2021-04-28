@@ -81,8 +81,8 @@ export default class HlsJsTech extends BaseTech {
 
   getVideoLevels() {
     if (this.hls) {
-      const levels: IVideoLevel[] = this.hls.levels.map((level, id) => ({
-        id: id,
+      const levels: IVideoLevel[] = this.hls.levels.map((level, idx) => ({
+        id: idx,
         width: level.width,
         height: level.height,
         bitrate: level.bitrate,
@@ -94,15 +94,10 @@ export default class HlsJsTech extends BaseTech {
   get currentLevel() {
     let videoLevel: IVideoLevel;
     if (this.hls) {
-      const currentLevel = this.hls.levels.find(
-        (level, index) => index == this.hls.currentLevel
+      videoLevel = this.getVideoLevels().find(
+        (level) => level.id === this.hls.currentLevel
       );
-      return (videoLevel = {
-        id: this.hls.currentLevel,
-        width: currentLevel.width,
-        height: currentLevel.height,
-        bitrate: currentLevel.bitrate,
-      });
+      return videoLevel;
     }
   }
 
