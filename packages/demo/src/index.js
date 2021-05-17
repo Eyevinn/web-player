@@ -8,6 +8,46 @@ import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 // import webplayer from '@eyevinn/web-player';
 // import '@eyevinn/web-player/dist/webplayer.css';
 
+function writeToClipboard(text) {
+  const data = [
+    new ClipboardItem({
+      'text/plain': new Blob([text], { type: 'text/plain' }),
+    }),
+  ];
+
+  return navigator.clipboard.write(data).catch((e) => {
+    console.warn('[Demo] failed to write to clipboard', e);
+    throw e;
+  });
+}
+
+let shareStatusTimeout;
+function updateShareStatus(text) {
+  const shareButton = document.querySelector('#share-button');
+
+  shareButton.disabled = true;
+  shareButton.textContent = text;
+
+  clearTimeout(shareStatusTimeout);
+  shareStatusTimeout = setTimeout(() => {
+    shareButton.disabled = false;
+    shareButton.textContent = 'Share 📋';
+  }, 1500);
+}
+
+function shareDemoUrl(manifestUrl) {
+  const url = new URL(document.location.href);
+  url.searchParams.set('manifest', manifestUrl);
+  writeToClipboard(url.toString()).then(
+    () => {
+      updateShareStatus('Copied! ✅');
+    },
+    () => {
+      updateShareStatus('Could not copy ❌');
+    }
+  );
+}
+
 async function main() {
   const hlsButton = document.querySelector('#hls-button');
   const dashButton = document.querySelector('#dash-button');
@@ -15,13 +55,11 @@ async function main() {
 
   const manifestInput = document.querySelector('#manifest-input');
   const loadButton = document.querySelector('#load-button');
+  const shareButton = document.querySelector('#share-button');
+
   const qualityPicker = document.getElementById('level');
 
   const searchParams = new URL(window.location.href).searchParams;
-
-  if (searchParams.get('manifest')) {
-    manifestInput.value = searchParams.get('manifest');
-  }
 
   const root = document.querySelector('#player');
   const video = document.createElement('video');
@@ -83,6 +121,10 @@ async function main() {
 
   loadButton.onclick = () => load();
 
+  shareButton.onclick = () => {
+    shareDemoUrl(manifestInput.value);
+  };
+
   qualityPicker.onchange = () => {
     if (qualityPicker.value == -1) {
       console.log(`Switching from level ${player.currentLevel.id} to ABR`);
@@ -95,6 +137,11 @@ async function main() {
       player.currentLevel = selectedLevel;
     }
   };
+
+  if (searchParams.get('manifest')) {
+    manifestInput.value = searchParams.get('manifest');
+    load();
+  }
 }
 
 window.onload = main;
