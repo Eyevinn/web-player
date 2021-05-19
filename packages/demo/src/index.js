@@ -8,17 +8,12 @@ import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 // import webplayer from '@eyevinn/web-player';
 // import '@eyevinn/web-player/dist/webplayer.css';
 
-function writeToClipboard(text) {
-  const data = [
-    new ClipboardItem({
-      'text/plain': new Blob([text], { type: 'text/plain' }),
-    }),
-  ];
+async function writeToClipboard(text) {
+  if (!navigator.clipboard) {
+    throw new Error("clipbard not supported");
+  }
 
-  return navigator.clipboard.write(data).catch((e) => {
-    console.warn('[Demo] failed to write to clipboard', e);
-    throw e;
-  });
+  await navigator.clipboard.writeText(text);
 }
 
 let shareStatusTimeout;
