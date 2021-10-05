@@ -87,6 +87,16 @@ async function main() {
       }
     }
 
+    // DEV_PLAYGROUND ::::::::::::::::::::::::::::::..
+    const atrack = player.getAudioTrack_DEV();
+    console.log(`atrack=${atrack}`)
+    const atracks = player.getAudioTracks_DEV();
+    // const ttracks = player.getTextTracks_DEV();
+    console.log(`..:::__|__:::.. INDEX atracks=${JSON.stringify(atracks)}`)
+
+    //::::::::::::::::::::::::::::::::::::::::::::::..
+
+
     const videoLevels = player.getVideoLevels();
     videoLevels.forEach((level, index) => {
       const option = document.createElement('option');
@@ -104,7 +114,7 @@ async function main() {
   };
   dashButton.onclick = async () => {
     manifestInput.value =
-      'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
+    'https://dash.akamaized.net/dash264/TestCasesIOP41/MultiTrack/alternative_content/6/manifest_alternative_lang.mpd';//'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
     load();
   };
 
@@ -126,9 +136,7 @@ async function main() {
       player.currentLevel = null;
     } else {
       const selectedLevel = player.getVideoLevels()[qualityPicker.value];
-      console.log(
-        `Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`
-      );
+      console.log(`Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`);
       player.currentLevel = selectedLevel;
     }
   };

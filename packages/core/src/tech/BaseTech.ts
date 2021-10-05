@@ -208,6 +208,11 @@ export default class BaseTech extends EventEmitter {
     this.emit(PlayerEvent.AUDIO_TRACK_CHANGE);
   }
 
+  protected onTextTrackChange() {
+    this.updateState({ textTracks: this.textTracks });
+    this.emit(PlayerEvent.TEXT_TRACK_CHANGE);
+  }
+
   protected onEnded() {
     this.emit(PlayerEvent.ENDED);
     this.updateState({

@@ -34,6 +34,12 @@ export default class HlsJsTech extends BaseTech {
       Hls.Events.AUDIO_TRACK_SWITCHED,
       this.onAudioTrackChange.bind(this)
     );
+
+    this.hls.on(
+      Hls.Events.SUBTITLE_TRACK_SWITCH,
+      this.onTextTrackChange.bind(this)
+    );
+
     this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this));
   }
 
@@ -150,13 +156,32 @@ export default class HlsJsTech extends BaseTech {
         enabled: this.audioTrack === audioTrack.id.toString(),
       })) || []
     )
-      .reverse() // if there are duplicate languages the latest should be kept
-      .filter(
-        (track, index, arr) =>
-          arr.findIndex(
-            (comparisonTrack) => track.language === comparisonTrack.language
-          ) === index
-      );
+  }
+
+  get textTrack() {
+    return this.hls?.subtitleTrack?.toString();
+  }
+
+  set textTrack(id) {
+    if (this.hls) {
+      if (!id) {
+        this.hls.subtitleTrack = -1;
+      } else {
+        this.hls.subtitleTrack = parseInt(id);
+      }
+
+    }
+  }
+
+  get textTracks() {
+    return (
+      this.hls?.subtitleTracks.map(textTrack => ({
+        id: textTrack.id.toString(),
+        label: textTrack.name,
+        language: textTrack.lang,
+        enabled: this.textTrack === textTrack.id.toString(),
+      })) || []
+    )
   }
 
   seekToLive() {

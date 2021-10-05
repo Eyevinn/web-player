@@ -44,7 +44,7 @@ export default class WebPlayer extends EventEmitter {
         }
         break;
       case ManifestType.DASH:
-        Tech = (await import('./tech/ShakaTech')).default;
+        Tech = (await import('./tech/DashJsTech')).default;//ShakaTech')).default;
         break;
       case ManifestType.MSS:
         Tech = (await import('./tech/DashJsTech')).default;
@@ -130,6 +130,29 @@ export default class WebPlayer extends EventEmitter {
   setAudioTrack(id) {
     if (this.tech) {
       this.tech.audioTrack = id;
+    }
+  }
+
+  getAudioTrack_DEV() {
+    if (this.tech) {
+      return this.tech.audioTrack;
+    }
+  }
+
+  getAudioTracks_DEV() {
+    if (this.tech) {
+      console.log(`tech -> audioTracks num=${this.tech.audioTracks.length || -1}`);
+      this.tech.audioTracks.map(track => console.log("TRACK_-:" + JSON.stringify(track)))
+      return this.tech.audioTracks;
+    }
+  }
+
+
+  getTextTracks_DEV() {
+    if (this.tech) {
+      console.log(`tech -> textTracks num=${this.tech.textTracks.length || -1}`);
+      this.tech.textTracks.map(track => console.log("textTRACK_-:" + JSON.stringify(track)))
+      return this.tech.textTracks;
     }
   }
 

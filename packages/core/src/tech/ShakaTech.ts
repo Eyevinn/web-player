@@ -40,12 +40,45 @@ export default class DashPlayer extends BaseTech {
   }
 
   get audioTracks() {
-    return this.shakaPlayer?.getAudioLanguages().map((audioLang) => ({
-      id: audioLang,
-      language: audioLang,
-      label: audioLang,
-      enabled: this.audioTrack === audioLang,
-    }));
+    console.log("....:::::..:::.::::.:::\n " + JSON.stringify(this.shakaPlayer.selectVariantsByLabel("Surround")));
+    this.shakaPlayer?.getVariantTracks().map(at => console.log("MPD audioTracks: \n" + JSON.stringify(at)));
+    //this.shakaPlayer?.getAudioLanguagesAndRoles().map( at => console.log("MPD audio and roles: \n" + JSON.stringify(at)));
+    //this.shakaPlayer?.getAudioLanguages().map( at => console.log("MPD only audiolangs: \n" + JSON.stringify(at)));
+    // this.shakaPlayer?.getTextTracks().map(at => console.log("MPD TextTracks: \n" + JSON.stringify(at)));
+    //this.shakaPlayer?.getTextLanguagesAndRoles().map(at => console.log("MPD TextL&R: \n" + JSON.stringify(at)));
+    return this.shakaPlayer?.getAudioLanguagesAndRoles().map((audioTrack) => ({
+      id: audioTrack.language,
+      label: audioTrack.label ? audioTrack.label : audioTrack.language,
+      language: audioTrack.language,
+      enabled: this.audioTrack === audioTrack.language,
+    }))
+  }
+
+  get textTrack() {
+    return this.shakaPlayer?.getTextTracks()?.find((track) => track.active)
+      ?.language;
+  }
+
+  set textTrack(id) {
+    if (this.shakaPlayer) {
+      if (!id) {
+        this.shakaPlayer.setTextTrackVisibility(false);
+      } else {
+        this.shakaPlayer.setTextTrackVisibility(true);
+        this.shakaPlayer.selectTextLanguage(id);
+      }
+    }
+  }
+
+  get textTracks() {
+    return this.shakaPlayer?.getTextLanguagesAndRoles()
+      .filter((textTrack: any) => textTrack.kind !== 'metadata')
+      .map(track => ({
+        id: track.language,
+        label: track.label ? track.label : track.language,
+        language: track.language,
+        enabled: this.textTrack === track.language,
+      }));
   }
 
   set currentLevel(level: IVideoLevel) {
