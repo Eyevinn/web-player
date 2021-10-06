@@ -44,7 +44,7 @@ export default class WebPlayer extends EventEmitter {
         }
         break;
       case ManifestType.DASH:
-        Tech = (await import('./tech/DashJsTech')).default;//ShakaTech')).default;
+        Tech = (await import('./tech/ShakaTech')).default;
         break;
       case ManifestType.MSS:
         Tech = (await import('./tech/DashJsTech')).default;
