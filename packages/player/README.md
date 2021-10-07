@@ -1,4 +1,6 @@
 # Eyevinn WebPlayer
+[![](https://data.jsdelivr.com/v1/package/npm/@eyevinn/web-player/badge)](https://www.jsdelivr.com/package/npm/@eyevinn/web-player)
+
 The Eyevinn WebPlayer is a simplistic video (audio is on the roadmap) player for playback of ABR streams. It is free-to-use and currently supports the ABR streaming formats Apple HLS, MPEG-DASH.
 The player is built using a modular approach which means that a lot of functionality is put into separate modules and can be used independently from each other, this module bundles it all together in a neat package.
 
@@ -19,7 +21,7 @@ player.load("<src-here>").then(() => {
 ```
 
 ### CDN 
-Download the latest release of this package and include the javascript & css files in your HTML.
+Download the latest release of this package [from jsdelivr](https://registry.npmjs.org/@eyevinn/web-player/-/web-player-0.4.0.tgz) and include the javascript & css files in your HTML.
 
 The snippet below shows an example on how to implement the player
 ```html
