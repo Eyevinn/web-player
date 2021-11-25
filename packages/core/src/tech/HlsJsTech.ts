@@ -14,6 +14,27 @@ const DEFAULT_CONFIG = {
 const LIVE_EDGE = 5; // seconds from liveEdge
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
+function dashToCamelCase(str: string) {
+  const lowerString = str.toLowerCase();
+  return lowerString.replace(/-([a-z])/g, function (g) {
+    return g[1].toUpperCase();
+  });
+}
+
+function parseString(str: string) {
+  return str
+    .replace(/[^a-z A-Z0-9=,.:-]/g, '')
+    .split(',')
+    .map((entry) => entry.split('='))
+    .map((arr) => {
+      const dateRangeDetails = {};
+      for (const col of arr) {
+        dateRangeDetails[dashToCamelCase(col[0])] = col[1].trim();
+      }
+      return dateRangeDetails;
+    });
+}
+
 export default class HlsJsTech extends BaseTech {
   static isSupported() {
     return Hls.isSupported();
@@ -34,7 +55,39 @@ export default class HlsJsTech extends BaseTech {
       Hls.Events.AUDIO_TRACK_SWITCHED,
       this.onAudioTrackChange.bind(this)
     );
+
     this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this));
+
+    this.hls.on(Hls.Events.MANIFEST_PARSED, (_, { levels }) => {
+      const manifest = levels[0]?.details.m3u8;
+      const manifestLines = manifest
+        .split('\n')
+        .filter((line) => line[0] === '#')
+        .map((line) => line.replace(':', '€').replace('#', '').split('€'))
+        .filter((arr) => arr.length >= 2)
+        .map((arr) => {
+          return [arr[0], arr[1]];
+        });
+
+      console.log(manifestLines);
+
+      const dateRange = manifestLines
+        .filter((arr) => arr[0] === 'EXT-X-DATERANGE')
+        .map((drData) =>
+          drData[1]
+            .replace(/[^a-z A-Z0-9=,.:-]/g, '')
+            .split(',')
+            .map((entry) => entry.split('='))
+        )
+        .map((arr) => {
+          const dateRangeDetails = {};
+          for (const col of arr) {
+            dateRangeDetails[dashToCamelCase(col[0])] = col[1].trim();
+          }
+          return dateRangeDetails;
+        });
+        console.log(dateRange)
+    });
   }
 
   load(src: string): Promise<void> {
