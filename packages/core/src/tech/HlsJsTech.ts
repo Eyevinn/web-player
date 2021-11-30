@@ -14,25 +14,19 @@ const DEFAULT_CONFIG = {
 const LIVE_EDGE = 5; // seconds from liveEdge
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
-function dashToCamelCase(str: string) {
-  const lowerString = str.toLowerCase();
-  return lowerString.replace(/-([a-z])/g, function (g) {
-    return g[1].toUpperCase();
-  });
-}
-
-function parseString(str: string) {
-  return str
+function parseStringToObject(str: string) {
+  const parsedObject = {};
+  const objArr = str
     .replace(/[^a-z A-Z0-9=,.:-]/g, '')
     .split(',')
-    .map((entry) => entry.split('='))
-    .map((arr) => {
-      const dateRangeDetails = {};
-      for (const col of arr) {
-        dateRangeDetails[dashToCamelCase(col[0])] = col[1].trim();
-      }
-      return dateRangeDetails;
-    });
+    .map((entry) => entry.split('='));
+
+  objArr.forEach(row => {
+    const key = row[0];
+    const value = row[1];
+    parsedObject[key] = value;
+  })
+  return parsedObject;
 }
 
 export default class HlsJsTech extends BaseTech {
@@ -64,29 +58,31 @@ export default class HlsJsTech extends BaseTech {
         .split('\n')
         .filter((line) => line[0] === '#')
         .map((line) => line.replace(':', '€').replace('#', '').split('€'))
-        .filter((arr) => arr.length >= 2)
-        .map((arr) => {
-          return [arr[0], arr[1]];
-        });
+        .filter((arr) => arr.length >= 2);
 
-      console.log(manifestLines);
+      const manifestKeys: Record<string, number> = {};
+      const manifestJSObject: Record<string, unknown[]> = {};
 
-      const dateRange = manifestLines
-        .filter((arr) => arr[0] === 'EXT-X-DATERANGE')
-        .map((drData) =>
-          drData[1]
-            .replace(/[^a-z A-Z0-9=,.:-]/g, '')
-            .split(',')
-            .map((entry) => entry.split('='))
-        )
-        .map((arr) => {
-          const dateRangeDetails = {};
-          for (const col of arr) {
-            dateRangeDetails[dashToCamelCase(col[0])] = col[1].trim();
-          }
-          return dateRangeDetails;
-        });
-        console.log(dateRange)
+      manifestLines.forEach((line) => {
+        const key = line[0];
+        const value = line[1];
+        if (manifestKeys[key] === undefined) {
+          manifestKeys[key] = 1;
+          manifestJSObject[key] = [];
+        } else {
+          manifestKeys[key] += 1;
+        }
+        if (key === 'EXT-X-DATERANGE') {
+          manifestJSObject[key].push({
+            tagCount: manifestKeys[key],
+            value: parseStringToObject(value)
+          });
+          return;
+        }
+        manifestJSObject[key].push({ tagCount: manifestKeys[key], value });
+      });
+
+      console.log(manifestJSObject);
     });
   }
 
