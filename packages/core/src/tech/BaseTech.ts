@@ -43,6 +43,7 @@ export interface IPlayerState {
   isMuted: boolean;
   audioTracks: ITrack[];
   textTracks: ITrack[];
+  metaData: Record<string, unknown>;
 }
 
 function getTextTrackId(textTrack) {
@@ -69,6 +70,7 @@ export default class BaseTech extends EventEmitter {
       isMuted: video.muted,
       audioTracks: [],
       textTracks: [],
+      metaData: null,
     };
 
     this.video = video;
@@ -110,7 +112,6 @@ export default class BaseTech extends EventEmitter {
       'ended',
       (this.onEnded = this.onEnded.bind(this))
     );
-
     // @ts-ignore
     if (this.video.audioTracks) {
       // @ts-ignore

@@ -22,6 +22,7 @@ import { useAirPlay, usePlayer } from './util/hooks';
 import ContextMenu from './components/contextMenu/ContextMenu';
 import CastOverlay from './components/castOverlay/CastOverlay';
 import LiveButton from './components/buttons/liveButton/LiveButton';
+import MetaDataContainer from './components/metaDataContainer/MetaDataContainer';
 
 export default function EyevinnSkin({
 	player,
@@ -137,7 +138,6 @@ export default function EyevinnSkin({
 		// the player has no content and cannot play anything
 		return null;
 	}
-
 	return (
 		<div
 			ref={skinContainerRef}
@@ -178,6 +178,7 @@ export default function EyevinnSkin({
 							isSeekable={state?.isSeekable}
 						/>
 					)}
+					<MetaDataContainer metaData={state?.metaData} />
 					<div class={style.divider} />
 					<CastButton />
 					{airplayAvailable && <AirPlayButton onClick={toggleAirPlay} />}

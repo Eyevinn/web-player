@@ -14,18 +14,18 @@ const DEFAULT_CONFIG = {
 const LIVE_EDGE = 5; // seconds from liveEdge
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
-function parseStringToObject(str: string) {
+function parseMetaDataStringToObject(str: string) {
   const parsedObject = {};
   const objArr = str
-    .replace(/[^a-z A-Z0-9=,.:-]/g, '')
+    .replace(/["\\"]/g, '')
     .split(',')
     .map((entry) => entry.split('='));
 
-  objArr.forEach(row => {
+  objArr.forEach((row) => {
     const key = row[0];
     const value = row[1];
     parsedObject[key] = value;
-  })
+  });
   return parsedObject;
 }
 
@@ -52,38 +52,28 @@ export default class HlsJsTech extends BaseTech {
 
     this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this));
 
-    this.hls.on(Hls.Events.MANIFEST_PARSED, (_, { levels }) => {
-      const manifest = levels[0]?.details.m3u8;
-      const manifestLines = manifest
-        .split('\n')
-        .filter((line) => line[0] === '#')
-        .map((line) => line.replace(':', '€').replace('#', '').split('€'))
-        .filter((arr) => arr.length >= 2);
+    this.hls.on(Hls.Events.LEVEL_PTS_UPDATED, this.onLevelPTSUpdated.bind(this));
+  }
 
-      const manifestKeys: Record<string, number> = {};
-      const manifestJSObject: Record<string, unknown[]> = {};
-
-      manifestLines.forEach((line) => {
-        const key = line[0];
-        const value = line[1];
-        if (manifestKeys[key] === undefined) {
-          manifestKeys[key] = 1;
-          manifestJSObject[key] = [];
-        } else {
-          manifestKeys[key] += 1;
-        }
-        if (key === 'EXT-X-DATERANGE') {
-          manifestJSObject[key].push({
-            tagCount: manifestKeys[key],
-            value: parseStringToObject(value)
-          });
-          return;
-        }
-        manifestJSObject[key].push({ tagCount: manifestKeys[key], value });
-      });
-
-      console.log(manifestJSObject);
-    });
+  protected onLevelPTSUpdated(_, data) {
+    const { m3u8 } = data.details;
+    const PDT = data.frag.programDateTime
+    const metaData: unknown[] = m3u8
+      .split('\n')
+      .filter((line) => line[0] === '#')
+      .map((line) => line.replace(':', '€').split('€')) //separate stringified key/value pairs with a "safe" character
+      .filter((arr) => arr[0] === '#EXT-X-DATERANGE')
+      .map((arr) => parseMetaDataStringToObject(arr[1]))
+    
+    if (!!metaData.length) {
+      this.updateState({
+        metaData
+      })
+      return
+    }
+    this.updateState({
+      metaData: null
+    })
   }
 
   load(src: string): Promise<void> {
