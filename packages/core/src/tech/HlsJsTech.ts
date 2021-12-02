@@ -21,6 +21,7 @@ function parseMetaDataStringToObject(str: string) {
     .split(',')
     .map((entry) => entry.split('='));
 
+  //TODO: Probably parse this differently.
   objArr.forEach((row) => {
     const key = row[0];
     const value = row[1];
@@ -52,28 +53,26 @@ export default class HlsJsTech extends BaseTech {
 
     this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this));
 
-    this.hls.on(Hls.Events.LEVEL_PTS_UPDATED, this.onLevelPTSUpdated.bind(this));
+    this.hls.on(Hls.Events.FRAG_BUFFERED, this.onFragBuffered.bind(this));
   }
 
-  protected onLevelPTSUpdated(_, data) {
-    const { m3u8 } = data.details;
-    const PDT = data.frag.programDateTime
-    const metaData: unknown[] = m3u8
-      .split('\n')
-      .filter((line) => line[0] === '#')
-      .map((line) => line.replace(':', '€').split('€')) //separate stringified key/value pairs with a "safe" character
-      .filter((arr) => arr[0] === '#EXT-X-DATERANGE')
-      .map((arr) => parseMetaDataStringToObject(arr[1]))
-    
-    if (!!metaData.length) {
-      this.updateState({
-        metaData
-      })
-      return
+  protected onFragBuffered(_, { frag }) {
+    const tagList: string[] = frag.tagList;
+    const metaData = tagList
+      .filter((tag) => tag[0] === 'EXT-X-DATERANGE')
+      .map((tag) => parseMetaDataStringToObject(tag[1]))
+      .find((tag) => tag);
+
+    //start in seconds, aligning with currentTime
+    const start = frag.start;
+
+    //If there's an active metaData-tag:
+    //stringify object and embedd on track.ActiveCues[0]['text']
+    if (metaData) {
+      this.video
+        .addTextTrack('metadata', metaData['CLASS'])
+        .addCue(new VTTCue(start, start + 20, JSON.stringify(metaData)));
     }
-    this.updateState({
-      metaData: null
-    })
   }
 
   load(src: string): Promise<void> {

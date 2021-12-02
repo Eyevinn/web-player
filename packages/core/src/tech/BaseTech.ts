@@ -120,6 +120,27 @@ export default class BaseTech extends EventEmitter {
         (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
       );
     }
+    if (this.video.textTracks) {
+      this.video.textTracks.addEventListener(
+        'addtrack',
+        this.onAddTextTrack.bind(this)
+      );
+    }
+  }
+
+  protected onAddTextTrack({ track }: TrackEvent) {
+    //TODO: break this out into updateMetaData()
+    //TODO: check if browser === 'safari' ??
+    if (track && track.kind === 'metadata') {
+      track.mode = 'hidden';
+      track.addEventListener('cuechange', async (evt) => {
+        if (track.activeCues[0]) {
+          this.updateState({
+            metaData: JSON.parse(track.activeCues[0]['text']),
+          });
+        }
+      });
+    }
   }
 
   protected updateState(state: any) {
