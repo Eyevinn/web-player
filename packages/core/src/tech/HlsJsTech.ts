@@ -40,6 +40,10 @@ export default class HlsJsTech extends BaseTech {
   private isLiveFlag: boolean;
   private playlistDuration = 0;
 
+  //Cacheing PDT to calculate startTime of EXT-X-DATE-RANGE
+  //milliseconds
+  private internalProgramDateTime = 0;
+
   constructor(opts: IBaseTechOptions) {
     super(opts);
     this.hls = new Hls(DEFAULT_CONFIG);
@@ -53,25 +57,58 @@ export default class HlsJsTech extends BaseTech {
 
     this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this));
 
+    //The other option would be onLevelPTSUpdated. FragBuffered is les "spammy"
     this.hls.on(Hls.Events.FRAG_BUFFERED, this.onFragBuffered.bind(this));
   }
 
   protected onFragBuffered(_, { frag }) {
     const tagList: string[] = frag.tagList;
+    //TODO: This should be metaDataCue: Record<string, unknown> and not include .find()
     const metaData = tagList
       .filter((tag) => tag[0] === 'EXT-X-DATERANGE')
       .map((tag) => parseMetaDataStringToObject(tag[1]))
       .find((tag) => tag);
 
-    //start in seconds, aligning with currentTime
-    const start = frag.start;
+    //This is milliseconds
+    const rawProgramDateTime = new Date(frag.rawProgramDateTime).getTime();
+
+    if (!!rawProgramDateTime) {
+      this.internalProgramDateTime = rawProgramDateTime;
+    } else if (!this.internalProgramDateTime && !rawProgramDateTime) {
+      //If rawProgramDateTime isn't available, fragPDT - fragStart get's similar result.
+      const fragPDT = new Date(frag.programDateTime).getTime(); //ms
+      const fragStart = new Date(frag.start / 1000).getTime(); //sec hence (/ 1000)
+      this.internalProgramDateTime = fragPDT - fragStart;
+    } else {
+      //no-op
+    }
+
+    //Start should be bigger than PDT hence .abs()
+    const metaDataStart = Math.abs(
+      this.internalProgramDateTime - new Date(metaData['START-DATE']).getTime()
+    );
+    //Start should be bigger than PDT hence .abs()
+    const metaDataEnd = Math.abs(
+      this.internalProgramDateTime - new Date(metaData['END-DATE']).getTime()
+    );
+    //Havn't seen this yet, assuming it's milliseconds.
+    const metaDataDuration = new Date(metaData['DURATION']).getTime();
+    //Seconds. videoPlayer current time;
+    const currentTime = this.currentTime;
 
     //If there's an active metaData-tag:
     //stringify object and embedd on track.ActiveCues[0]['text']
     if (metaData) {
+      //TODO: Create a metaDataCue and do: (for x in y) => add cue;
       this.video
         .addTextTrack('metadata', metaData['CLASS'])
-        .addCue(new VTTCue(start, start + 20, JSON.stringify(metaData)));
+        .addCue(
+          new VTTCue(
+            metaDataStart, //this should match player format (seconds) now in MS
+            metaDataStart + 20, // -||-
+            JSON.stringify(metaData)
+          )
+        );
     }
   }
 

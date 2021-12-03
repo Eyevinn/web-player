@@ -130,7 +130,7 @@ export default class BaseTech extends EventEmitter {
 
   protected onAddTextTrack({ track }: TrackEvent) {
     //TODO: break this out into updateMetaData()
-    //TODO: check if browser === 'safari' ??
+    //TODO: check if browser !== 'safari' ??
     if (track && track.kind === 'metadata') {
       track.mode = 'hidden';
       track.addEventListener('cuechange', async (evt) => {

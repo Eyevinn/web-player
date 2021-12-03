@@ -99,7 +99,7 @@ async function main() {
   }
   hlsButton.onclick = async () => {
     manifestInput.value =
-      'https://92afaa4d093f4ca58b7c73e1622a9715.mediatailor.eu-west-1.amazonaws.com/v1/master/1b8a07d9a44fe90e52d5698704c72270d177ae74/Demo/master.m3u8';
+      'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8';
     load();
   };
   dashButton.onclick = async () => {
