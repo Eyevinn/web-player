@@ -104,7 +104,7 @@ async function main() {
   };
   dashButton.onclick = async () => {
     manifestInput.value =
-      'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
+    'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
     load();
   };
 
@@ -126,9 +126,7 @@ async function main() {
       player.currentLevel = null;
     } else {
       const selectedLevel = player.getVideoLevels()[qualityPicker.value];
-      console.log(
-        `Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`
-      );
+      console.log(`Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`);
       player.currentLevel = selectedLevel;
     }
   };
