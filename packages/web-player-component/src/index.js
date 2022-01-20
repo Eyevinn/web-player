@@ -2,6 +2,9 @@ import webplayer from '@eyevinn/web-player';
 import style from '@eyevinn/web-player/dist/webplayer.css';
 
 export default class PlayerComponent extends HTMLElement {
+  static get observedAttributes() {
+    return ['source'];
+  }
   constructor() {
     //Call constructor of HTMLElement
     super();
@@ -17,8 +20,12 @@ export default class PlayerComponent extends HTMLElement {
     shadowRoot.appendChild(wrapper);
     //Init player with wrapper
     const player = webplayer(wrapper);
+
+
+    //Get attribute source
+    let src = this.getAttribute('source');
     //Load video and play
-    player.load("https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd").then(() => {
+    player.load(src).then(() => {
       player.play()
     });
   }
