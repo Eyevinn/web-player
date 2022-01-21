@@ -4,31 +4,33 @@ import style from '@eyevinn/web-player/dist/webplayer.css';
 export default class PlayerComponent extends HTMLElement {
   static get observedAttributes() {
     return ['source'];
-  }
+  };
   constructor() {
     //Call constructor of HTMLElement
     super();
-    //Create shadow root
-    this.attachShadow({ mode: 'open' });
-    const { shadowRoot } = this;
     //Attach CSS
     let styleTag = document.createElement('style');
     styleTag.innerHTML = style;
-    shadowRoot.appendChild(styleTag);
-    //Create wrapper and attach to shadow DOM
+    this.appendChild(styleTag);
+    //Create wrapper and attach to DOM
     const wrapper = document.createElement('div');
-    shadowRoot.appendChild(wrapper);
+    this.appendChild(wrapper);
     //Init player with wrapper
-    const player = webplayer(wrapper);
-
-
-    //Get attribute source
-    let src = this.getAttribute('source');
-    //Load video and play
-    player.load(src).then(() => {
-      player.play()
+    this.player = webplayer(wrapper);
+  }
+  attributeChangedCallback() {
+    let attributeValue = this.getAttribute('source');
+    this.player.load(attributeValue).then(() => {
+      this.player.play()
     });
   }
+  disconnectedCallback() {
+    //Calls both player's reset function and 
+    this.player.reset();
+    console.log("Player destroyed");
+  }
+
+
 }
 //Register custom element
 customElements.define('player-component', PlayerComponent);
