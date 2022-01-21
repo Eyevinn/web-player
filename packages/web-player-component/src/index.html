@@ -6,7 +6,7 @@
         <title>Web Player Component Demo</title>
     </head>
     <body>
-        <player-component source="https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd"></player-component>
-        <!-- <script type="module" src="./dist/web-player.component.js" async defer></script> -->
+        <!-- Browsers will block autoplay if muted is false -->
+        <player-component source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" muted="true" autoplay="true"></player-component>
     </body>
 </html>

@@ -30,7 +30,7 @@ module.exports = {
   devServer: {
     contentBase: './src',
     compress: true,
-    port: 1337,
+    port: 1338,
     host: '0.0.0.0',
   },
   stats: {
