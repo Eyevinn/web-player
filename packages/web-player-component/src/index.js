@@ -3,6 +3,7 @@
 import style from '@eyevinn/web-player/dist/webplayer.css';
 import WebPlayer from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
+//import { PlayerEvent } from '@eyevinn/web-player-core';
 
 export default class PlayerComponent extends HTMLElement {
   static get observedAttributes() {
@@ -61,12 +62,21 @@ export default class PlayerComponent extends HTMLElement {
   //Only applies starttime on page load
   connectedCallback() {
     this.video.currentTime = this.getAttribute('starttime');
+    this.setupEventProxy();
     console.log("connectedCallback");
   }
 
   disconnectedCallback() {
     this.player.reset();
     console.log("Player destroyed");
+  }
+
+  setupEventProxy() {
+    if(!this.player) return;
+    this.player.on('*', (event, data) => {
+      this.dispatchEvent(new CustomEvent(event, {detail: data}));
+      console.log(event);
+    });
   }
 }
 //Register custom element

@@ -7,6 +7,12 @@
     </head>
     <body>
         <!-- Browsers will block autoplay if muted is false -->
-        <player-component source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" starttime="45" muted autoplay></player-component>
+        <player-component source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" starttime="25" muted autoplay></player-component>
+        <script>
+            document.querySelector("player-component").addEventListener("play", (event) => {
+                document.body.style.backgroundColor = "black";
+              });
+        </script>
+
     </body>
 </html>
