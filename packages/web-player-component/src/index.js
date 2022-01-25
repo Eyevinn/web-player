@@ -28,12 +28,10 @@ export default class PlayerComponent extends HTMLElement {
       player: this.player,
       castAppId: {}
     });
-    //this.player = webplayer(wrapper)
   }
 
   //Handles changed attributes of player-component. Changes video attributes directly (not through player functions).
   attributeChangedCallback(name) {
-    console.log("attributeChangedCallback: " + name);
     if (name === 'source') {
       if (this.hasAttribute('source')) {
         this.player.load(this.getAttribute('source'));
@@ -63,7 +61,6 @@ export default class PlayerComponent extends HTMLElement {
   connectedCallback() {
     this.video.currentTime = this.getAttribute('starttime');
     this.setupEventProxy();
-    console.log("connectedCallback");
   }
 
   disconnectedCallback() {
@@ -75,9 +72,8 @@ export default class PlayerComponent extends HTMLElement {
     if(!this.player) return;
     this.player.on('*', (event, data) => {
       this.dispatchEvent(new CustomEvent(event, {detail: data}));
-      console.log(event);
     });
   }
 }
 //Register custom element
-customElements.define('player-component', PlayerComponent);
+customElements.define('eyevinn-video', PlayerComponent);

@@ -1,9 +1,13 @@
 {
   "name": "@eyevinn/web-player-component",
   "version": "0.0.1",
-  "description": "> TODO: description",
-  "author": "SebastianLjungman <sebastian.ljungman94@gmail.com>",
-  "homepage": "https://github.com/SebastianLjungman/web-player#readme",
+  "author": "Eyevinn Technology <work@eyevinn.se>",
+  "contributors": [
+    "Benjamin Wallberg <benjamin.wallberg@eyevinn.se> (Eyevinn Technology AB)",
+    "Sebastian Ljungman <sebastian.ljungman@eyevinn.se (Eyevinn Technology AB)>",
+    "Nicholas Frederiksen <nicholas.frederiksen@eyevinn.se (Eyevinn Technology AB)>"
+  ],
+  "homepage": "https://web.player.eyevinn.technology/",
   "license": "ISC",
   "main": "dist/web-player.component.js",
   "files": [
@@ -11,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SebastianLjungman/web-player.git"
+    "url": "git+https://github.com/Eyevinn/web-player.git"
   },
   "scripts": {
     "prepare": "npm run build",
@@ -19,7 +23,7 @@
     "dev": "webpack-dev-server --hot"
   },
   "bugs": {
-    "url": "https://github.com/SebastianLjungman/web-player/issues"
+    "url": "https://github.com/Eyevinn/web-player/issues"
   },
   "dependencies": {
     "@eyevinn/web-player-core": "^0.4.1",
