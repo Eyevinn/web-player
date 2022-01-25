@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="./style.css" />
     <script type="text/javascript"></script>
   </head>
-  <body>
+  <body width="1000">
     <header>
       <img src="./logo.png" />
       <h1>WebPlayer@<%= htmlWebpackPlugin.options.title %></h1>
@@ -36,6 +36,7 @@
       <div class="input-buttons">
         <button id="load-button">LOAD</button>
         <button id="share-button">Share 📋</button>
+        <button id="embed-button">Embed </button>
       </div>
     </section>
 
@@ -47,6 +48,12 @@
         Video Quality
         <option value="-1">AUTO</option>
       </select>
+    </div>
+    <div>
+      <label>Embeded Video</label>
+      <embed type="text/html" src="http://localhost:1338/?manifest=https%3A%2F%2Fbitmovin-a.akamaihd.net%2Fcontent%2FMI201109210084_1%2Fmpds%2Ff08e80da-bf1d-4e3d-8899-f0f6155f6efa.mpd" width="500" height="300">
+      <!-- <script type="module" src="node_modules/@eyevinn/web-player/packages/web-player-component/src/index.js"></script> -->
+        <!-- <player-component source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" starttime="25" muted autoplay></player-component> -->
     </div>
   </body>
 </html>

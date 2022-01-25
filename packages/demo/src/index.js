@@ -30,6 +30,19 @@ function updateShareStatus(text) {
   }, 1500);
 }
 
+function updateShareEmbedStatus(text) {
+  const embedButton = document.querySelector('#embed-button');
+
+  embedButton.disabled = true;
+  embedButton.textContent = text;
+
+  clearTimeout(shareStatusTimeout);
+  shareStatusTimeout = setTimeout(() => {
+    embedButton.disabled = false;
+    embedButton.textContent = 'EMBED 📋';
+  }, 1500);
+}
+
 function shareDemoUrl(manifestUrl) {
   const url = new URL(document.location.href);
   url.searchParams.set('manifest', manifestUrl);
@@ -43,6 +56,20 @@ function shareDemoUrl(manifestUrl) {
   );
 }
 
+function embedDemoUrl(manifestUrl) {
+  const url = new URL("http://localhost:1338");
+  url.searchParams.set('manifest', manifestUrl);
+  const embededHtml = `<embed type="text/html" src="${url.toString()}">`
+  writeToClipboard(embededHtml).then(
+    () => {
+      updateShareEmbedStatus('Copied! ✅');
+    },
+    () => {
+      updateShareEmbedStatus('Could not copy ❌');
+    }
+  );
+}
+
 async function main() {
   const hlsButton = document.querySelector('#hls-button');
   const dashButton = document.querySelector('#dash-button');
@@ -51,6 +78,7 @@ async function main() {
   const manifestInput = document.querySelector('#manifest-input');
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
+  const embedButton = document.querySelector('#embed-button');
 
   const qualityPicker = document.getElementById('level');
 
@@ -118,6 +146,10 @@ async function main() {
 
   shareButton.onclick = () => {
     shareDemoUrl(manifestInput.value);
+  };
+
+  embedButton.onclick = () => {
+    embedDemoUrl(manifestInput.value);
   };
 
   qualityPicker.onchange = () => {

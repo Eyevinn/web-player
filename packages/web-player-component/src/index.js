@@ -1,4 +1,4 @@
-//import webplayer from '@eyevinn/web-player';
+import webplayer from '@eyevinn/web-player';
 //import { textChangeRangeIsUnchanged } from 'typescript';
 import style from '@eyevinn/web-player/dist/webplayer.css';
 import WebPlayer from '@eyevinn/web-player-core';
@@ -29,6 +29,7 @@ export default class PlayerComponent extends HTMLElement {
       player: this.player,
       castAppId: {}
     });
+    //this.player = webplayer(wrapper)
   }
 
   //Handles changed attributes of player-component. Changes video attributes directly (not through player functions).

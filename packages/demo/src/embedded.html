@@ -13,7 +13,7 @@
     <script>
         let uri = window.location.search.substring(1);
         let params = new URLSearchParams(uri);
-        let manifest = "https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8"//params.get("manifest");
+        let manifest = params.get("manifest");
         document.querySelector("player-component").setAttribute("source", manifest)
     </script>
     <style>
