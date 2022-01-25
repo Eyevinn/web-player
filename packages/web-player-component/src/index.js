@@ -1,9 +1,8 @@
-import webplayer from '@eyevinn/web-player';
 //import { textChangeRangeIsUnchanged } from 'typescript';
-import style from '@eyevinn/web-player/dist/webplayer.css';
 import WebPlayer from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
-//import { PlayerEvent } from '@eyevinn/web-player-core';
+
+import style from '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 
 export default class PlayerComponent extends HTMLElement {
   static get observedAttributes() {

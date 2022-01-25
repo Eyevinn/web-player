@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const package = require('./package.json');
+const webpack = require('webpack');
 
 module.exports = {
   mode: 'production',
@@ -22,8 +23,12 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: package.dependencies["@eyevinn/web-player"].replace("^", ''),
+      title: package.version,
       template: './src/index.html',
+    }),
+    // disable dynamic imports, it doesn't work with the umd output
+    new webpack.optimize.LimitChunkCountPlugin({
+      maxChunks: 1,
     }),
   ],
   devtool: 'source-map',
