@@ -1,6 +1,6 @@
-# A Web Component for the Eyevinn Web-Player
+# A Web Component for the Eyevinn WebPlayer
 
-This web component is powered by the Eyevinn Web-Player can be used on an HTML-page by using the `<eyevinn-video></eyevinn-video>` tag.
+This web component is powered by the Eyevinn WebPlayer and can be used on an HTML-page by using the `<eyevinn-video></eyevinn-video>` tag.
 
 ## Attributes
 

@@ -30,11 +30,14 @@ export default class PlayerComponent extends HTMLElement {
     });
   }
 
-  //Handles changed attributes of player-component. Changes video attributes directly (not through player functions).
   attributeChangedCallback(name) {
     if (name === 'source') {
       if (this.hasAttribute('source')) {
-        this.player.load(this.getAttribute('source'));
+        this.player.load(this.getAttribute('source')).then(() => {
+          if(this.hasAttribute('autoplay')) {
+            this.player.play();
+          }
+        });
       }
       else {
         console.log("Please provide a valid source!");
@@ -46,14 +49,6 @@ export default class PlayerComponent extends HTMLElement {
       }
       else {
         this.video.muted = false;
-      }
-    }
-    if (name === 'autoplay') {
-      if (this.hasAttribute('autoplay')) {
-        this.video.setAttribute('autoplay', 'autoplay');
-      }
-      else {
-        this.video.removeAttribute('autoplay');
       }
     }
   }
