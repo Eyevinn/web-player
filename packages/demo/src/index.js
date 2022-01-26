@@ -4,8 +4,6 @@ import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 
-import "@eyevinn/web-player-component";
-
 // Uncomment this to demo the player package
 // import webplayer from '@eyevinn/web-player';
 // import '@eyevinn/web-player/dist/webplayer.css';
