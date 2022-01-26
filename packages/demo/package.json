@@ -14,8 +14,7 @@
     "@eyevinn/web-player": "^0.4.1",
     "@eyevinn/web-player-core": "^0.4.1",
     "@eyevinn/web-player-debug": "^0.2.1",
-    "@eyevinn/web-player-eyevinn-skin": "^0.3.1",
-    "@eyevinn/web-player-component": "^0.0.1"
+    "@eyevinn/web-player-eyevinn-skin": "^0.3.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^6.3.2",
