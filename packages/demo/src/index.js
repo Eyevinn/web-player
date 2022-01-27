@@ -51,6 +51,7 @@ async function main() {
   const manifestInput = document.querySelector('#manifest-input');
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
+  const embedButton = document.querySelector('#embed-button');
 
   const qualityPicker = document.getElementById('level');
 
@@ -104,7 +105,7 @@ async function main() {
   };
   dashButton.onclick = async () => {
     manifestInput.value =
-    'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
+      'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
     load();
   };
 
@@ -118,6 +119,10 @@ async function main() {
 
   shareButton.onclick = () => {
     shareDemoUrl(manifestInput.value);
+  };
+
+  embedButton.onclick = () => {
+    console.log("Should create toast with embed-code for video: " + manifestInput.value)
   };
 
   qualityPicker.onchange = () => {
