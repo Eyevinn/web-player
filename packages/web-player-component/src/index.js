@@ -44,7 +44,7 @@ export default class PlayerComponent extends HTMLElement {
         });
       }
       else {
-        console.log("Invalid source was provided to <eyevinn-video> element");
+        console.error("Invalid source was provided to <eyevinn-video> element");
       }
     }
     if (name === 'muted') {
