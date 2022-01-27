@@ -1,7 +1,5 @@
-//import { textChangeRangeIsUnchanged } from 'typescript';
 import WebPlayer from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
-
 import style from '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 
 export default class PlayerComponent extends HTMLElement {
@@ -34,13 +32,16 @@ export default class PlayerComponent extends HTMLElement {
     if (name === 'source') {
       if (this.hasAttribute('source')) {
         this.player.load(this.getAttribute('source')).then(() => {
-          if(this.hasAttribute('autoplay')) {
+          if (this.hasAttribute('autoplay')) {
             this.player.play();
+          }
+          if (this.hasAttribute('starttime')) {
+            this.video.currentTime = this.getAttribute('starttime');
           }
         });
       }
       else {
-        console.log("Please provide a valid source!");
+        console.log("Invalid source was provided to <eyevinn-video> element");
       }
     }
     if (name === 'muted') {
@@ -52,9 +53,8 @@ export default class PlayerComponent extends HTMLElement {
       }
     }
   }
-  //Only applies starttime on page load
+
   connectedCallback() {
-    this.video.currentTime = this.getAttribute('starttime');
     this.setupEventProxy();
   }
 
