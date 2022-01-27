@@ -1,0 +1,74 @@
+//import { textChangeRangeIsUnchanged } from 'typescript';
+import WebPlayer from '@eyevinn/web-player-core';
+import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
+
+import style from '@eyevinn/web-player-eyevinn-skin/dist/index.css';
+
+export default class PlayerComponent extends HTMLElement {
+  static get observedAttributes() {
+    return ['source', 'starttime', 'muted', 'autoplay'];
+  };
+  constructor() {
+    //Call constructor of HTMLElement
+    super();
+    //Attach CSS
+    let styleTag = document.createElement('style');
+    styleTag.innerHTML = style;
+    this.appendChild(styleTag);
+    //Create wrapper and attach to DOM
+    const wrapper = document.createElement('div');
+    this.appendChild(wrapper);
+    //Create video element and attach to DOM
+    this.video = document.createElement('video');
+    wrapper.appendChild(this.video);
+    //Init player and skin
+    this.player = new WebPlayer({ video: this.video });
+    renderEyevinnSkin({
+      root: wrapper,
+      player: this.player,
+      castAppId: {}
+    });
+  }
+
+  attributeChangedCallback(name) {
+    if (name === 'source') {
+      if (this.hasAttribute('source')) {
+        this.player.load(this.getAttribute('source')).then(() => {
+          if(this.hasAttribute('autoplay')) {
+            this.player.play();
+          }
+        });
+      }
+      else {
+        console.log("Please provide a valid source!");
+      }
+    }
+    if (name === 'muted') {
+      if (this.hasAttribute("muted")) {
+        this.video.muted = true;
+      }
+      else {
+        this.video.muted = false;
+      }
+    }
+  }
+  //Only applies starttime on page load
+  connectedCallback() {
+    this.video.currentTime = this.getAttribute('starttime');
+    this.setupEventProxy();
+  }
+
+  disconnectedCallback() {
+    this.player.reset();
+    console.log("Player destroyed");
+  }
+
+  setupEventProxy() {
+    if(!this.player) return;
+    this.player.on('*', (event, data) => {
+      this.dispatchEvent(new CustomEvent(event, {detail: data}));
+    });
+  }
+}
+//Register custom element
+customElements.define('eyevinn-video', PlayerComponent);
