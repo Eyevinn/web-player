@@ -10,7 +10,7 @@ export default class PlayerComponent extends HTMLElement {
     //Call constructor of HTMLElement
     super();
     //Attach shadow DOM
-    this.attachShadow({mode: 'open'});
+    this.attachShadow({ mode: 'open' });
     const { shadowRoot } = this;
     //Create style and attach to shadow DOM
     let styleTag = document.createElement('style');
@@ -35,11 +35,11 @@ export default class PlayerComponent extends HTMLElement {
     if (name === 'source') {
       if (this.hasAttribute('source')) {
         this.player.load(this.getAttribute('source')).then(() => {
-          if (this.hasAttribute('autoplay')) {
-            this.player.play();
-          }
           if (this.hasAttribute('starttime')) {
             this.video.currentTime = this.getAttribute('starttime');
+          }
+          if (this.hasAttribute('autoplay')) {
+            this.player.play();
           }
         });
       }
@@ -63,13 +63,12 @@ export default class PlayerComponent extends HTMLElement {
 
   disconnectedCallback() {
     this.player.reset();
-    console.log("Player destroyed");
   }
 
   setupEventProxy() {
-    if(!this.player) return;
+    if (!this.player) return;
     this.player.on('*', (event, data) => {
-      this.dispatchEvent(new CustomEvent(event, {detail: data}));
+      this.dispatchEvent(new CustomEvent(event, { detail: data }));
     });
   }
 }
