@@ -9,17 +9,17 @@ export default class PlayerComponent extends HTMLElement {
   constructor() {
     //Call constructor of HTMLElement
     super();
-    //Attach shadowDOM
+    //Attach shadow DOM
     this.attachShadow({mode: 'open'});
     const { shadowRoot } = this;
-    //Create style and attach to shadowDOM
+    //Create style and attach to shadow DOM
     let styleTag = document.createElement('style');
     styleTag.innerHTML = style;
     shadowRoot.appendChild(styleTag);
-    //Create wrapper and attach to shadowDOM
+    //Create wrapper and attach to shadow DOM
     const wrapper = document.createElement('div');
     shadowRoot.appendChild(wrapper);
-    //Create video element and attach to shadowDOM
+    //Create video element and attach to shadow DOM
     this.video = document.createElement('video');
     wrapper.appendChild(this.video);
     //Init player and skin
