@@ -17,6 +17,8 @@ async function writeToClipboard(text) {
 }
 
 let shareStatusTimeout;
+let shareEmbedStatusTimeout;
+
 function updateShareStatus(text) {
   const shareButton = document.querySelector('#share-button');
 
@@ -27,6 +29,19 @@ function updateShareStatus(text) {
   shareStatusTimeout = setTimeout(() => {
     shareButton.disabled = false;
     shareButton.textContent = 'Share 📋';
+  }, 1500);
+}
+
+function updateEmbedStatus(text) {
+  const embedButton = document.querySelector('#embed-button');
+
+  embedButton.disabled = true;
+  embedButton.textContent = text;
+
+  clearTimeout(shareEmbedStatusTimeout);
+  shareEmbedStatusTimeout = setTimeout(() => {
+    embedButton.disabled = false;
+    embedButton.textContent = 'Embed 📋';
   }, 1500);
 }
 
@@ -43,6 +58,19 @@ function shareDemoUrl(manifestUrl) {
   );
 }
 
+function embedDemoUrl(manifestUrl) {
+  const embedString = `<script type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.1.1/dist/web-player.component.js"></script>
+  <eyevinn-video source="${manifestUrl}" muted autoplay ></eyevinn-video>`
+  writeToClipboard(embedString).then(
+    () => {
+      updateEmbedStatus('Copied! ✅');
+    },
+    () => {
+      updateEmbedStatus('Could not copy ❌');
+    }
+  );
+}
+
 async function main() {
   const hlsButton = document.querySelector('#hls-button');
   const dashButton = document.querySelector('#dash-button');
@@ -51,6 +79,7 @@ async function main() {
   const manifestInput = document.querySelector('#manifest-input');
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
+  const embedButton = document.querySelector('#embed-button');
 
   const qualityPicker = document.getElementById('level');
 
@@ -104,7 +133,7 @@ async function main() {
   };
   dashButton.onclick = async () => {
     manifestInput.value =
-    'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
+      'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
     load();
   };
 
@@ -118,6 +147,10 @@ async function main() {
 
   shareButton.onclick = () => {
     shareDemoUrl(manifestInput.value);
+  };
+
+  embedButton.onclick = () => {
+    embedDemoUrl(manifestInput.value);
   };
 
   qualityPicker.onchange = () => {
