@@ -17,6 +17,8 @@ async function writeToClipboard(text) {
 }
 
 let shareStatusTimeout;
+let shareEmbedStatusTimeout;
+
 function updateShareStatus(text) {
   const shareButton = document.querySelector('#share-button');
 
@@ -30,6 +32,19 @@ function updateShareStatus(text) {
   }, 1500);
 }
 
+function updateEmbedStatus(text) {
+  const embedButton = document.querySelector('#embed-button');
+
+  embedButton.disabled = true;
+  embedButton.textContent = text;
+
+  clearTimeout(shareEmbedStatusTimeout);
+  shareEmbedStatusTimeout = setTimeout(() => {
+    embedButton.disabled = false;
+    embedButton.textContent = 'Embed 📋';
+  }, 1500);
+}
+
 function shareDemoUrl(manifestUrl) {
   const url = new URL(document.location.href);
   url.searchParams.set('manifest', manifestUrl);
@@ -39,6 +54,19 @@ function shareDemoUrl(manifestUrl) {
     },
     () => {
       updateShareStatus('Could not copy ❌');
+    }
+  );
+}
+
+function embedDemoUrl(manifestUrl) {
+  const embedString = `<script type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.1.1/dist/web-player.component.js"></script>
+  <eyevinn-video source="${manifestUrl}" muted autoplay ></eyevinn-video>`
+  writeToClipboard(embedString).then(
+    () => {
+      updateEmbedStatus('Copied! ✅');
+    },
+    () => {
+      updateEmbedStatus('Could not copy ❌');
     }
   );
 }
@@ -122,7 +150,7 @@ async function main() {
   };
 
   embedButton.onclick = () => {
-    console.log("Should create toast with embed-code for video: " + manifestInput.value)
+    embedDemoUrl(manifestInput.value);
   };
 
   qualityPicker.onchange = () => {
