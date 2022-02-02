@@ -63,7 +63,7 @@ video {
 	animation: fadein 0.5s;
 }
 
-/* Animations to fade the snackbar in and out */
+/* Animations to fade in the snackbar*/
 @keyframes fadein {
 	from {
 		opacity: 0;

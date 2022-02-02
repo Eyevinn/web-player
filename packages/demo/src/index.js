@@ -38,15 +38,8 @@ function updateShareStatus(text) {
 
 function updateEmbedStatus(text) {
   const embedButton = document.querySelector('#embed-button');
-
   embedButton.disabled = true;
   embedButton.textContent = text;
-
-  // clearTimeout(shareEmbedStatusTimeout);
-  // shareEmbedStatusTimeout = setTimeout(() => {
-  //   embedButton.disabled = false;
-  //   embedButton.textContent = 'Embed 📋';
-  // }, 1500);
 }
 
 function shareDemoUrl(manifestUrl) {
@@ -58,17 +51,6 @@ function shareDemoUrl(manifestUrl) {
     },
     () => {
       updateShareStatus('Could not copy ❌');
-    }
-  );
-}
-
-function copyEmbedDemoUrl(embedString) {
-  writeToClipboard(embedString).then(
-    () => {
-      updateEmbedStatus('Click to copy ➡️');
-    },
-    () => {
-      updateEmbedStatus('Could not copy ❌');
     }
   );
 }
@@ -166,20 +148,23 @@ async function main() {
   embedButton.onclick = () => {
     const embedString = `<script type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.1.1/dist/web-player.component.js"></script>
     <eyevinn-video source="${manifestInput.value}" muted autoplay ></eyevinn-video>`;
-    copyEmbedDemoUrl(embedString);
+    updateEmbedStatus('Click to copy ➡️');
     embedPopUp(embedString);
   };
 
-  snackbar.onclick = (embedString) => {
-    writeToClipboard(embedString).then(
+  snackbar.onclick = () => {
+    writeToClipboard(embedCode.innerText).then(
       () => {
         updateEmbedStatus('Copied! ✅');
+      },
+      () => {
+        updateEmbedStatus('Could not copy ❌');
       }
     );
     clearTimeout(shareEmbedStatusTimeout);
     shareEmbedStatusTimeout = setTimeout(() => {
       resetEmbed();
-    }, 1500);
+    }, 1000);
 
   };
 
@@ -208,7 +193,6 @@ async function main() {
   function embedPopUp(embedString) {
     snackbar.className = "show";
     embedCode.innerText = embedString;
-    console.log(embedCode)
   }
 }
 
