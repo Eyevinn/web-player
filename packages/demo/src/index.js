@@ -38,7 +38,6 @@ function updateShareStatus(text) {
 
 function updateEmbedStatus(text) {
   const embedButton = document.querySelector('#embed-button');
-  //embedButton.disabled = true;
   embedButton.textContent = text;
 }
 
@@ -47,7 +46,7 @@ function shareDemoUrl(manifestUrl) {
   url.searchParams.set('manifest', manifestUrl);
   writeToClipboard(url.toString()).then(
     () => {
-      //updateShareStatus('Copied! ✅');
+      updateShareStatus('Copied! ✅');
     },
     () => {
       updateShareStatus('Could not copy ❌');
@@ -64,6 +63,11 @@ async function main() {
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
   const embedButton = document.querySelector('#embed-button');
+  
+  if (!manifestInput.value) {
+    shareButton.disabled = true;
+    embedButton.disabled = true;
+  }
 
   if (!isClipboardAvailable()) {
     shareButton.disabled = true;
@@ -159,6 +163,14 @@ async function main() {
 
   manifestInput.oninput = () => {
     resetEmbed();
+    if (manifestInput.value) {
+      shareButton.disabled = false;
+      embedButton.disabled = false;
+    }
+    else {
+      shareButton.disabled = true;
+      embedButton.disabled = true;
+    }
   }
 
   qualityPicker.onchange = () => {
