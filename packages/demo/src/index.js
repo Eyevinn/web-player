@@ -8,9 +8,13 @@ import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 // import webplayer from '@eyevinn/web-player';
 // import '@eyevinn/web-player/dist/webplayer.css';
 
+function isClipboardAvailable() {
+  return !!navigator.clipboard;
+}
+
 async function writeToClipboard(text) {
-  if (!navigator.clipboard) {
-    throw new Error("clipbard not supported");
+  if (!isClipboardAvailable()) {
+    throw new Error("clipboard not supported");
   }
 
   await navigator.clipboard.writeText(text);
@@ -80,6 +84,11 @@ async function main() {
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
   const embedButton = document.querySelector('#embed-button');
+
+  if (!isClipboardAvailable()) {
+    shareButton.disabled = true;
+    embedButton.disabled = true;
+  }
 
   const qualityPicker = document.getElementById('level');
 
