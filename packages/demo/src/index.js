@@ -42,11 +42,11 @@ function updateEmbedStatus(text) {
   embedButton.disabled = true;
   embedButton.textContent = text;
 
-  clearTimeout(shareEmbedStatusTimeout);
-  shareEmbedStatusTimeout = setTimeout(() => {
-    embedButton.disabled = false;
-    embedButton.textContent = 'Embed 📋';
-  }, 1500);
+  // clearTimeout(shareEmbedStatusTimeout);
+  // shareEmbedStatusTimeout = setTimeout(() => {
+  //   embedButton.disabled = false;
+  //   embedButton.textContent = 'Embed 📋';
+  // }, 1500);
 }
 
 function shareDemoUrl(manifestUrl) {
@@ -62,12 +62,10 @@ function shareDemoUrl(manifestUrl) {
   );
 }
 
-function embedDemoUrl(manifestUrl) {
-  const embedString = `<script type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.1.1/dist/web-player.component.js"></script>
-  <eyevinn-video source="${manifestUrl}" muted autoplay ></eyevinn-video>`
+function copyEmbedDemoUrl(embedString) {
   writeToClipboard(embedString).then(
     () => {
-      updateEmbedStatus('Copied! ✅');
+      updateEmbedStatus('Click to copy ➡️');
     },
     () => {
       updateEmbedStatus('Could not copy ❌');
@@ -97,6 +95,9 @@ async function main() {
   const root = document.querySelector('#player');
   const video = document.createElement('video');
   root.appendChild(video);
+
+  const snackbar = document.querySelector('#snackbar');
+  let embedCode = document.querySelector('#embed-code');
 
   if (searchParams.get('debug') === 'true') {
     debugEvents(video);
@@ -139,27 +140,47 @@ async function main() {
     manifestInput.value =
       'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8';
     load();
+    resetEmbed();
   };
   dashButton.onclick = async () => {
     manifestInput.value =
       'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
     load();
+    resetEmbed();
   };
 
   mssButton.onclick = async () => {
     manifestInput.value =
       'http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest';
     load();
+    resetEmbed();
   };
 
-  loadButton.onclick = () => load();
-
+  loadButton.onclick = () => {
+    load();
+  }
   shareButton.onclick = () => {
     shareDemoUrl(manifestInput.value);
   };
 
   embedButton.onclick = () => {
-    embedDemoUrl(manifestInput.value);
+    const embedString = `<script type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.1.1/dist/web-player.component.js"></script>
+    <eyevinn-video source="${manifestInput.value}" muted autoplay ></eyevinn-video>`;
+    copyEmbedDemoUrl(embedString);
+    embedPopUp(embedString);
+  };
+
+  snackbar.onclick = (embedString) => {
+    writeToClipboard(embedString).then(
+      () => {
+        updateEmbedStatus('Copied! ✅');
+      }
+    );
+    clearTimeout(shareEmbedStatusTimeout);
+    shareEmbedStatusTimeout = setTimeout(() => {
+      resetEmbed();
+    }, 1500);
+
   };
 
   qualityPicker.onchange = () => {
@@ -176,6 +197,18 @@ async function main() {
   if (searchParams.get('manifest')) {
     manifestInput.value = searchParams.get('manifest');
     load();
+  }
+
+  function resetEmbed() {
+    embedButton.disabled = false;
+    embedButton.textContent = 'Embed 📋';
+    snackbar.classList.remove("show");
+  }
+
+  function embedPopUp(embedString) {
+    snackbar.className = "show";
+    embedCode.innerText = embedString;
+    console.log(embedCode)
   }
 }
 

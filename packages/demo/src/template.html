@@ -21,33 +21,37 @@
       <img src="./logo.png" />
       <h1>WebPlayer@<%= htmlWebpackPlugin.options.title %></h1>
     </header>
-    <section>
-      <button id="hls-button">HLS</button>
-      <button id="dash-button">MPEG-DASH</button>
-      <button id="mss-button" disabled>SmoothStreaming</button>
-    </section>
-    <section class="input-section">
-      <input
-        type="text"
-        name="manifest-url"
-        id="manifest-input"
-        placeholder="Paste a Stream URI Here..."
-      />
-      <div class="input-buttons">
-        <button id="load-button">LOAD</button>
-        <button id="share-button">Share 📋</button>
-        <button id="embed-button">Embed 📋</button>
+    <div id="ui-container">
+      <section>
+        <button id="hls-button">HLS</button>
+        <button id="dash-button">MPEG-DASH</button>
+        <button id="mss-button" disabled>SmoothStreaming</button>
+      </section>
+      <div id="snackbar">
+        <span id="embed-code"></span>
       </div>
-    </section>
-
-    <div id="player"></div>
-
-    <div style="margin-top: 10px">
-      <label>Video Quality</label>
-      <select id="level" label="Quality">
-        Video Quality
-        <option value="-1">AUTO</option>
-      </select>
+      <section class="input-section">
+        <input
+          type="text"
+          name="manifest-url"
+          id="manifest-input"
+          placeholder="Paste a Stream URI Here..."
+        />
+        <div class="input-buttons">
+          <button id="load-button">LOAD</button>
+          <button id="share-button">Share 📋</button>
+          <button id="embed-button">Embed 📋</button>
+        </div>
+      </section>
+      <div id="player"></div>
+  
+      <div style="margin-top: 10px">
+        <label>Video Quality</label>
+        <select id="level" label="Quality">
+          Video Quality
+          <option value="-1">AUTO</option>
+        </select>
+      </div>
     </div>
   </body>
 </html>

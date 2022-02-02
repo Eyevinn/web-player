@@ -5,15 +5,15 @@ header {
 	flex-wrap: wrap;
 }
 
-header > *,
-header >:last-child {
+header>*,
+header>:last-child {
 	padding-top: 0;
 	margin-bottom: 1rem;
 }
 
 video {
 	margin-bottom: 0;
-	width:  100%;
+	width: 100%;
 }
 
 .input-section {
@@ -28,10 +28,49 @@ video {
 
 .input-buttons button {
 	width: 100%;
-	margin-right:  1rem;
+	margin-right: 1rem;
 	text-transform: uppercase;
 }
 
 .input-buttons button:last-child {
 	margin-right: 0;
+}
+
+#ui-container {
+	position: relative;
+}
+
+#snackbar {
+	visibility: hidden;
+	min-width: 250px;
+	max-width: 60%;
+	background-color: #0070F3;
+	color: #fff;
+	border-radius: 4px;
+	padding: 16px;
+	position: absolute;
+	z-index: 1;
+	top: 0;
+	margin-left: 101%;
+	margin-right: 1%;
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+#snackbar.show {
+	visibility: visible;
+	/* Add animation: Take 0.5 seconds to fade in the snackbar.*/
+	-webkit-animation: fadein 0.5s;
+	animation: fadein 0.5s;
+}
+
+/* Animations to fade the snackbar in and out */
+@keyframes fadein {
+	from {
+		opacity: 0;
+		left:-1%;
+	}
+	to {
+		opacity: 1;
+		left: 0;
+	}
 }
