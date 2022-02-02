@@ -38,7 +38,7 @@ function updateShareStatus(text) {
 
 function updateEmbedStatus(text) {
   const embedButton = document.querySelector('#embed-button');
-  embedButton.disabled = true;
+  //embedButton.disabled = true;
   embedButton.textContent = text;
 }
 
@@ -47,7 +47,7 @@ function shareDemoUrl(manifestUrl) {
   url.searchParams.set('manifest', manifestUrl);
   writeToClipboard(url.toString()).then(
     () => {
-      updateShareStatus('Copied! ✅');
+      //updateShareStatus('Copied! ✅');
     },
     () => {
       updateShareStatus('Could not copy ❌');
@@ -80,6 +80,7 @@ async function main() {
 
   const snackbar = document.querySelector('#snackbar');
   let embedCode = document.querySelector('#embed-code');
+  let snackbarCloseButton = document.querySelector('#snackbar-close-button');
 
   if (searchParams.get('debug') === 'true') {
     debugEvents(video);
@@ -148,25 +149,17 @@ async function main() {
   embedButton.onclick = () => {
     const embedString = `<script type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.1.1/dist/web-player.component.js"></script>
     <eyevinn-video source="${manifestInput.value}" muted autoplay ></eyevinn-video>`;
-    updateEmbedStatus('Click to copy ➡️');
+    updateEmbedStatus('Copy this code ➡️');
     embedPopUp(embedString);
   };
 
-  snackbar.onclick = () => {
-    writeToClipboard(embedCode.innerText).then(
-      () => {
-        updateEmbedStatus('Copied! ✅');
-      },
-      () => {
-        updateEmbedStatus('Could not copy ❌');
-      }
-    );
-    clearTimeout(shareEmbedStatusTimeout);
-    shareEmbedStatusTimeout = setTimeout(() => {
-      resetEmbed();
-    }, 1000);
-
+  snackbarCloseButton.onclick = () => {
+    resetEmbed();
   };
+
+  manifestInput.oninput = () => {
+    resetEmbed();
+  }
 
   qualityPicker.onchange = () => {
     if (qualityPicker.value == -1) {

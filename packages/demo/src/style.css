@@ -53,6 +53,14 @@ video {
 	top: 0;
 	margin-left: 101%;
 	margin-right: 1%;
+	font-family: 'Courier New', Courier, monospace;
+}
+
+#snackbar-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin-bottom: 100px;
 }
 
 /* Show the snackbar when clicking on a button (class added with JavaScript) */
