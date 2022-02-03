@@ -3,6 +3,7 @@ import WebPlayer from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
+import { PlayerAnalyticsConnector } from "@eyevinn/player-analytics-client-sdk-web";
 
 // Uncomment this to demo the player package
 // import webplayer from '@eyevinn/web-player';
@@ -92,12 +93,20 @@ async function main() {
     root,
     player,
   });
+  const playerAnalytics = new PlayerAnalyticsConnector("https://sink.epas.eyevinn.technology/", true);
 
   // Uncomment out this if you want to demo the player package
   // const player = webplayer(root);
 
   async function load() {
+    await playerAnalytics.init({
+      sessionId: `demo-page-${Date.now()}`,
+      live: false,
+      contentId: "BBB",
+      contentUrl: manifestInput.value,
+    });
     await player.load(manifestInput.value);
+    playerAnalytics.load(video);
     populateQualityPicker();
   }
 
