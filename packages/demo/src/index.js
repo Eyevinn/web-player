@@ -195,6 +195,12 @@ async function main() {
   if (searchParams.get('manifest')) {
     manifestInput.value = searchParams.get('manifest');
     load();
+    if (manifestInput.value) {
+      embedButton.disabled = false;
+      if (isClipboardAvailable()) {
+        shareButton.disabled = false;
+      }
+    }
   }
 
   function resetEmbed() {
