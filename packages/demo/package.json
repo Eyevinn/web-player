@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@eyevinn/web-player-demo",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "author": "Benjamin Wallberg <benjamin.wallberg@eyevinn.se>",
   "homepage": "https://github.com/Eyevinn/web-player#readme",
   "license": "Apache-2.0",
@@ -11,10 +11,10 @@
     "build": "webpack"
   },
   "dependencies": {
-    "@eyevinn/web-player": "^0.5.0",
-    "@eyevinn/web-player-core": "^0.5.0",
+    "@eyevinn/web-player": "^0.6.0",
+    "@eyevinn/web-player-core": "^0.6.0",
     "@eyevinn/web-player-debug": "^0.2.1",
-    "@eyevinn/web-player-eyevinn-skin": "^0.4.0"
+    "@eyevinn/web-player-eyevinn-skin": "^0.5.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^6.3.2",
