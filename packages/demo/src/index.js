@@ -21,7 +21,6 @@ async function writeToClipboard(text) {
 }
 
 let shareStatusTimeout;
-let shareEmbedStatusTimeout;
 
 function updateShareStatus(text) {
   const shareButton = document.querySelector('#share-button');
@@ -63,13 +62,8 @@ async function main() {
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
   const embedButton = document.querySelector('#embed-button');
-  
-  if (!manifestInput.value) {
-    shareButton.disabled = true;
-    embedButton.disabled = true;
-  }
 
-  if (!isClipboardAvailable()) {
+  if (!isClipboardAvailable() || !manifestInput.value) {
     shareButton.disabled = true;
     embedButton.disabled = true;
   }
@@ -128,12 +122,15 @@ async function main() {
       'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8';
     load();
     resetEmbed();
+    shareButton.disabled = false;
+
   };
   dashButton.onclick = async () => {
     manifestInput.value =
       'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
     load();
     resetEmbed();
+    shareButton.disabled = false;
   };
 
   mssButton.onclick = async () => {
@@ -141,6 +138,7 @@ async function main() {
       'http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest';
     load();
     resetEmbed();
+    shareButton.disabled = false;
   };
 
   loadButton.onclick = () => {
