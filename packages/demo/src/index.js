@@ -135,7 +135,7 @@ async function main() {
     resetEmbed();
     if (isClipboardAvailable()) {
       shareButton.disabled = false;
-    } 
+    }
 
   };
   dashButton.onclick = async () => {
@@ -145,7 +145,7 @@ async function main() {
     resetEmbed();
     if (isClipboardAvailable()) {
       shareButton.disabled = false;
-    } 
+    }
   };
 
   mssButton.onclick = async () => {
@@ -155,7 +155,7 @@ async function main() {
     resetEmbed();
     if (isClipboardAvailable()) {
       shareButton.disabled = false;
-    } 
+    }
   };
 
   loadButton.onclick = () => {
@@ -222,6 +222,17 @@ async function main() {
     snackbar.className = "show";
     embedCode.innerText = embedString;
   }
+
+  player.on('BITRATE_CHANGE', (event) => {
+    playerAnalytics.reportBitrateChange({
+      bitrate: player.currentLevel, // bitrate in Kbps
+      width: player.width, // optional, video width in pixels
+      height: "", // optional, video height in pixels
+      videoBitrate: "", // optional, if available provide the bitrate for the video track
+      audioBitrate: "", // optional, if available provide the bitrate for the audio track
+    });
+    console.log("HEEEEEY CHANGE", event)
+  });
 }
 
 window.onload = main;

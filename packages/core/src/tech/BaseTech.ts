@@ -24,6 +24,8 @@ export enum PlaybackState {
   PAUSED,
   SEEKING,
   BUFFERING,
+
+  BITRATE_CHANGE
 }
 
 export interface IVideoLevel {
@@ -220,6 +222,12 @@ export default class BaseTech extends EventEmitter {
     });
   }
 
+  //Sebbe
+  protected onBitrateChange() {
+    this.emit(PlayerEvent.BITRATE_CHANGE);
+    console.log("Bitrate CHANGED!!");
+  }
+  //
   set currentLevel(level: IVideoLevel) {
     // Base tech does not do quality levels.
   }

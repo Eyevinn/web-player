@@ -41,6 +41,13 @@ export default class HlsJsTech extends BaseTech {
     );
 
     this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this));
+
+    //Sebastian's code
+    this.hls.on(
+      Hls.Events.LEVEL_SWITCHING,
+      this.onBitrateChange.bind(this)
+    );
+    //
   }
 
   load(src: string): Promise<void> {
