@@ -1,5 +1,5 @@
 // Comment out these imports if you want to demo the player package
-import WebPlayer from '@eyevinn/web-player-core';
+import WebPlayer, { PlayerEvent } from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
@@ -223,15 +223,12 @@ async function main() {
     embedCode.innerText = embedString;
   }
 
-  player.on('BITRATE_CHANGE', (event) => {
+  player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
     playerAnalytics.reportBitrateChange({
-      bitrate: player.currentLevel, // bitrate in Kbps
-      width: player.width, // optional, video width in pixels
-      height: "", // optional, video height in pixels
-      videoBitrate: "", // optional, if available provide the bitrate for the video track
-      audioBitrate: "", // optional, if available provide the bitrate for the audio track
+      bitrate: (data.bitrate / 1000).toString(), // bitrate in Kbps
+      width: (data.width).toString(), // optional, video width in pixels
+      height: (data.height).toString(), // optional, video height in pixels
     });
-    console.log("HEEEEEY CHANGE", event)
   });
 }
 

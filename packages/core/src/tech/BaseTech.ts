@@ -222,12 +222,10 @@ export default class BaseTech extends EventEmitter {
     });
   }
 
-  //Sebbe
   protected onBitrateChange() {
-    this.emit(PlayerEvent.BITRATE_CHANGE);
-    console.log("Bitrate CHANGED!!");
+    // Base tech does not do quality levels.
   }
-  //
+
   set currentLevel(level: IVideoLevel) {
     // Base tech does not do quality levels.
   }

@@ -44,7 +44,7 @@ export default class HlsJsTech extends BaseTech {
 
     //Sebastian's code
     this.hls.on(
-      Hls.Events.LEVEL_SWITCHING,
+      Hls.Events.LEVEL_SWITCHED,
       this.onBitrateChange.bind(this)
     );
     //
@@ -102,6 +102,10 @@ export default class HlsJsTech extends BaseTech {
       }));
       return levels;
     }
+  }
+
+  private onBitrateChange() {
+    this.emit(PlayerEvent.BITRATE_CHANGE, this.currentLevel);
   }
 
   get currentLevel() {
