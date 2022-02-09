@@ -25,7 +25,8 @@ export enum PlaybackState {
   SEEKING,
   BUFFERING,
 
-  BITRATE_CHANGE
+  BITRATE_CHANGE,
+  PLAYER_STOPPED
 }
 
 export interface IVideoLevel {
@@ -368,6 +369,7 @@ export default class BaseTech extends EventEmitter {
       currentTime: this.currentTime,
       duration: this.duration,
     });
+    this.emit(PlayerEvent.PLAYER_STOPPED);
   }
 
   seekToLive() {

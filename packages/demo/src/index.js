@@ -230,6 +230,19 @@ async function main() {
       height: (data.height).toString(), // optional, video height in pixels
     });
   });
-}
 
+  player.on(PlayerEvent.PLAYER_STOPPED, () => {
+    playerAnalytics.reportStop()
+  });
+
+  player.on(PlayerEvent.ERROR, (data) => {
+    playerAnalytics.reportError({
+      category: "", // optional, eg. NETWORK, DECODER, etc.
+      code: "",
+      message: "", // optional
+      data: data, // optional
+    })
+  });
+
+}
 window.onload = main;

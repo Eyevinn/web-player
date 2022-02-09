@@ -2,6 +2,7 @@
 import { Player } from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
 import BaseTech, { PlaybackState, IVideoLevel } from './BaseTech';
+import { PlayerEvent } from '../util/constants';
 
 export default class DashPlayer extends BaseTech {
   private shakaPlayer: any;
@@ -13,6 +14,13 @@ export default class DashPlayer extends BaseTech {
       'variantchanged',
       (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
     );
+    this.shakaPlayer.addEventListener("adaptation", () => {
+      this.onBitrateChange();
+    });
+    this.shakaPlayer.addEventListener(
+      'error',
+      (this.onError = this.onError.bind(this))
+    );
   }
 
   load(src: string): Promise<void> {
@@ -22,6 +30,27 @@ export default class DashPlayer extends BaseTech {
     return this.shakaPlayer.load(src).catch(() => {
       // TODO error handling
     });
+  }
+
+  protected onBitrateChange() {
+    const activeTracks = this.shakaPlayer
+      .getVariantTracks()
+      .filter((track) => track.active);
+    const bitrate = activeTracks.reduce(
+      (btr, track) => btr + track.bandwidth,
+      0
+    );
+    const videoTrack = activeTracks.find((track) => track.type === "variant");
+
+    this.emit(PlayerEvent.BITRATE_CHANGE, {
+      bitrate,
+      width: videoTrack.width,
+      height: videoTrack.height,
+    });
+  }
+
+  protected onError(type, detail) {
+    this.emit(PlayerEvent.ERROR, detail)
   }
 
   get isLive() {
