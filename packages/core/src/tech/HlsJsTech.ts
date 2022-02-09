@@ -104,7 +104,7 @@ export default class HlsJsTech extends BaseTech {
     }
   }
 
-  private onBitrateChange() {
+  protected onBitrateChange() {
     this.emit(PlayerEvent.BITRATE_CHANGE, this.currentLevel);
   }
 
