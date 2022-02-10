@@ -238,17 +238,17 @@ async function main() {
   player.on(PlayerEvent.ERROR, (data) => {
     if (data.fatal || data.Severity === 2) {
       playerAnalytics.reportError({
-        category: "", // optional, eg. NETWORK, DECODER, etc.
-        code: "",
-        message: "", // optional
+        category: data.type, // optional, eg. NETWORK, DECODER, etc.
+        code: data.fatal,
+        message: data.details, // optional
         data: data, // optional
       })
     }
     else {
       playerAnalytics.reportWarning({
-        category: "", // optional, eg. NETWORK, DECODER, etc.
-        code: "",
-        message: "", // optional
+        category: data.type, // optional, eg. NETWORK, DECODER, etc.
+        code: data.fatal,
+        message: data.details, // optional
         data: data, // optional
       });
     }
