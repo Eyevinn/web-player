@@ -34,5 +34,7 @@ export enum PlayerEvent {
 	LIVE_ENDED = 'live_ended',
 	BITRATE_CHANGE = 'bitrate_change',
 	PLAYER_STOPPED = 'player_stopped',
-	ERROR = 'error'
+	ERROR = 'error',
+
+	DESTROY_EPAS = 'destroy_epas'
 }

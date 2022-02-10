@@ -14,7 +14,7 @@ export default class DashPlayer extends BaseTech {
       'variantchanged',
       (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
     );
-    this.shakaPlayer.addEventListener("adaptation", () => {
+    this.shakaPlayer.addEventListener('adaptation', () => {
       this.onBitrateChange();
     });
     this.shakaPlayer.addEventListener(

@@ -92,7 +92,7 @@ async function main() {
   renderEyevinnSkin({
     root,
     player,
-  });
+  }); 
   const playerAnalytics = new PlayerAnalyticsConnector("https://sink.epas.eyevinn.technology/", true);
 
   // Uncomment out this if you want to demo the player package
@@ -106,7 +106,7 @@ async function main() {
       contentUrl: manifestInput.value,
     });
     await player.load(manifestInput.value);
-    playerAnalytics.load(video);
+      playerAnalytics.load(video);
     populateQualityPicker();
   }
 
@@ -232,17 +232,31 @@ async function main() {
   });
 
   player.on(PlayerEvent.PLAYER_STOPPED, () => {
-    playerAnalytics.reportStop()
+    playerAnalytics.reportStop();
   });
 
   player.on(PlayerEvent.ERROR, (data) => {
-    playerAnalytics.reportError({
-      category: "", // optional, eg. NETWORK, DECODER, etc.
-      code: "",
-      message: "", // optional
-      data: data, // optional
-    })
+    if (data.fatal || data.Severity === 2) {
+      playerAnalytics.reportError({
+        category: "", // optional, eg. NETWORK, DECODER, etc.
+        code: "",
+        message: "", // optional
+        data: data, // optional
+      })
+    }
+    else {
+      playerAnalytics.reportWarning({
+        category: "", // optional, eg. NETWORK, DECODER, etc.
+        code: "",
+        message: "", // optional
+        data: data, // optional
+      });
+    }
   });
 
+  player.on(PlayerEvent.DESTROY_EPAS, () => {
+    //Do I WANT to destroy it here???
+    //playerAnalytics.destroy();
+  });
 }
 window.onload = main;
