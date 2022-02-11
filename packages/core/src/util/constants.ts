@@ -36,5 +36,5 @@ export enum PlayerEvent {
 	PLAYER_STOPPED = 'player_stopped',
 	ERROR = 'error',
 
-	DESTROY_EPAS = 'destroy_epas'
+	DEINIT_EPAS = 'deinit_epas'
 }

@@ -15,7 +15,7 @@
     "@eyevinn/web-player-core": "^0.6.0",
     "@eyevinn/web-player-debug": "^0.2.1",
     "@eyevinn/web-player-eyevinn-skin": "^0.5.0",
-    "@eyevinn/player-analytics-client-sdk-web": "^0.0.13"
+    "@eyevinn/player-analytics-client-sdk-web": "^0.0.14"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^6.3.2",

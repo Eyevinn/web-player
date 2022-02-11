@@ -49,8 +49,16 @@ export default class DashPlayer extends BaseTech {
     });
   }
 
+  //TODO: Need to format for EPAS
   protected onError(type, detail) {
-    this.emit(PlayerEvent.ERROR, detail)
+    const fatal = true;
+    let epasData = {
+      category: "Shaka category",
+      code: "Shaka code",
+      message: "Shaka message",
+      data: detail
+    }
+    this.emit(PlayerEvent.ERROR, {epasData, fatal})
   }
 
   get isLive() {

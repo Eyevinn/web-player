@@ -42,7 +42,6 @@ export default class HlsJsTech extends BaseTech {
 
     this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this));
 
-    //Sebastian's code
     this.hls.on(
       Hls.Events.LEVEL_SWITCHED,
       this.onBitrateChange.bind(this)
@@ -51,7 +50,6 @@ export default class HlsJsTech extends BaseTech {
       Hls.Events.ERROR,
       this.onErrorEvent.bind(this)
     );
-    //
   }
 
   load(src: string): Promise<void> {
@@ -113,7 +111,42 @@ export default class HlsJsTech extends BaseTech {
   }
 
   protected onErrorEvent(event, data) {
-    this.emit(PlayerEvent.ERROR, data);
+    let epasData = {
+      category: data?.type, // optional, eg. NETWORK, DECODER, etc.
+      code: "-1",
+      message: "", // optional
+      data: data, // optional
+    }
+    const fatal = data?.fatal;
+    const errorDetails = data?.details;
+
+    switch (errorDetails) {
+      //All Fatal
+      case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
+      case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
+      case Hls.ErrorDetails.FRAG_LOAD_ERROR: //fatal = true || false
+          epasData.code = `${data.response.code}`,
+          epasData.message = data.response.text
+        break;
+      case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
+          epasData.message = data.reason
+        break;
+      case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
+      case Hls.ErrorDetails.FRAG_LOAD_TIMEOUT: //fatal = true || false
+      case Hls.ErrorDetails.KEY_LOAD_TIMEOUT:
+        break;
+      //Non Fatal
+      case Hls.ErrorDetails.AUDIO_TRACK_LOAD_ERROR:
+      case Hls.ErrorDetails.KEY_LOAD_ERROR:
+          epasData.code = `${data.response.code}`,
+          epasData.message = data.response.text
+      break;
+      case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
+      case Hls.ErrorDetails.AUDIO_TRACK_LOAD_TIMEOUT:
+      default:
+    }
+
+    this.emit(PlayerEvent.ERROR, { epasData, fatal });
   }
 
   get currentLevel() {
