@@ -130,7 +130,7 @@ async function main() {
   }
   hlsButton.onclick = async () => {
     manifestInput.value =
-      'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8';
+      'https://d2fz24s2fts31b.cloudfront.net/out/v1/6484d7c664924b77893f9b4f63080e5d/manifest.m3u8';
     load();
     resetEmbed();
     if (isClipboardAvailable()) {
@@ -140,7 +140,7 @@ async function main() {
   };
   dashButton.onclick = async () => {
     manifestInput.value =
-      'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd';
+      'https://d2fz24s2fts31b.cloudfront.net/out/v1/3b6879c0836346c2a44c9b4b33520f4e/manifest.mpd';
     load();
     resetEmbed();
     if (isClipboardAvailable()) {
