@@ -35,6 +35,4 @@ export enum PlayerEvent {
 	BITRATE_CHANGE = 'bitrate_change',
 	PLAYER_STOPPED = 'player_stopped',
 	ERROR = 'error',
-
-	DEINIT_EPAS = 'deinit_epas'
 }

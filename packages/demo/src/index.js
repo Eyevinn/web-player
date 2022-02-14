@@ -3,7 +3,7 @@ import WebPlayer, { PlayerEvent } from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
-import { PlayerAnalyticsConnector } from "@eyevinn/player-analytics-client-sdk-web";
+import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
 
 // Uncomment this to demo the player package
 // import webplayer from '@eyevinn/web-player';
@@ -15,7 +15,7 @@ function isClipboardAvailable() {
 
 async function writeToClipboard(text) {
   if (!isClipboardAvailable()) {
-    throw new Error("clipboard not supported");
+    throw new Error('clipboard not supported');
   }
 
   await navigator.clipboard.writeText(text);
@@ -93,7 +93,10 @@ async function main() {
     root,
     player,
   });
-  const playerAnalytics = new PlayerAnalyticsConnector("https://sink.epas.eyevinn.technology/", true);
+  const playerAnalytics = new PlayerAnalyticsConnector(
+    'https://sink.epas.eyevinn.technology/',
+    true
+  );
 
   // Uncomment out this if you want to demo the player package
   // const player = webplayer(root);
@@ -102,7 +105,7 @@ async function main() {
     await playerAnalytics.init({
       sessionId: `demo-page-${Date.now()}`,
       live: false,
-      contentId: "BBB",
+      contentId: 'BBB',
       contentUrl: manifestInput.value,
     });
     await player.load(manifestInput.value);
@@ -136,7 +139,6 @@ async function main() {
     if (isClipboardAvailable()) {
       shareButton.disabled = false;
     }
-
   };
   dashButton.onclick = async () => {
     manifestInput.value =
@@ -160,7 +162,7 @@ async function main() {
 
   loadButton.onclick = () => {
     load();
-  }
+  };
   shareButton.onclick = () => {
     shareDemoUrl(manifestInput.value);
   };
@@ -181,14 +183,13 @@ async function main() {
     if (!manifestInput.value) {
       embedButton.disabled = true;
       shareButton.disabled = true;
-    }
-    else {
+    } else {
       embedButton.disabled = false;
       if (isClipboardAvailable()) {
         shareButton.disabled = false;
       }
     }
-  }
+  };
 
   qualityPicker.onchange = () => {
     if (qualityPicker.value == -1) {
@@ -196,7 +197,9 @@ async function main() {
       player.currentLevel = null;
     } else {
       const selectedLevel = player.getVideoLevels()[qualityPicker.value];
-      console.log(`Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`);
+      console.log(
+        `Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`
+      );
       player.currentLevel = selectedLevel;
     }
   };
@@ -215,19 +218,19 @@ async function main() {
   function resetEmbed() {
     embedButton.disabled = false;
     embedButton.textContent = 'Embed 📋';
-    snackbar.classList.remove("show");
+    snackbar.classList.remove('show');
   }
 
   function embedPopUp(embedString) {
-    snackbar.className = "show";
+    snackbar.className = 'show';
     embedCode.innerText = embedString;
   }
 
   player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
     playerAnalytics.reportBitrateChange({
       bitrate: (data.bitrate / 1000).toString(), // bitrate in Kbps
-      width: (data.width).toString(), // optional, video width in pixels
-      height: (data.height).toString(), // optional, video height in pixels
+      width: data.width.toString(), // optional, video width in pixels
+      height: data.height.toString(), // optional, video height in pixels
     });
   });
 
@@ -235,17 +238,16 @@ async function main() {
     playerAnalytics.reportStop();
   });
 
-  player.on(PlayerEvent.ERROR, ({ epasData, fatal }) => {
+  player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
     if (fatal) {
-      playerAnalytics.reportError(epasData)
-    }
-    else {
-      playerAnalytics.reportWarning(epasData)
+      playerAnalytics.reportError(errorData);
+    } else {
+      playerAnalytics.reportWarning(errorData);
     }
   });
 
-  player.on(PlayerEvent.DEINIT_EPAS, () => {
-    playerAnalytics.deinit()
+  player.on(PlayerEvent.UNREADY, () => {
+    playerAnalytics.deinit();
   });
 }
 window.onload = main;

@@ -40,7 +40,7 @@ export default class DashPlayer extends BaseTech {
       (btr, track) => btr + track.bandwidth,
       0
     );
-    const videoTrack = activeTracks.find((track) => track.type === "variant");
+    const videoTrack = activeTracks.find((track) => track.type === 'variant');
 
     this.emit(PlayerEvent.BITRATE_CHANGE, {
       bitrate,
@@ -49,16 +49,18 @@ export default class DashPlayer extends BaseTech {
     });
   }
 
-  //TODO: Need to format for EPAS
-  protected onError(type, detail) {
-    const fatal = true;
-    let epasData = {
-      category: "Shaka category",
-      code: "Shaka code",
-      message: "Shaka message",
-      data: detail
-    }
-    this.emit(PlayerEvent.ERROR, {epasData, fatal})
+  protected onError(data) {
+    const errorDetails = data?.detail;
+    console.log(errorDetails);
+    const fatal = errorDetails.severity > 1 ? true : false;
+    
+    let errorData = {
+      category: errorDetails.category.toString(),
+      code: errorDetails.code.toString(),
+      message: errorDetails.data[1].toString(),
+      data: errorDetails.data
+    };
+    this.emit(PlayerEvent.ERROR, { errorData, fatal });
   }
 
   get isLive() {

@@ -111,42 +111,10 @@ export default class HlsJsTech extends BaseTech {
   }
 
   protected onErrorEvent(event, data) {
-    let epasData = {
-      category: data?.type, // optional, eg. NETWORK, DECODER, etc.
-      code: "-1",
-      message: "", // optional
-      data: data, // optional
-    }
     const fatal = data?.fatal;
-    const errorDetails = data?.details;
+    const errorData = this.errorFormat(data);
 
-    switch (errorDetails) {
-      //All Fatal
-      case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
-      case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
-      case Hls.ErrorDetails.FRAG_LOAD_ERROR: //fatal = true || false
-          epasData.code = `${data.response.code}`,
-          epasData.message = data.response.text
-        break;
-      case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
-          epasData.message = data.reason
-        break;
-      case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
-      case Hls.ErrorDetails.FRAG_LOAD_TIMEOUT: //fatal = true || false
-      case Hls.ErrorDetails.KEY_LOAD_TIMEOUT:
-        break;
-      //Non Fatal
-      case Hls.ErrorDetails.AUDIO_TRACK_LOAD_ERROR:
-      case Hls.ErrorDetails.KEY_LOAD_ERROR:
-          epasData.code = `${data.response.code}`,
-          epasData.message = data.response.text
-      break;
-      case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
-      case Hls.ErrorDetails.AUDIO_TRACK_LOAD_TIMEOUT:
-      default:
-    }
-
-    this.emit(PlayerEvent.ERROR, { epasData, fatal });
+    this.emit(PlayerEvent.ERROR, { errorData, fatal });
   }
 
   get currentLevel() {
@@ -238,6 +206,43 @@ export default class HlsJsTech extends BaseTech {
 
   seekToLive() {
     this.currentTime = this.hls.liveSyncPosition;
+  }
+
+  errorFormat(data) {
+    let errorData = {
+      category: data?.type, // optional, eg. NETWORK, DECODER, etc.
+      code: "-1",
+      message: "", // optional
+      data: data, // optional
+    }
+    const errorDetails = data?.details;
+    switch (errorDetails) {
+      //All Fatal
+      case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
+      case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
+      case Hls.ErrorDetails.FRAG_LOAD_ERROR: //fatal = true || false
+          errorData.code = `${data.response.code}`,
+          errorData.message = data.response.text
+        break;
+      case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
+          errorData.message = data.reason
+        break;
+      case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
+      case Hls.ErrorDetails.FRAG_LOAD_TIMEOUT: //fatal = true || false
+      case Hls.ErrorDetails.KEY_LOAD_TIMEOUT:
+        break;
+      //Non Fatal
+      case Hls.ErrorDetails.AUDIO_TRACK_LOAD_ERROR:
+      case Hls.ErrorDetails.KEY_LOAD_ERROR:
+          errorData.code = `${data.response.code}`,
+          errorData.message = data.response.text
+      break;
+      case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
+      case Hls.ErrorDetails.AUDIO_TRACK_LOAD_TIMEOUT:
+      default:
+    }
+
+    return errorData;
   }
 
   destroy() {

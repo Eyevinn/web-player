@@ -152,8 +152,6 @@ export default class WebPlayer extends EventEmitter {
       this.tech.destroy();
       this.tech = null;
       this.emit(PlayerEvent.UNREADY);
-
-      this.emit(PlayerEvent.DEINIT_EPAS);
     }
   }
 }
