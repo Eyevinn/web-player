@@ -102,13 +102,13 @@ async function main() {
   // const player = webplayer(root);
 
   async function load() {
+    await player.load(manifestInput.value);
     await playerAnalytics.init({
       sessionId: `demo-page-${Date.now()}`,
-      live: false,
-      contentId: 'BBB',
+      live: player.isLive,
+      contentId: manifestInput.value,
       contentUrl: manifestInput.value,
     });
-    await player.load(manifestInput.value);
     playerAnalytics.load(video);
     populateQualityPicker();
   }

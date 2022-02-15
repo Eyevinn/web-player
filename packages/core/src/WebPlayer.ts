@@ -69,6 +69,10 @@ export default class WebPlayer extends EventEmitter {
     return this.tech?.isMuted ?? false;
   }
 
+  get isLive() : boolean {
+    return this.tech?.isLive ?? false;
+  }
+
   get currentTime(): number {
     return this.tech?.currentTime;
   }
