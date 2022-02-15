@@ -32,4 +32,7 @@ export enum PlayerEvent {
 	TEXT_TRACK_CHANGE = 'text_track_change',
 	BUFFERING = 'buffering',
 	LIVE_ENDED = 'live_ended',
+	BITRATE_CHANGE = 'bitrate_change',
+	PLAYER_STOPPED = 'player_stopped',
+	ERROR = 'error',
 }
