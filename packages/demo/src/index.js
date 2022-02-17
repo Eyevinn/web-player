@@ -94,8 +94,7 @@ async function main() {
     player,
   });
   const playerAnalytics = new PlayerAnalyticsConnector(
-    'https://sink.epas.eyevinn.technology/',
-    true
+    'https://sink.epas.eyevinn.technology/'
   );
 
   // Uncomment out this if you want to demo the player package
