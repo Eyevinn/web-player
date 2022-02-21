@@ -116,6 +116,10 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 	);
 	const seekToLive = useCallback(() => player.seekToLive(), [player]);
 
+	const volChange = useCallback(
+		(change: number) => player.volChange(change),
+		[player]
+	);
 	return [
 		ready,
 		state,
@@ -126,6 +130,7 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		seekByPercentage,
 		seekByChange,
 		seekToLive,
+		volChange,
 	];
 }
 
