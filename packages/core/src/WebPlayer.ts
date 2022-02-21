@@ -143,6 +143,29 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
+  volChange(change) {
+    if (change > 0 && this.video.volume < 1) {
+        this.video.volume = (this.video.volume + change).toFixed(2);
+    }
+
+    else if (change < 0 && this.video.volume > 0) {
+      this.video.volume = (this.video.volume + change).toFixed(2);
+    }
+
+    if (this.video.volume === 0) {
+      this.mute();
+      console.log("muted!" + this.video.volume);
+      console.log(this.isMuted)
+    }
+
+    else {
+      this.unmute();
+      console.log("unmuted!" + this.video.volume);
+      console.log(this.isMuted)
+    }
+    
+  }
+
   mute() {
     this.tech?.mute();
   }
