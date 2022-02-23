@@ -62,10 +62,28 @@ export default class HlsJsTech extends BaseTech {
     return new Promise((resolve) => {
       this.hls.loadSource(src);
       this.hls.once(Hls.Events.MANIFEST_PARSED, () => {
+        this.removeUnsupportedLevels();
         resolve();
       });
     });
   }
+
+  /**
+   * filter out any level not supported by hls.js
+   * recursive method that looks for a level and then removes it if unsupported, due to how
+   * hls.js is built we cannot remove all unsupported levels in one go because the underlying
+   * array changes.
+   */
+  private removeUnsupportedLevels() {
+    const unsupportedLevelIndex = this.hls.levels.findIndex((level) => {
+      return !MediaSource.isTypeSupported(`video/mp4; codecs="${level.attrs.CODECS}"`);
+    }); 
+    if (unsupportedLevelIndex !== -1) {
+        this.hls.removeLevel(unsupportedLevelIndex);
+        this.removeUnsupportedLevels();
+    }
+  }
+
 
   protected onTimeUpdate() {
     this.updateState({
