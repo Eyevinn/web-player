@@ -62,10 +62,22 @@ export default class HlsJsTech extends BaseTech {
     return new Promise((resolve) => {
       this.hls.loadSource(src);
       this.hls.once(Hls.Events.MANIFEST_PARSED, () => {
+        this.removeUnsupportedLevels();
         resolve();
       });
     });
   }
+
+  private removeUnsupportedLevels() {
+    const unsupportedLevelIndex = this.hls.levels.findIndex((level) => {
+      return !MediaSource.isTypeSupported(`video/mp4; codecs="${level.attrs.CODECS}"`);
+    }); 
+    if (unsupportedLevelIndex !== -1) {
+        this.hls.removeLevel(unsupportedLevelIndex);
+        this.removeUnsupportedLevels();
+    }
+  }
+
 
   protected onTimeUpdate() {
     this.updateState({
