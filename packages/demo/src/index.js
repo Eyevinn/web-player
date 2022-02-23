@@ -64,6 +64,8 @@ async function main() {
   const shareButton = document.querySelector('#share-button');
   const embedButton = document.querySelector('#embed-button');
 
+  let initiatedAnalytics = false;
+
   if (!manifestInput.value) {
     embedButton.disabled = true;
   }
@@ -93,6 +95,7 @@ async function main() {
     root,
     player,
   });
+
   const playerAnalytics = new PlayerAnalyticsConnector(
     'https://sink.epas.eyevinn.technology/'
   );
@@ -102,13 +105,20 @@ async function main() {
 
   async function load() {
     await player.load(manifestInput.value);
-    await playerAnalytics.init({
-      sessionId: `demo-page-${Date.now()}`,
-      live: player.isLive,
-      contentId: manifestInput.value,
-      contentUrl: manifestInput.value,
-    });
+
+    await playerAnalytics
+      .init({
+        sessionId: `demo-page-${Date.now()}`,
+        live: player.isLive,
+        contentId: manifestInput.value,
+        contentUrl: manifestInput.value,
+      })
+      .then(() => {
+        initiatedAnalytics = true;
+      });
+
     playerAnalytics.load(video);
+
     populateQualityPicker();
   }
 
@@ -122,14 +132,16 @@ async function main() {
 
     const videoLevels = player.getVideoLevels();
     videoLevels.forEach((level, index) => {
+      if (!level) return;
       const option = document.createElement('option');
-      option.text = `${level.width}x${level.height}, ${Math.round(
-        level.bitrate / 1024
-      )}kbps`;
-      option.value = index;
+      option.text = `id_${level.id}: ${level.width}x${
+        level.height
+      }, ${Math.round(level.bitrate / 1024)}kbps`;
+      option.value = level.id;
       qualityPicker.add(option);
     });
   }
+
   hlsButton.onclick = async () => {
     manifestInput.value =
       'https://d2fz24s2fts31b.cloudfront.net/out/v1/6484d7c664924b77893f9b4f63080e5d/manifest.m3u8';
@@ -195,7 +207,9 @@ async function main() {
       console.log(`Switching from level ${player.currentLevel.id} to ABR`);
       player.currentLevel = null;
     } else {
-      const selectedLevel = player.getVideoLevels()[qualityPicker.value];
+      const selectedLevel = player
+        .getVideoLevels()
+        .find((level) => level.id === qualityPicker.value);
       console.log(
         `Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`
       );
@@ -226,11 +240,13 @@ async function main() {
   }
 
   player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
-    playerAnalytics.reportBitrateChange({
-      bitrate: (data.bitrate / 1000).toString(), // bitrate in Kbps
-      width: data.width.toString(), // optional, video width in pixels
-      height: data.height.toString(), // optional, video height in pixels
-    });
+    if (initiatedAnalytics) {
+      playerAnalytics.reportBitrateChange({
+        bitrate: (data.bitrate / 1000).toString(), // bitrate in Kbps
+        width: data.width.toString(), // optional, video width in pixels
+        height: data.height.toString(), // optional, video height in pixels
+      });
+    }
   });
 
   player.on(PlayerEvent.PLAYER_STOPPED, () => {
@@ -247,6 +263,8 @@ async function main() {
 
   player.on(PlayerEvent.UNREADY, () => {
     playerAnalytics.deinit();
+    initiatedAnalytics = false;
   });
 }
+
 window.onload = main;
