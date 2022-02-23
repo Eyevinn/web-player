@@ -134,10 +134,10 @@ async function main() {
     videoLevels.forEach((level, index) => {
       if (!level) return;
       const option = document.createElement('option');
-      option.text = `id_${level.id}: ${level.width}x${
+      option.text = `${level.width}x${
         level.height
       }, ${Math.round(level.bitrate / 1024)}kbps`;
-      option.value = level.id;
+      option.value = index;
       qualityPicker.add(option);
     });
   }
