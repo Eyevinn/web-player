@@ -134,9 +134,9 @@ async function main() {
     videoLevels.forEach((level, index) => {
       if (!level) return;
       const option = document.createElement('option');
-      option.text = `${level.width}x${
-        level.height
-      }, ${Math.round(level.bitrate / 1024)}kbps`;
+      option.text = `${level.width}x${level.height}, ${Math.round(
+        level.bitrate / 1024
+      )}kbps`;
       option.value = index;
       qualityPicker.add(option);
     });
@@ -207,9 +207,7 @@ async function main() {
       console.log(`Switching from level ${player.currentLevel.id} to ABR`);
       player.currentLevel = null;
     } else {
-      const selectedLevel = player
-        .getVideoLevels()
-        .find((level) => level.id === qualityPicker.value);
+      const selectedLevel = player.getVideoLevels()[qualityPicker.value];
       console.log(
         `Switching from level ${player.currentLevel.id} to ${selectedLevel.id}`
       );
