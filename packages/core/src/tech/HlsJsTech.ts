@@ -3,7 +3,7 @@ import BaseTech, {
   IVideoLevel,
   PlaybackState,
 } from './BaseTech';
-import Hls, { Level } from 'hls.js';
+import Hls from 'hls.js';
 import { PlayerEvent } from '../util/constants';
 
 const DEFAULT_CONFIG = {
