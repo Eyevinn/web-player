@@ -1,12 +1,16 @@
 import { h } from 'preact';
+
 import { useState, useEffect, useCallback, useRef } from 'preact/hooks';
 import WebPlayer, { PlaybackState } from '@eyevinn/web-player-core';
 import classNames from 'classnames';
 import Timeline from './components/timeline/Timeline';
 import PlayPauseButton from './components/buttons/playPause/PlayPauseButton';
-import VolumeButton from './components/buttons/volume/VolumeButton';
+//import VolumeButton from './components/buttons/volume/VolumeButton';
 import AudioTrackButton from './components/buttons/audioTrack/AudioTrackButton';
 import FullscreenButton from './components/buttons/fullscreen/FullscreenButton';
+
+
+import VolumeWrapper from './components/buttons/volume/VolumeWrapper';
 
 import style from './skin.module.scss';
 import Loader from './components/loader/Loader';
@@ -43,7 +47,8 @@ export default function EyevinnSkin({
     seekByPercentage,
     seekByChange,
     seekToLive,
-	volChange
+	  volChange,
+    //volChangeByPercentage,
   ] = usePlayer(player, castAppId);
   const [airplayAvailable, toggleAirPlay] = useAirPlay(player);
 
@@ -109,12 +114,12 @@ export default function EyevinnSkin({
             seekByChange(-5);
             break;
           case 'ArrowUp':
-            console.log('VOLUME UP');
-			volChange(0.1);
+            console.log('VOLUME UP PRESS');
+			      volChange(0.1 as Number);
             break;
           case 'ArrowDown':
-			volChange(-0.1);
-            console.log('VOLUME DOWN');
+			      volChange(-0.1 as Number);
+            console.log('VOLUME DOWN PRESS');
             break;
         }
       };
@@ -146,7 +151,10 @@ export default function EyevinnSkin({
     // the player has no content and cannot play anything
     return null;
   }
-
+ //TODO: Flytta VolumeSlider till VolumeButton DONE
+ // Emitta volym ifrån WebPlayer och ändra värdet på VolumeSlider baserat på det
+ // Emitta ändringar till WebPlayer genom gemensam funktion för tangenter/slider
+ // Använd onEnter/onLeave på VolumeButton för att avgöra om slider ska visas DONE
   return (
     <div
       ref={skinContainerRef}
@@ -202,7 +210,8 @@ export default function EyevinnSkin({
               onChange={changeAudioTrack}
             />
           )}
-          <VolumeButton muted={state?.isMuted} onClick={toggleMute} onmouseover={onmouseover}/>
+          
+          <VolumeWrapper muted={state?.isMuted} onClick={toggleMute} onSliderInput={volChange} volume={state?.volume * 100}></VolumeWrapper>
           <FullscreenButton
             isFullscreen={isFullscreen()}
             onClick={toggleFullscreen}

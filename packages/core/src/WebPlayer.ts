@@ -144,17 +144,21 @@ export default class WebPlayer extends EventEmitter {
   }
 
   volChange(change) {
-    if (change > 0 && this.video.volume < 1) {
-        this.video.volume = (this.video.volume + change).toFixed(2);
+    //TEMPORARY SOLUTION! CAN'T SET VOLUME TO ZERO WITH SLIDER USING THIS METHOD
+    if (change > 1) {
+      this.tech.volume = change/100
+      console.log("Percentual" + change)
+    }
+    else if (change > 0 && this.tech.volume < 1) {
+        this.tech.volume = (this.tech.volume + change).toFixed(2);
+    }
+    else if (change < 0 && this.tech.volume > 0) {
+      this.tech.volume = (this.tech.volume + change).toFixed(2);
     }
 
-    else if (change < 0 && this.video.volume > 0) {
-      this.video.volume = (this.video.volume + change).toFixed(2);
-    }
-
-    if (this.video.volume === 0) {
+    if (this.tech.volume === 0) {
       this.mute();
-      console.log("muted!" + this.video.volume);
+      console.log("muted!" + this.tech.volume);
       console.log(this.isMuted)
     }
 
@@ -163,6 +167,8 @@ export default class WebPlayer extends EventEmitter {
       console.log("unmuted!" + this.video.volume);
       console.log(this.isMuted)
     }
+    console.log(this.tech.volume)
+    this.emit(PlayerEvent.VOLUME_CHANGE, this.video.volume);
     
   }
 

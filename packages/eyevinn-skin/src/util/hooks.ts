@@ -81,6 +81,9 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 				...state,
 			});
 		});
+		webPlayer.on(PlayerEvent.VOLUME_CHANGE, ({volume}) => {
+			console.log("VOL state changed")
+		});
 	}, []);
 
 	let state, player;
@@ -120,6 +123,11 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		(change: number) => player.volChange(change),
 		[player]
 	);
+
+	// const volChangeByPercentage = useCallback(
+	// 	(percentage: number) => player.volChange(percentage),
+	// 	[player]
+	// );
 	return [
 		ready,
 		state,
@@ -131,6 +139,7 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		seekByChange,
 		seekToLive,
 		volChange,
+		//volChangeByPercentage,
 	];
 }
 

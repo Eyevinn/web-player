@@ -12,3 +12,13 @@
 .container svg:hover {
 	fill: rgba(255, 255, 255, 1);
 }
+
+.wrapper {
+	display: flex;
+}
+.slider {
+	margin-left: 0.5em;
+	height: 1.5em;
+	cursor: pointer;
+}
+
