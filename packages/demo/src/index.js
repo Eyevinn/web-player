@@ -100,15 +100,22 @@ async function main() {
   // Uncomment out this if you want to demo the player package
   // const player = webplayer(root);
 
+  let analyticsInitiated = false;
+
   async function load() {
     await player.load(manifestInput.value);
-    await playerAnalytics.init({
-      sessionId: `demo-page-${Date.now()}`,
-      live: player.isLive,
-      contentId: manifestInput.value,
-      contentUrl: manifestInput.value,
-    });
-    playerAnalytics.load(video);
+    try {
+      await playerAnalytics.init({
+        sessionId: `demo-page-${Date.now()}`,
+        live: player.isLive,
+        contentId: manifestInput.value,
+        contentUrl: manifestInput.value,
+      });
+      playerAnalytics.load(video);
+      analyticsInitiated = true;
+    } catch (err) {
+      console.error(err);
+    }
     populateQualityPicker();
   }
 
@@ -246,7 +253,8 @@ async function main() {
   });
 
   player.on(PlayerEvent.UNREADY, () => {
-    playerAnalytics.deinit();
+    analyticsInitiated && playerAnalytics.deinit();
+    analyticsInitiated = false;
   });
 }
 window.onload = main;
