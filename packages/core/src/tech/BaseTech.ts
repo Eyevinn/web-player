@@ -46,6 +46,7 @@ export interface IPlayerState {
   isMuted: boolean;
   audioTracks: ITrack[];
   textTracks: ITrack[];
+  volume: number;
 }
 
 function getTextTrackId(textTrack) {
@@ -72,6 +73,7 @@ export default class BaseTech extends EventEmitter {
       isMuted: video.muted,
       audioTracks: [],
       textTracks: [],
+      volume: video.volume
     };
 
     this.video = video;
@@ -265,6 +267,13 @@ export default class BaseTech extends EventEmitter {
         ? Math.min(newpos, this.duration - LIVE_EDGE)
         : newpos;
     }
+  }
+
+  get volume(): number {
+    return this.video.volume
+  }
+  set volume(newvol: number) {
+    this.video.volume = newvol;
   }
 
   get audioTrack() {

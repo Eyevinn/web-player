@@ -29,9 +29,9 @@ function VolumeMute() {
 	);
 }
 
-export default function VolumeButton({ muted, onClick, onmouseover }) {
+export default function VolumeButton({ muted, onClick }) {
 	return (
-		<div class={style.container} onClick={onClick} onMouseOver={onmouseover}>
+		<div class={style.container} onClick={onClick}>
 			{muted ? <VolumeMute /> : <VolumeUp />}
 		</div>
 	);
