@@ -103,20 +103,28 @@ async function main() {
   let analyticsInitiated = false;
 
   async function load() {
-    await player.load(manifestInput.value);
+    await cleanupAnalytics();
+
     try {
       await playerAnalytics.init({
         sessionId: `demo-page-${Date.now()}`,
-        live: player.isLive,
-        contentId: manifestInput.value,
-        contentUrl: manifestInput.value,
       });
+      await player.load(manifestInput.value);
       playerAnalytics.load(video);
       analyticsInitiated = true;
     } catch (err) {
+      // playerAnalytics.deinit();
       console.error(err);
     }
+
     populateQualityPicker();
+  }
+
+  async function cleanupAnalytics() {
+    if (analyticsInitiated) {
+      playerAnalytics.reportStop();
+      playerAnalytics.deinit();
+    }
   }
 
   function populateQualityPicker() {
@@ -232,11 +240,17 @@ async function main() {
     embedCode.innerText = embedString;
   }
 
+  //Work on this one...
+  player.on(PlayerEvent.READY, () => {
+    console.log('player ready');
+  });
+
   player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
+    if (!analyticsInitiated) return;
     playerAnalytics.reportBitrateChange({
-      bitrate: (data.bitrate / 1000).toString(), // bitrate in Kbps
-      width: data.width.toString(), // optional, video width in pixels
-      height: data.height.toString(), // optional, video height in pixels
+      bitrate: data.bitrate / 1000, // bitrate in Kbps
+      width: data.width, // optional, video width in pixels
+      height: data.height, // optional, video height in pixels
     });
   });
 
@@ -253,7 +267,7 @@ async function main() {
   });
 
   player.on(PlayerEvent.UNREADY, () => {
-    analyticsInitiated && playerAnalytics.deinit();
+    playerAnalytics.deinit();
     analyticsInitiated = false;
   });
 }
