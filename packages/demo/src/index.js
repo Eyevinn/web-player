@@ -103,28 +103,21 @@ async function main() {
   let analyticsInitiated = false;
 
   async function load() {
-    await cleanupAnalytics();
+    analyticsInitiated = false;
 
     try {
       await playerAnalytics.init({
-        sessionId: `demo-page-${Date.now()}`,
+        sessionId: `web-player-demo-${Date.now()}`,
       });
       await player.load(manifestInput.value);
       playerAnalytics.load(video);
       analyticsInitiated = true;
     } catch (err) {
-      // playerAnalytics.deinit();
       console.error(err);
+      analyticsInitiated && playerAnalytics.deinit();
     }
 
     populateQualityPicker();
-  }
-
-  async function cleanupAnalytics() {
-    if (analyticsInitiated) {
-      playerAnalytics.reportStop();
-      playerAnalytics.deinit();
-    }
   }
 
   function populateQualityPicker() {
@@ -148,7 +141,7 @@ async function main() {
   hlsButton.onclick = async () => {
     manifestInput.value =
       'https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/1c63bf88e2664639a6c293b4d055e6bb/ade303f83e8444d69b7658f988abb054/2a647c0cf9b7409598770b9f11799178/manifest.m3u8';
-    load();
+    await load();
     resetEmbed();
     if (isClipboardAvailable()) {
       shareButton.disabled = false;
@@ -157,7 +150,7 @@ async function main() {
   dashButton.onclick = async () => {
     manifestInput.value =
       'https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/1c63bf88e2664639a6c293b4d055e6bb/64651f16da554640930b7ce2cd9f758b/66d211307b7d43d3bd515a3bfb654e1c/manifest.mpd';
-    load();
+    await load();
     resetEmbed();
     if (isClipboardAvailable()) {
       shareButton.disabled = false;
@@ -167,15 +160,15 @@ async function main() {
   mssButton.onclick = async () => {
     manifestInput.value =
       'http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest';
-    load();
+    await load();
     resetEmbed();
     if (isClipboardAvailable()) {
       shareButton.disabled = false;
     }
   };
 
-  loadButton.onclick = () => {
-    load();
+  loadButton.onclick = async () => {
+    await load();
   };
   shareButton.onclick = () => {
     shareDemoUrl(manifestInput.value);
@@ -246,29 +239,39 @@ async function main() {
   });
 
   player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
-    if (!analyticsInitiated) return;
-    playerAnalytics.reportBitrateChange({
-      bitrate: data.bitrate / 1000, // bitrate in Kbps
-      width: data.width, // optional, video width in pixels
-      height: data.height, // optional, video height in pixels
-    });
+    if (analyticsInitiated) {
+      playerAnalytics.reportBitrateChange({
+        bitrate: data.bitrate / 1000, // bitrate in Kbps
+        width: data.width, // optional, video width in pixels
+        height: data.height, // optional, video height in pixels
+      });
+    }
   });
 
   player.on(PlayerEvent.PLAYER_STOPPED, () => {
-    playerAnalytics.reportStop();
+    if (analyticsInitiated) {
+      playerAnalytics.reportStop();
+    }
   });
 
   player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
-    if (fatal) {
-      playerAnalytics.reportError(errorData);
-    } else {
-      playerAnalytics.reportWarning(errorData);
+    console.error('player reported error');
+    console.log(errorData);
+    if (analyticsInitiated) {
+      if (fatal) {
+        playerAnalytics.reportError(errorData);
+      } else {
+        playerAnalytics.reportWarning(errorData);
+      }
     }
   });
 
   player.on(PlayerEvent.UNREADY, () => {
-    playerAnalytics.deinit();
-    analyticsInitiated = false;
+    console.log('player unready');
+    if (analyticsInitiated) {
+      playerAnalytics.deinit();     
+      analyticsInitiated = false;
+    }
   });
 }
 window.onload = main;
