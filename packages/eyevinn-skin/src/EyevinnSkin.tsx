@@ -115,10 +115,10 @@ export default function EyevinnSkin({
             break;
           case 'ArrowUp':
             console.log('VOLUME UP PRESS');
-			      volChange(0.1 as Number);
+			      volChange(0.1);
             break;
           case 'ArrowDown':
-			      volChange(-0.1 as Number);
+			      volChange(-0.1);
             console.log('VOLUME DOWN PRESS');
             break;
         }
@@ -155,6 +155,7 @@ export default function EyevinnSkin({
  // Emitta volym ifrån WebPlayer och ändra värdet på VolumeSlider baserat på det
  // Emitta ändringar till WebPlayer genom gemensam funktion för tangenter/slider
  // Använd onEnter/onLeave på VolumeButton för att avgöra om slider ska visas DONE
+ console.log(state)
   return (
     <div
       ref={skinContainerRef}

@@ -158,17 +158,16 @@ export default class WebPlayer extends EventEmitter {
 
     if (this.tech.volume === 0) {
       this.mute();
-      console.log("muted!" + this.tech.volume);
-      console.log(this.isMuted)
+      //console.log(this.isMuted)
     }
 
     else {
       this.unmute();
-      console.log("unmuted!" + this.video.volume);
-      console.log(this.isMuted)
+      //console.log(this.isMuted)
     }
-    console.log(this.tech.volume)
-    this.emit(PlayerEvent.VOLUME_CHANGE, this.video.volume);
+    //console.log(this.tech.volume)
+    //DON'T EMIT HERE! Gives a lot of "undefined". Emit in BaseTech.
+    //this.emit(PlayerEvent.VOLUME_CHANGE, this.tech.volume);
     
   }
 

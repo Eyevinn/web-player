@@ -26,7 +26,7 @@ export enum PlaybackState {
   BUFFERING,
 
   BITRATE_CHANGE,
-  PLAYER_STOPPED
+  PLAYER_STOPPED,
 }
 
 export interface IVideoLevel {
@@ -73,7 +73,7 @@ export default class BaseTech extends EventEmitter {
       isMuted: video.muted,
       audioTracks: [],
       textTracks: [],
-      volume: video.volume
+      volume: video.volume,
     };
 
     this.video = video;
@@ -202,9 +202,14 @@ export default class BaseTech extends EventEmitter {
   }
 
   protected onVolumeChange() {
+    const fields: { [s: string]: number | boolean | string } = {
+      volume: this.video.volume,
+    };
     if (this.state.isMuted !== this.isMuted) {
-      this.updateState({ isMuted: this.isMuted });
+      fields.isMuted = this.isMuted;
     }
+
+    this.updateState(fields);
     this.emit(PlayerEvent.VOLUME_CHANGE, { volume: this.video.volume });
   }
 
@@ -270,7 +275,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   get volume(): number {
-    return this.video.volume
+    return this.video.volume;
   }
   set volume(newvol: number) {
     this.video.volume = newvol;
