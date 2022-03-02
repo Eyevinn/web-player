@@ -116,14 +116,14 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
   );
   const seekToLive = useCallback(() => player.seekToLive(), [player]);
 
-  const volChange = useCallback((change: number) => player.volChange(change), [
+  const changeVolume = useCallback((change: number) => player.changeVolume(change), [
     player,
   ]);
 
-  // const volChangeByPercentage = useCallback(
-  // 	(percentage: number) => player.volChange(percentage),
-  // 	[player]
-  // );
+  const changeVolumeByPercentage = useCallback(
+  	(percentage: number) => player.changeVolumeByPercentage(percentage),
+  	[player]
+  );
   return [
     ready,
     state,
@@ -134,8 +134,8 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
     seekByPercentage,
     seekByChange,
     seekToLive,
-    volChange, // <-- den måste göra trix intern med ddin player (funkar?) men du måste också uppdatera state som man prenumererar på.
-    //volChangeByPercentage,
+    changeVolume,
+    changeVolumeByPercentage,
   ];
 }
 

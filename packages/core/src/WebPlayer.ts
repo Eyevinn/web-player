@@ -143,13 +143,8 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
-  volChange(change) {
-    //TEMPORARY SOLUTION! CAN'T SET VOLUME TO ZERO WITH SLIDER USING THIS METHOD
-    if (change > 1) {
-      this.tech.volume = change/100
-      console.log("Percentual" + change)
-    }
-    else if (change > 0 && this.tech.volume < 1) {
+  changeVolume(change) {
+    if (change > 0 && this.tech.volume < 1) {
         this.tech.volume = (this.tech.volume + change).toFixed(2);
     }
     else if (change < 0 && this.tech.volume > 0) {
@@ -158,17 +153,23 @@ export default class WebPlayer extends EventEmitter {
 
     if (this.tech.volume === 0) {
       this.mute();
-      //console.log(this.isMuted)
     }
 
     else {
       this.unmute();
-      //console.log(this.isMuted)
     }
-    //console.log(this.tech.volume)
-    //DON'T EMIT HERE! Gives a lot of "undefined". Emit in BaseTech.
-    //this.emit(PlayerEvent.VOLUME_CHANGE, this.tech.volume);
+  }
+
+  changeVolumeByPercentage(percentage: number) {
+    this.tech.volume = percentage/100
     
+    if (this.tech.volume === 0) {
+      this.mute();
+    }
+
+    else {
+      this.unmute();
+    }
   }
 
   mute() {
