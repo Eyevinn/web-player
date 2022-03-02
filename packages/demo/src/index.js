@@ -103,8 +103,6 @@ async function main() {
   let analyticsInitiated = false;
 
   async function load() {
-    analyticsInitiated = false;
-
     try {
       await playerAnalytics.init({
         sessionId: `web-player-demo-${Date.now()}`,
