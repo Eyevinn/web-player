@@ -45,8 +45,8 @@ export default function EyevinnSkin({
     seekByPercentage,
     seekByChange,
     seekToLive,
-	  changeVolume,
-    changeVolumeByPercentage,
+	  setVolume,
+    setVolumeByPercentage,
   ] = usePlayer(player, castAppId);
   const [airplayAvailable, toggleAirPlay] = useAirPlay(player);
 
@@ -112,10 +112,10 @@ export default function EyevinnSkin({
             seekByChange(-5);
             break;
           case 'ArrowUp':
-			      changeVolume(0.1);
+			      setVolume(0.1);
             break;
           case 'ArrowDown':
-			      changeVolume(-0.1);
+			      setVolume(-0.1);
             break;
         }
       };
@@ -181,7 +181,7 @@ export default function EyevinnSkin({
             playbackState={state?.playbackState}
             onClick={togglePlayPause}
           />
-          <VolumeControls muted={state?.isMuted} onVolumeButtonClick={toggleMute} onSliderInput={changeVolumeByPercentage} volume={state?.volume * 100}></VolumeControls>
+          <VolumeControls muted={state?.isMuted} onVolumeButtonClick={toggleMute} onSliderInput={setVolumeByPercentage} volume={state?.volume * 100}></VolumeControls>
           {state?.isLive && !state?.isSeekable && (
             <LiveButton
               onClick={seekToLive}

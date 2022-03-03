@@ -69,7 +69,7 @@ export default class WebPlayer extends EventEmitter {
     return this.tech?.isMuted ?? false;
   }
 
-  get isLive() : boolean {
+  get isLive(): boolean {
     return this.tech?.isLive ?? false;
   }
 
@@ -143,32 +143,31 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
-  changeVolume(change) {
-    if (change > 0 && this.tech.volume < 1) {
-        this.tech.volume = (this.tech.volume + change).toFixed(2);
-    }
-    else if (change < 0 && this.tech.volume > 0) {
-      this.tech.volume = (this.tech.volume + change).toFixed(2);
-    }
-
-    if (this.tech.volume === 0) {
-      this.mute();
-    }
-
-    else {
+  setVolume(change) {
+    if (this.isMuted && change > 0) {
       this.unmute();
+    }
+    else if (change > 0 && this.tech.volume < 1) {
+      this.tech.volume = this.tech.volume + change;
+    } 
+    else if (change < 0 && this.tech.volume > 0) {
+      if (this.tech.volume + change === 0) {
+        this.mute();
+      }
+      else {
+      this.tech.volume = this.tech.volume + change;
+      }
     }
   }
 
-  changeVolumeByPercentage(percentage: number) {
-    this.tech.volume = percentage/100
-    
-    if (this.tech.volume === 0) {
+  setVolumeByPercentage(percentage: number) {
+    if (percentage === 0) {
       this.mute();
+      this.tech.volume = 0.1;
     }
-
     else {
-      this.unmute();
+    this.tech.volume = percentage / 100;
+    this.unmute();
     }
   }
 
