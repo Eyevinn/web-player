@@ -104,6 +104,8 @@ async function main() {
 
   async function load() {
     try {
+      player.reset();
+
       await playerAnalytics.init({
         sessionId: `web-player-demo-${Date.now()}`,
       });
