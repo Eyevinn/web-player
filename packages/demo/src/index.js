@@ -5,6 +5,14 @@ import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
 
+const ExampleStreams = [
+  { title: "HLS VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/1c63bf88e2664639a6c293b4d055e6bb/ade303f83e8444d69b7658f988abb054/2a647c0cf9b7409598770b9f11799178/manifest.m3u8" },
+  { title: "MPD VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/1c63bf88e2664639a6c293b4d055e6bb/64651f16da554640930b7ce2cd9f758b/66d211307b7d43d3bd515a3bfb654e1c/manifest.mpd" },
+  { title: "HLS LIVE", url: "https://d2fz24s2fts31b.cloudfront.net/out/v1/6484d7c664924b77893f9b4f63080e5d/manifest.m3u8" },
+  { title: "MPD LIVE", url: "https://d2fz24s2fts31b.cloudfront.net/out/v1/3b6879c0836346c2a44c9b4b33520f4e/manifest.mpd" },
+  { title: "HLS LIVE SSAI", url: "https://edfaeed9c7154a20828a30a26878ade0.mediatailor.eu-west-1.amazonaws.com/v1/master/1b8a07d9a44fe90e52d5698704c72270d177ae74/AdTest/master.m3u8" }
+];
+
 // Uncomment this to demo the player package
 // import webplayer from '@eyevinn/web-player';
 // import '@eyevinn/web-player/dist/webplayer.css';
@@ -55,14 +63,11 @@ function shareDemoUrl(manifestUrl) {
 }
 
 async function main() {
-  const hlsButton = document.querySelector('#hls-button');
-  const dashButton = document.querySelector('#dash-button');
-  const mssButton = document.querySelector('#mss-button');
-
   const manifestInput = document.querySelector('#manifest-input');
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
   const embedButton = document.querySelector('#embed-button');
+  renderExampleButtons();
 
   if (!manifestInput.value) {
     embedButton.disabled = true;
@@ -93,6 +98,7 @@ async function main() {
     root,
     player,
   });
+  
   const playerAnalytics = new PlayerAnalyticsConnector(
     'https://sink.epas.eyevinn.technology/'
   );
@@ -138,34 +144,24 @@ async function main() {
       qualityPicker.add(option);
     });
   }
-  hlsButton.onclick = async () => {
-    manifestInput.value =
-      'https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/1c63bf88e2664639a6c293b4d055e6bb/ade303f83e8444d69b7658f988abb054/2a647c0cf9b7409598770b9f11799178/manifest.m3u8';
-    await load();
-    resetEmbed();
-    if (isClipboardAvailable()) {
-      shareButton.disabled = false;
-    }
-  };
-  dashButton.onclick = async () => {
-    manifestInput.value =
-      'https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/1c63bf88e2664639a6c293b4d055e6bb/64651f16da554640930b7ce2cd9f758b/66d211307b7d43d3bd515a3bfb654e1c/manifest.mpd';
-    await load();
-    resetEmbed();
-    if (isClipboardAvailable()) {
-      shareButton.disabled = false;
-    }
-  };
 
-  mssButton.onclick = async () => {
-    manifestInput.value =
-      'http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest';
-    await load();
-    resetEmbed();
-    if (isClipboardAvailable()) {
-      shareButton.disabled = false;
-    }
-  };
+  function renderExampleButtons() {
+    const buttonContainer = document.querySelector("#example-streams");
+    ExampleStreams.forEach((exampleStream) => {
+      const btn = document.createElement("button");
+      btn.innerHTML = exampleStream.title;
+      buttonContainer.appendChild(btn);
+
+      btn.addEventListener("click", async () => {
+        manifestInput.value = exampleStream.url;
+        await load();
+        resetEmbed();
+        if (isClipboardAvailable()) {
+          shareButton.disabled = false;
+        }   
+      });
+    });
+  }
 
   loadButton.onclick = async () => {
     await load();
