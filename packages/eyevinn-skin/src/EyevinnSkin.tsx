@@ -181,7 +181,7 @@ export default function EyevinnSkin({
             playbackState={state?.playbackState}
             onClick={togglePlayPause}
           />
-          <VolumeControls muted={state?.isMuted} onClick={toggleMute} onSliderInput={changeVolumeByPercentage} volume={state?.volume * 100}></VolumeControls>
+          <VolumeControls muted={state?.isMuted} onVolumeButtonClick={toggleMute} onSliderInput={changeVolumeByPercentage} volume={state?.volume * 100}></VolumeControls>
           {state?.isLive && !state?.isSeekable && (
             <LiveButton
               onClick={seekToLive}

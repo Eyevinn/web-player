@@ -5,7 +5,13 @@ import { useState } from 'preact/hooks';
 import VolumeButton from './VolumeButton';
 import VolumeSlider from './VolumeSlider';
 
-export default function VolumeControls({ muted, onClick, onSliderInput, volume }) {
+// function toggleMuteAndSlider() {
+//   console.log("toggle!!");
+//   this.volume = 0;
+//   onClick;
+//}
+
+export default function VolumeControls({ muted, onVolumeButtonClick, onSliderInput, volume }) {
   const [showVolSlider, setShowVolSlider] = useState(false);
 
   return (
@@ -13,9 +19,9 @@ export default function VolumeControls({ muted, onClick, onSliderInput, volume }
       onMouseEnter={() => setShowVolSlider(true)}
       onMouseLeave={() => setShowVolSlider(false)}
     >
-      <VolumeButton muted={muted} onClick={onClick} />
+      <VolumeButton muted={muted} onClick={onVolumeButtonClick} />
 
-      {showVolSlider && <VolumeSlider onInput={onSliderInput} volume={volume} />}
+      {showVolSlider && <VolumeSlider muted={muted} onInput={onSliderInput} volume={volume} />}
     </div>
   );
 }

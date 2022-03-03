@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import style from './volume.module.css'
 
-export default function VolumeSlider({ onInput, volume }) {
+export default function VolumeSlider({ onInput, volume, muted}) {
 
   return (
     <div class={style.slider}>
@@ -9,7 +9,7 @@ export default function VolumeSlider({ onInput, volume }) {
         type="range"
         min="0"
         max="100"
-        value={volume}
+        value={muted ? 0 : volume}
         step={10}
         onKeyDown={e => e.preventDefault()}
         onInput={(e) => onInput(
