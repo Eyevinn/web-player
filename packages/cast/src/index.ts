@@ -48,6 +48,7 @@ export class CastSender extends EventEmitter {
 		isMuted: false,
 		audioTracks: [],
 		textTracks: [],
+		volume: 1
 	};
 
 	private player: cast.framework.RemotePlayer;
