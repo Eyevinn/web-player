@@ -40,6 +40,10 @@ video {
 	position: relative;
 }
 
+#example-streams button {
+	margin-right: 3px;
+}
+
 #snackbar {
 	visibility: hidden;
 	min-width: 250px;
