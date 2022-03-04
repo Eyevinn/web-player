@@ -5,12 +5,43 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Web Player Component Demo</title>
+    <style>
+        div {
+            display: grid;
+            grid-template: auto / auto;
+            grid-gap: 10px;
+            margin: 0 auto;
+            width: 800px;
+        }
+        eyevinn-video {
+            display: inline-grid;
+            width: 800px;
+        }
+    </style>
 </head>
 
 <body scroll="no">
-    <!-- Browsers will block autoplay if muted is false -->
-     <eyevinn-video source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" starttime="25" muted autoplay></eyevinn-video>
-     <eyevinn-video source="https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd" starttime="100" muted autoplay-visible></eyevinn-video>
+    <div>
+        <h1>EPAS</h1>
+        <eyevinn-video 
+            source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" 
+            starttime="25" 
+            epas="https://sink.epas.eyevinn.technology/" 
+            muted autoplay>
+        </eyevinn-video>
+        <h1>No EPAS</h1>
+        <eyevinn-video 
+            source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" 
+            starttime="25" 
+            muted autoplay>
+        </eyevinn-video>
+        <h1>Autoplay when visible</h1>
+        <eyevinn-video 
+            source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" 
+            starttime="25" 
+            muted autoplay-visible>
+        </eyevinn-video>
+    </div>
 </body>
 
 </html>

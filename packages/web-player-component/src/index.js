@@ -1,6 +1,7 @@
 import WebPlayer from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import style from '@eyevinn/web-player-eyevinn-skin/dist/index.css';
+import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
 
 export default class PlayerComponent extends HTMLElement {
   static get observedAttributes() {
@@ -36,18 +37,51 @@ export default class PlayerComponent extends HTMLElement {
       player: this.player,
       castAppId: {}
     });
+
+    // initiate EPAS analytics when specified
+    this.playerAnalytics = null;
+    if (this.hasAttribute('epas')) {
+      this.playerAnalytics = new PlayerAnalyticsConnector(this.getAttribute('epas'));
+    }    
+  }
+
+  initAnalytics() {
+    return new Promise((resolve, reject) => {
+      if (this.playerAnalytics) {
+        this.playerAnalytics.init({
+          sessionId: `${window.location.hostname}-${Date.now()}`
+        }).then(() => {
+          resolve();
+        }).catch(err => {
+          console.error(err);
+          this.playerAnalytics.deinit();
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    })
   }
 
   attributeChangedCallback(name) {
     if (name === 'source') {
       if (this.hasAttribute('source')) {
-        this.player.load(this.getAttribute('source')).then(() => {
-          if (this.hasAttribute('starttime')) {
-            this.video.currentTime = this.getAttribute('starttime');
-          }
-          if (this.hasAttribute('autoplay')) {
-            this.player.play();
-          }
+        this.initAnalytics().then(() => {
+          this.player.load(this.getAttribute('source')).then(() => {
+            if (this.playerAnalytics) {
+              this.playerAnalytics.load(this.video);
+              this.playerAnalytics.reportMetadata({
+                live: this.player.isLive,
+                contentUrl: this.getAttribute('source'),
+              });
+            }
+            if (this.hasAttribute('starttime')) {
+              this.video.currentTime = this.getAttribute('starttime');
+            }
+            if (this.hasAttribute('autoplay')) {
+              this.player.play();
+            }
+          });
         });
       }
       else {
