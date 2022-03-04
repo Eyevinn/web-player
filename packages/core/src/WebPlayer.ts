@@ -27,6 +27,7 @@ export default class WebPlayer extends EventEmitter {
   async load(src: string, autoplay = false) {
     this.video.muted = autoplay;
     this.video.autoplay = autoplay;
+    this.video.setAttribute("playsinline", "");
 
     this.emit(PlayerEvent.READYING);
     this.reset();
