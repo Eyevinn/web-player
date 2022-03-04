@@ -64,6 +64,7 @@ function shareDemoUrl(manifestUrl) {
 
 async function main() {
   const manifestInput = document.querySelector('#manifest-input');
+  const autoplayCheckbox = document.querySelector('#autoplay');
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
   const embedButton = document.querySelector('#embed-button');
@@ -115,7 +116,7 @@ async function main() {
       await playerAnalytics.init({
         sessionId: `web-player-demo-${Date.now()}`,
       });
-      await player.load(manifestInput.value);
+      await player.load(manifestInput.value, autoplayCheckbox.checked);
       playerAnalytics.load(video);
       analyticsInitiated = true;
     } catch (err) {
@@ -172,7 +173,7 @@ async function main() {
 
   embedButton.onclick = () => {
     const embedString = `<script async type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.3.2/dist/web-player.component.js"></script>
-    <eyevinn-video source="${manifestInput.value}" muted autoplay ></eyevinn-video>`;
+    <eyevinn-video source="${manifestInput.value}" ${autoplayCheckbox.checked ? 'muted autoplay' : ''} ></eyevinn-video>`;
     updateEmbedStatus('Copy this code ➡️');
     embedPopUp(embedString);
   };
