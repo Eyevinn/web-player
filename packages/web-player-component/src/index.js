@@ -82,7 +82,6 @@ export default class PlayerComponent extends HTMLElement {
   inview(entries) {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        console.log("DEBUG time to autoplay");
         this.video.muted = true;
         this.video.autoplay = true;
         this.player.play();
