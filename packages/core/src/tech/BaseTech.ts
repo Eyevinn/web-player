@@ -377,7 +377,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   getVideoLevels() {
-    let videoLevels: IVideoLevel[];
+    let videoLevels: IVideoLevel[] = [];
     return videoLevels;
   }
 
