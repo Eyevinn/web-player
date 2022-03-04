@@ -53,7 +53,7 @@ export default class DashPlayer extends BaseTech {
     const errorDetails = data?.detail;
     console.log(errorDetails);
     const fatal = errorDetails.severity > 1 ? true : false;
-    
+
     let errorData = {
       category: errorDetails.category.toString(),
       code: errorDetails.code.toString(),
@@ -65,6 +65,11 @@ export default class DashPlayer extends BaseTech {
 
   get isLive() {
     return this.shakaPlayer.isLive();
+  }
+
+  get duration(): number {
+    const { start, end } = this.shakaPlayer.seekRange();
+    return end - start || 0;
   }
 
   get audioTrack() {
