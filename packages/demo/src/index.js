@@ -118,6 +118,10 @@ async function main() {
       });
       await player.load(manifestInput.value, autoplayCheckbox.checked);
       playerAnalytics.load(video);
+      playerAnalytics.reportMetadata({
+        live: player.isLive,
+        contentUrl: manifestInput.value,
+      });
       analyticsInitiated = true;
     } catch (err) {
       console.error(err);
