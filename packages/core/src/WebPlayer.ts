@@ -11,7 +11,7 @@ export interface IWebPlayerOptions {
   video: HTMLVideoElement;
 }
 
-export { PlaybackState };
+export { PlaybackState, canPlayManifestType, ManifestType, getManifestType };
 
 export default class WebPlayer extends EventEmitter {
   private tech: BaseTech;

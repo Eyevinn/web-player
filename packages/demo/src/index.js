@@ -1,5 +1,5 @@
 // Comment out these imports if you want to demo the player package
-import WebPlayer, { PlayerEvent } from '@eyevinn/web-player-core';
+import WebPlayer, { PlayerEvent, getManifestType, canPlayManifestType } from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
@@ -150,9 +150,14 @@ async function main() {
     });
   }
 
-  function renderExampleButtons() {
+  async function renderExampleButtons() {
     const buttonContainer = document.querySelector("#example-streams");
-    ExampleStreams.forEach((exampleStream) => {
+    ExampleStreams.forEach(async (exampleStream) => {
+
+      const manifestType = await getManifestType(exampleStream.url);
+      const supportedManifestType = canPlayManifestType(manifestType);
+      if (/iPhone|iPad|macOS/.test(navigator.userAgent) && !supportedManifestType) return false;
+
       const btn = document.createElement("button");
       btn.innerHTML = exampleStream.title;
       buttonContainer.appendChild(btn);
