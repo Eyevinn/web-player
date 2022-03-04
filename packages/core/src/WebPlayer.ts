@@ -143,31 +143,38 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
-  setVolume(change) {
-    if (this.isMuted && change > 0) {
-      this.unmute();
-    }
-    else if (change > 0 && this.tech.volume < 1) {
-      this.tech.volume = this.tech.volume + change;
-    } 
-    else if (change < 0 && this.tech.volume > 0) {
-      if (this.tech.volume + change === 0) {
+  setVolume({ 
+    change, 
+    percentage 
+  }: { 
+    change?: number; 
+    percentage?: number 
+  }) {
+    if (this.tech) {
+      if (change) {
+        if (this.isMuted && change > 0) {
+          this.unmute();
+        } 
+        else if (change > 0 && this.tech.volume < 1) {
+          this.tech.volume = this.tech.volume + change;
+        } 
+        else if (change < 0 && this.tech.volume > 0) {
+          if (this.tech.volume + change === 0) {
+            this.mute();
+          } 
+          else {
+            this.tech.volume = this.tech.volume + change;
+          }
+        }
+      }
+      else if (percentage === 0) {
         this.mute();
+        this.tech.volume = 0.1;
+      } 
+      else if (percentage > 0) {
+        this.tech.volume = percentage / 100;
+        this.unmute();
       }
-      else {
-      this.tech.volume = this.tech.volume + change;
-      }
-    }
-  }
-
-  setVolumeByPercentage(percentage: number) {
-    if (percentage === 0) {
-      this.mute();
-      this.tech.volume = 0.1;
-    }
-    else {
-    this.tech.volume = percentage / 100;
-    this.unmute();
     }
   }
 

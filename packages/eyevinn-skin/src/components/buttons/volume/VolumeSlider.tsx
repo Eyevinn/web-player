@@ -1,7 +1,7 @@
 import { h } from 'preact';
-import style from './volume.module.css'
+import style from './volume.module.css';
 
-export default function VolumeSlider({ onInput, volume, muted}) {
+export default function VolumeSlider({ onInput, volume, muted }) {
 
   return (
     <div class={style.slider}>
