@@ -24,9 +24,11 @@ video {
 .input-buttons {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 }
 
-.input-buttons button {
+.input-buttons button,
+.input-buttons div {
 	width: 100%;
 	margin-right: 1rem;
 	text-transform: uppercase;
@@ -38,6 +40,10 @@ video {
 
 #ui-container {
 	position: relative;
+}
+
+#example-streams button {
+	margin-right: 3px;
 }
 
 #snackbar {

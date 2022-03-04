@@ -22,11 +22,7 @@
       <h1>WebPlayer@<%= htmlWebpackPlugin.options.title %></h1>
     </header>
     <div id="ui-container">
-      <section>
-        <button id="hls-button">HLS</button>
-        <button id="dash-button">MPEG-DASH</button>
-        <button id="mss-button" disabled>SmoothStreaming</button>
-      </section>
+      <section id="example-streams"></section>
       <div id="snackbar">
         <button id="snackbar-close-button" type="button">
           &times;
@@ -42,11 +38,15 @@
         />
         <div class="input-buttons">
           <button id="load-button">LOAD</button>
+          <div>
+            <input type="checkbox" name="autoplay" id="autoplay" />
+            <label for="autoplay">Autoplay</label>
+          </div>
           <button id="share-button">Share 📋</button>
           <button id="embed-button">Embed 📋</button>
         </div>
       </section>
-      <div id="player"></div> 
+      <div id="player"></div>
       <div style="margin-top: 10px">
         <label>Video Quality</label>
         <select id="level" label="Quality">

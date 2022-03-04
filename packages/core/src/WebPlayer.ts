@@ -11,7 +11,7 @@ export interface IWebPlayerOptions {
   video: HTMLVideoElement;
 }
 
-export { PlaybackState };
+export { PlaybackState, canPlayManifestType, ManifestType, getManifestType };
 
 export default class WebPlayer extends EventEmitter {
   private tech: BaseTech;
@@ -24,7 +24,11 @@ export default class WebPlayer extends EventEmitter {
     this.video = video;
   }
 
-  async load(src: string) {
+  async load(src: string, autoplay = false) {
+    this.video.muted = autoplay;
+    this.video.autoplay = autoplay;
+    this.video.setAttribute("playsinline", "");
+
     this.emit(PlayerEvent.READYING);
     this.reset();
 
