@@ -85,6 +85,10 @@ export default class PlayerComponent extends HTMLElement {
         this.video.muted = true;
         this.video.autoplay = true;
         this.player.play();
+      } else if (
+        this.player.isPlaying && !entry.isIntersecting
+      ) {
+        this.player.pause();
       }
     });
   }
