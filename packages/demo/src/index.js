@@ -98,7 +98,7 @@ async function main() {
     root,
     player,
   });
-  
+
   const playerAnalytics = new PlayerAnalyticsConnector(
     'https://sink.epas.eyevinn.technology/'
   );
@@ -158,7 +158,7 @@ async function main() {
         resetEmbed();
         if (isClipboardAvailable()) {
           shareButton.disabled = false;
-        }   
+        }
       });
     });
   }
@@ -251,8 +251,7 @@ async function main() {
   });
 
   player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
-    console.error('player reported error');
-    console.log(errorData);
+    console.error('player reported error', errorData);
     if (analyticsInitiated) {
       if (fatal) {
         playerAnalytics.reportError(errorData);
@@ -260,12 +259,16 @@ async function main() {
         playerAnalytics.reportWarning(errorData);
       }
     }
+    if (fatal) {
+      player.destroy();
+      console.log('player destroyed due to error');
+    }
   });
 
   player.on(PlayerEvent.UNREADY, () => {
     console.log('player unready');
     if (analyticsInitiated) {
-      playerAnalytics.deinit();     
+      playerAnalytics.deinit();
       analyticsInitiated = false;
     }
   });
