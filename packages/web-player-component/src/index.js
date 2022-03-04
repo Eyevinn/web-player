@@ -22,6 +22,13 @@ export default class PlayerComponent extends HTMLElement {
     //Create video element and attach to shadow DOM
     this.video = document.createElement('video');
     wrapper.appendChild(this.video);
+
+    // if we only want to play when in view, init observer
+    if (!this.hasAttribute('autoplay') && this.hasAttribute('autoplay-visible')) {
+      this.observer = new IntersectionObserver(this.inview.bind(this));
+      this.observer.observe(this.video);
+    }
+
     //Init player and skin
     this.player = new WebPlayer({ video: this.video });
     renderEyevinnSkin({
@@ -69,6 +76,17 @@ export default class PlayerComponent extends HTMLElement {
     if (!this.player) return;
     this.player.on('*', (event, data) => {
       this.dispatchEvent(new CustomEvent(event, { detail: data }));
+    });
+  }
+
+  inview(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        console.log("DEBUG time to autoplay");
+        this.video.muted = true;
+        this.video.autoplay = true;
+        this.player.play();
+      }
     });
   }
 }
