@@ -171,7 +171,7 @@ async function main() {
   };
 
   embedButton.onclick = () => {
-    const embedString = `<script async type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.3.1/dist/web-player.component.js"></script>
+    const embedString = `<script async type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.3.2/dist/web-player.component.js"></script>
     <eyevinn-video source="${manifestInput.value}" muted autoplay ></eyevinn-video>`;
     updateEmbedStatus('Copy this code ➡️');
     embedPopUp(embedString);
