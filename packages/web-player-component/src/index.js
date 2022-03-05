@@ -59,6 +59,16 @@ export default class PlayerComponent extends HTMLElement {
         console.log('player destroyed due to error');
       }
     });
+
+    this.player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
+      if (this.playerAnalytics) {
+        this.playerAnalytics.reportBitrateChange({
+          bitrate: data.bitrate / 1000,
+          width: data.width,
+          height: data.height,
+        });
+      }
+    });
   }
 
   async analyticsInit() {
