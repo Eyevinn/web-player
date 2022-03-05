@@ -80,6 +80,7 @@ export default class PlayerComponent extends HTMLElement {
       } catch (err) {
         console.error(err);
         this.playerAnalytics.deinit();
+        this.playerAnalytics = null;
       }
     }
   }
