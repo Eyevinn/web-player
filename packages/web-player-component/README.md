@@ -11,7 +11,8 @@ This web component is powered by the Eyevinn WebPlayer and can be used on an HTM
 | `autoplay`               | autoplay | Specifies that the video will start playing as soon as it is ready |
 | `muted`                  | muted    | Specifies that the audio output of the video should be muted       |
 | `autoplay-visible`       | autoplay-visible | Specifies that the video will start playing as soon as it is ready and only when visible (pauses when not visible) |
-| `epas`  | URL | Enable EPAS analytics tracking. Provide URL to EPAS eventsink |
+| `incognito`              | incognito | Disable player analytics tracking |
+| `epas-url`               | URL | URL to EPAS eventsink. Default is sink.epas.eyevinn.technology |
 
 ## Example
 

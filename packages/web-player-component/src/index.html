@@ -22,23 +22,23 @@
 
 <body scroll="no">
     <div>
-        <h1>EPAS</h1>
+        <h1>EPAS (autoplay)</h1>
         <eyevinn-video 
             source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" 
-            starttime="25" 
-            epas="https://sink.epas.eyevinn.technology/" 
+            epas-url="https://sink.epas.eyevinn.technology/" 
             muted autoplay>
         </eyevinn-video>
-        <h1>No EPAS</h1>
+        <h1>Incognito (no EPAS)</h1>
         <eyevinn-video 
-            source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" 
+            source="https://lab.cdn.eyevinn.technology/stswe19-three-roads-to-jerusalem.mp4/manifest.m3u8" 
             starttime="25" 
-            muted autoplay>
+            incognito>
         </eyevinn-video>
-        <h1>Autoplay when visible</h1>
+        <h1>Autoplay when visible and incognito</h1>
         <eyevinn-video 
-            source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" 
-            starttime="25" 
+            source="https://lab.cdn.eyevinn.technology/stswe19-global-but-local-ott-platform.mp4/manifest.m3u8" 
+            starttime="25"
+            incognito
             muted autoplay-visible>
         </eyevinn-video>
     </div>
