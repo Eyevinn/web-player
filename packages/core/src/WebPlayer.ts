@@ -27,7 +27,7 @@ export default class WebPlayer extends EventEmitter {
   async load(src: string, autoplay = false) {
     this.video.muted = autoplay;
     this.video.autoplay = autoplay;
-    this.video.setAttribute('playsinline', '');
+    this.video.setAttribute("playsinline", "");
 
     this.emit(PlayerEvent.READYING);
     this.reset();
@@ -73,7 +73,7 @@ export default class WebPlayer extends EventEmitter {
     return this.tech?.isMuted ?? false;
   }
 
-  get isLive(): boolean {
+  get isLive() : boolean {
     return this.tech?.isLive ?? false;
   }
 
