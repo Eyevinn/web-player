@@ -61,38 +61,35 @@ export default class PlayerComponent extends HTMLElement {
     });
 
     this.player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
-      if (this.playerAnalytics) {
-        this.playerAnalytics.reportBitrateChange({
-          bitrate: data.bitrate / 1000,
-          width: data.width,
-          height: data.height,
-        });
-      }
+      if (!this.playerAnalytics) return;
+      this.playerAnalytics.reportBitrateChange({
+        bitrate: data.bitrate / 1000,
+        width: data.width,
+        height: data.height,
+      });
     });
   }
 
   async analyticsInit() {
-    if (this.playerAnalytics) {
-      try {
-        await this.playerAnalytics.init({
-          sessionId: `${window.location.hostname}-${Date.now()}`
-        });
-      } catch (err) {
-        console.error(err);
-        this.playerAnalytics.deinit();
-        this.playerAnalytics = null;
-      }
+    if (!this.playerAnalytics) return;
+    try {
+      await this.playerAnalytics.init({
+        sessionId: `${window.location.hostname}-${Date.now()}`
+      });
+    } catch (err) {
+      console.error(err);
+      this.playerAnalytics.deinit();
+      this.playerAnalytics = null;
     }
   }
 
-  async analyticsLoad() {
-    if (this.playerAnalytics) {
-      this.playerAnalytics.load(this.video);
-      this.playerAnalytics.reportMetadata({
-        live: this.player.isLive,
-        contentUrl: this.getAttribute('source'),
-      });
-    }
+  analyticsLoad() {
+    if (!this.playerAnalytics) return;
+    this.playerAnalytics.load(this.video);
+    this.playerAnalytics.reportMetadata({
+      live: this.player.isLive,
+      contentUrl: this.getAttribute('source'),
+    });
   }
 
   async attributeChangedCallback(name) {
@@ -100,7 +97,7 @@ export default class PlayerComponent extends HTMLElement {
       if (this.hasAttribute('source')) {
         await this.analyticsInit();
         await this.player.load(this.getAttribute('source'));
-        await this.analyticsLoad();
+        this.analyticsLoad();
         if (this.hasAttribute('starttime')) {
           this.video.currentTime = this.getAttribute('starttime');
         }
@@ -115,7 +112,7 @@ export default class PlayerComponent extends HTMLElement {
       }
     }
     if (name === 'muted') {
-      this.video.muted = this.hasAttribute('muted');
+      this.video.muted = !!this.hasAttribute('muted'); // cast to boolean
     }
   }
 
