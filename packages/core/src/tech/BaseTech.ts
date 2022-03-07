@@ -336,7 +336,7 @@ export default class BaseTech extends EventEmitter {
     return this.video.volume;
   }
   set volume(newvol: number) {
-    this.video.volume = Math.round(newvol * 1e2 ) / 1e2;
+    this.video.volume = newvol;
   }
 
   play(): Promise<boolean> {
