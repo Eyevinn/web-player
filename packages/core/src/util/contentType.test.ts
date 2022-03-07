@@ -1,7 +1,7 @@
 import { enableFetchMocks } from "jest-fetch-mock";
 enableFetchMocks();
 
-import { getManifestType } from "./contentType";
+import { getManifestType, canPlayManifestType } from "./contentType";
 import { ManifestType } from "./constants";
 
 function setupContentTypeResponseMock(contentType) {
@@ -47,5 +47,17 @@ describe("content type utils", () => {
     setupContentTypeResponseMock("");
     expect(await getManifestType("fil.mp4")).toEqual(ManifestType.UNKNOWN);
 
+  });
+
+  it("can check whether browser has native support for streaming format", () => {
+    const canPlayTypeStub = jest
+    .spyOn(window.HTMLVideoElement.prototype, "canPlayType")
+    .mockImplementation((type) => { return "probably" });
+
+    expect(canPlayManifestType(ManifestType.HLS)).toEqual(true);
+    expect(canPlayTypeStub).toHaveBeenLastCalledWith("application/vnd.apple.mpegurl");
+    expect(canPlayManifestType(ManifestType.DASH)).toEqual(true);
+    expect(canPlayTypeStub).toHaveBeenLastCalledWith("application/dash+xml");
+    canPlayTypeStub.mockRestore()
   });
 });
