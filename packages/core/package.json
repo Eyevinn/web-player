@@ -22,7 +22,14 @@
   "scripts": {
     "prepare": "npm run build",
     "build": "microbundle --no-sourcemap --format modern,es,cjs",
-    "dev": "microbundle --watch --format modern,es,cjs"
+    "dev": "microbundle --watch --format modern,es,cjs",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jest": "27.4.1",
+    "jest": "27.4.7",
+    "jest-fetch-mock": "^3.0.3",
+    "ts-jest": "^27.1.2"
   },
   "dependencies": {
     "dashjs": "^3.2.2",
