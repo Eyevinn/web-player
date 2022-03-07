@@ -147,6 +147,25 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
+  setVolume({ 
+    change, 
+    percentage 
+  }: { 
+    change?: number; 
+    percentage?: number 
+  }) {
+    if (this.tech) {
+      let newVolume = change ? this.tech.volume + change : percentage / 100;
+      if (newVolume > 1) {
+        newVolume = 1;
+      }
+      if (newVolume < 0) {
+        newVolume = 0;
+      }
+      this.tech.volume = newVolume;
+    }
+  }
+
   mute() {
     this.tech?.mute();
   }

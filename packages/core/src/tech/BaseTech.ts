@@ -46,6 +46,7 @@ export interface IPlayerState {
   isMuted: boolean;
   audioTracks: ITrack[];
   textTracks: ITrack[];
+  volume: number;
 }
 
 function getTextTrackId(textTrack) {
@@ -72,6 +73,7 @@ export default class BaseTech extends EventEmitter {
       isMuted: video.muted,
       audioTracks: [],
       textTracks: [],
+      volume: video.volume,
     };
 
     this.video = video;
@@ -200,9 +202,14 @@ export default class BaseTech extends EventEmitter {
   }
 
   protected onVolumeChange() {
+    const fields: { [s: string]: number | boolean | string } = {
+      volume: this.video.volume,
+    };
     if (this.state.isMuted !== this.isMuted) {
-      this.updateState({ isMuted: this.isMuted });
+      fields.isMuted = this.isMuted;
     }
+
+    this.updateState(fields);
     this.emit(PlayerEvent.VOLUME_CHANGE, { volume: this.video.volume });
   }
 
@@ -323,6 +330,13 @@ export default class BaseTech extends EventEmitter {
           enabled: textTrack.enabled,
         }))
     );
+  }
+
+  get volume(): number {
+    return this.video.volume;
+  }
+  set volume(newvol: number) {
+    this.video.volume = newvol;
   }
 
   play(): Promise<boolean> {
