@@ -8,6 +8,9 @@ Demo: https://web.player.eyevinn.technology/
 - `npm install`
 - `npm run dev`
 
+## Run Unit Tests
+- `npm test`
+
 ## Authors
 
 This open source project is maintained by Eyevinn Technology
@@ -15,6 +18,7 @@ This open source project is maintained by Eyevinn Technology
 ## Contributors
 
 - Benjamin Wallberg (benjamin.wallberg@eyevinn.se)
+- Jonas Birmé (jonas.birme@eyevinn.se)
 
 You are welcome to either contribute to this project or spin-off a fork of your own. This code is released under the Apache 2.0 license.
 
