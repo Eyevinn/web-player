@@ -1,6 +1,7 @@
-import WebPlayer from '@eyevinn/web-player-core';
+import WebPlayer, { PlayerEvent } from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import style from '@eyevinn/web-player-eyevinn-skin/dist/index.css';
+import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
 
 export default class PlayerComponent extends HTMLElement {
   static get observedAttributes() {
@@ -36,31 +37,82 @@ export default class PlayerComponent extends HTMLElement {
       player: this.player,
       castAppId: {}
     });
+
+    // initiate EPAS analytics unless in incognito mode
+    this.playerAnalytics = null;
+    if (!this.hasAttribute('incognito')) {
+      const epasUrl = this.getAttribute('epas-url') || "https://sink.epas.eyevinn.technology";
+      this.playerAnalytics = new PlayerAnalyticsConnector(epasUrl);
+    }
+    
+    this.player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
+      console.error('player reported error', errorData);
+      if (this.playerAnalytics) {
+        if (fatal) {
+          this.playerAnalytics.reportError(errorData);
+        } else {
+          this.playerAnalytics.reportWarning(errorData);
+        }
+      }
+      if (fatal) {
+        this.player.destroy();
+        console.log('player destroyed due to error');
+      }
+    });
+
+    this.player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
+      if (!this.playerAnalytics) return;
+      this.playerAnalytics.reportBitrateChange({
+        bitrate: data.bitrate / 1000,
+        width: data.width,
+        height: data.height,
+      });
+    });
   }
 
-  attributeChangedCallback(name) {
+  async analyticsInit() {
+    if (!this.playerAnalytics) return;
+    try {
+      await this.playerAnalytics.init({
+        sessionId: `${window.location.hostname}-${Date.now()}`
+      });
+    } catch (err) {
+      console.error(err);
+      this.playerAnalytics.deinit();
+      this.playerAnalytics = null;
+    }
+  }
+
+  analyticsLoad() {
+    if (!this.playerAnalytics) return;
+    this.playerAnalytics.load(this.video);
+    this.playerAnalytics.reportMetadata({
+      live: this.player.isLive,
+      contentUrl: this.getAttribute('source'),
+    });
+  }
+
+  async attributeChangedCallback(name) {
     if (name === 'source') {
       if (this.hasAttribute('source')) {
-        this.player.load(this.getAttribute('source')).then(() => {
-          if (this.hasAttribute('starttime')) {
-            this.video.currentTime = this.getAttribute('starttime');
-          }
-          if (this.hasAttribute('autoplay')) {
-            this.player.play();
-          }
-        });
+        await this.analyticsInit();
+        await this.player.load(this.getAttribute('source'));
+        this.analyticsLoad();
+        if (this.hasAttribute('starttime')) {
+          this.video.currentTime = this.getAttribute('starttime');
+        }
+        if (this.hasAttribute('autoplay')) {
+          this.video.muted = this.hasAttribute('muted');
+          this.video.autoplay = true;
+          this.player.play();
+        }
       }
       else {
         console.error("Invalid source was provided to <eyevinn-video> element");
       }
     }
     if (name === 'muted') {
-      if (this.hasAttribute("muted")) {
-        this.video.muted = true;
-      }
-      else {
-        this.video.muted = false;
-      }
+      this.video.muted = !!this.hasAttribute('muted'); // cast to boolean
     }
   }
 
