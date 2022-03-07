@@ -163,7 +163,6 @@ export default class WebPlayer extends EventEmitter {
         newVolume = 0;
       }
       this.tech.volume = newVolume;
-      this.tech.volume > 0 ? this.isMuted && this.unmute() : this.mute();
     }
   }
 
