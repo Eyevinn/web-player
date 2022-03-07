@@ -27,7 +27,7 @@ export default class WebPlayer extends EventEmitter {
   async load(src: string, autoplay = false) {
     this.video.muted = autoplay;
     this.video.autoplay = autoplay;
-    this.video.setAttribute("playsinline", "");
+    this.video.setAttribute('playsinline', '');
 
     this.emit(PlayerEvent.READYING);
     this.reset();
@@ -73,7 +73,7 @@ export default class WebPlayer extends EventEmitter {
     return this.tech?.isMuted ?? false;
   }
 
-  get isLive() : boolean {
+  get isLive(): boolean {
     return this.tech?.isLive ?? false;
   }
 
@@ -144,6 +144,26 @@ export default class WebPlayer extends EventEmitter {
   setTextTrack(id) {
     if (this.tech) {
       this.tech.textTrack = id;
+    }
+  }
+
+  setVolume({ 
+    change, 
+    percentage 
+  }: { 
+    change?: number; 
+    percentage?: number 
+  }) {
+    if (this.tech) {
+      let newVolume = change ? this.tech.volume + change : percentage / 100;
+      if (newVolume > 1) {
+        newVolume = 1;
+      }
+      if (newVolume < 0) {
+        newVolume = 0;
+      }
+      this.tech.volume = newVolume;
+      this.tech.volume > 0 ? this.isMuted && this.unmute() : this.mute();
     }
   }
 
