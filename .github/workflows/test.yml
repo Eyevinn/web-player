@@ -1,4 +1,4 @@
-name: Node CI
+name: Run tests
 
 on: [push]
 
@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [12.x]
 
     steps:
     - uses: actions/checkout@v1
@@ -19,8 +19,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: npm install and test
       run: |
-        npm ci
+        npm install
         npm test
-      env:
-        CI: true
 
