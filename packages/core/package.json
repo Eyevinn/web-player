@@ -23,7 +23,7 @@
     "prepare": "npm run build",
     "build": "microbundle --no-sourcemap --format modern,es,cjs",
     "dev": "microbundle --watch --format modern,es,cjs",
-    "test": "jest"
+    "test": "jest --collect-coverage"
   },
   "devDependencies": {
     "@types/jest": "27.4.1",
