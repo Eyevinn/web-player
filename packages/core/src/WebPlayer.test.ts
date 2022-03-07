@@ -1,6 +1,3 @@
-import { enableFetchMocks } from "jest-fetch-mock";
-enableFetchMocks();
-
 import * as contentType from "./util/contentType";
 import * as browser from "./util/browser";
 import BaseTech from "./tech/BaseTech";
@@ -12,9 +9,6 @@ import WebPlayer from "./WebPlayer";
 import { ManifestType } from "./util/constants";
 
 describe("WebPlayer core", () => {
-  beforeEach(() => {
-    fetchMock.resetMocks();
-  });
   afterEach(() => {
     jest.clearAllMocks();
   });
