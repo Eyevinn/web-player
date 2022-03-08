@@ -1,7 +1,7 @@
 //@ts-ignore
 import { Player } from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
-import BaseTech, { PlaybackState, IVideoLevel } from './BaseTech';
+import BaseTech, { IVideoLevel, ITrack, getTextTrackId } from './BaseTech';
 import { PlayerEvent } from '../util/constants';
 
 export default class DashPlayer extends BaseTech {
@@ -25,17 +25,7 @@ export default class DashPlayer extends BaseTech {
   }
 
   load(src: string): Promise<void> {
-    this.updateState({
-      playbackState: PlaybackState.LOADING,
-      currentTime: 0,
-      duration: 0,
-      isLive: false,
-      isAtLiveEdge: false,
-      isSeekable: true,
-      isMuted: this.video.muted,
-      audioTracks: [],
-      textTracks: [],
-    });
+    super.setDefaultState();
     return this.shakaPlayer.load(src).catch(() => {
       // TODO error handling
     });
@@ -99,6 +89,49 @@ export default class DashPlayer extends BaseTech {
       label: audioLang,
       enabled: this.audioTrack === audioLang,
     }));
+  }
+
+  get textTrack() {
+    const track = this.shakaPlayer
+      .getTextTracks()
+      .find((track) => track.active);
+    if (track && this.shakaPlayer.isTextTrackVisible()) {
+      return getTextTrackId(track);
+    }
+    return null;
+  }
+
+  set textTrack(trackId) {
+    if (trackId) {
+      this.shakaPlayer.setTextTrackVisibility(true);
+      const internalTrack = this.shakaPlayer
+        .getTextTracks()
+        .find((t) => getTextTrackId(t) === trackId);
+      this.shakaPlayer.selectTextTrack(internalTrack);
+    } else {
+      this.shakaPlayer.setTextTrackVisibility(false);
+    }
+  }
+
+  get textTracks(): ITrack[] {
+    return this.shakaPlayer
+      .getTextTracks()
+      .map((track) =>  {
+        return {
+          id: track.id,
+          label: track.label,
+          language: track.language,
+          enabled: this.textTrack === getTextTrackId(track),
+        }
+      })
+      .filter(
+        (track, index, array) =>
+          array.findIndex(
+            (compTrack) =>
+              track.language === compTrack.language &&
+              track.label === compTrack.label
+          ) === index
+      );
   }
 
   set currentLevel(level: IVideoLevel) {

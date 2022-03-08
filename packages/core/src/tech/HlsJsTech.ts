@@ -57,17 +57,7 @@ export default class HlsJsTech extends BaseTech {
     if (this.state.playbackState !== PlaybackState.IDLE) {
       this.stop();
     }
-    this.updateState({
-      playbackState: PlaybackState.LOADING,
-      currentTime: 0,
-      duration: 0,
-      isLive: false,
-      isAtLiveEdge: false,
-      isSeekable: true,
-      isMuted: this.video.muted,
-      audioTracks: [],
-      textTracks: [],
-    });
+    super.setDefaultState();
     return new Promise((resolve) => {
       this.hls.loadSource(src);
       this.hls.once(Hls.Events.MANIFEST_PARSED, () => {

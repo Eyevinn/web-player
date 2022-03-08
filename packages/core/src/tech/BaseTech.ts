@@ -49,7 +49,7 @@ export interface IPlayerState {
   volume: number;
 }
 
-function getTextTrackId(textTrack) {
+export function getTextTrackId(textTrack) {
   if (!textTrack) {
     return null;
   }
@@ -127,7 +127,7 @@ export default class BaseTech extends EventEmitter {
     }
   }
 
-  protected updateState(state: any) {
+  protected updateState(state: Partial<IPlayerState>) {
     Object.keys(state).forEach((key) => {
       if (this.state[key] !== undefined) {
         this.state[key] = state[key];
@@ -364,6 +364,16 @@ export default class BaseTech extends EventEmitter {
   }
 
   load(src: string): Promise<void> {
+    this.setDefaultState();
+    return new Promise((resolve, reject) => {
+      this.video.src = src;
+      this.video.load();
+
+      resolve();
+    });
+  }
+
+  setDefaultState() {
     this.updateState({
       playbackState: PlaybackState.LOADING,
       currentTime: 0,
@@ -374,12 +384,7 @@ export default class BaseTech extends EventEmitter {
       isMuted: this.video.muted,
       audioTracks: [],
       textTracks: [],
-    });
-    return new Promise((resolve, reject) => {
-      this.video.src = src;
-      this.video.load();
-
-      resolve();
+      volume: this.video.volume
     });
   }
 

@@ -12,9 +12,7 @@ export default class MssPlayer extends BaseTech {
   }
 
   load(src: string): Promise<void> {
-    this.updateState({
-      playbackState: PlaybackState.LOADING,
-    });
+    super.setDefaultState();
     return new Promise((resolve, reject) => {
       this.mediaPlayer.attachSource(src);
       this.mediaPlayer.on(MediaPlayer.events.MANIFEST_LOADED, () => {
