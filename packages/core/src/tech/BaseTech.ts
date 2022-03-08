@@ -57,6 +57,7 @@ function getTextTrackId(textTrack) {
 }
 
 export default class BaseTech extends EventEmitter {
+  public name = "BaseTech";
   protected video: HTMLVideoElement;
   protected state: IPlayerState;
 
@@ -365,6 +366,14 @@ export default class BaseTech extends EventEmitter {
   load(src: string): Promise<void> {
     this.updateState({
       playbackState: PlaybackState.LOADING,
+      currentTime: 0,
+      duration: 0,
+      isLive: false,
+      isAtLiveEdge: false,
+      isSeekable: true,
+      isMuted: this.video.muted,
+      audioTracks: [],
+      textTracks: [],
     });
     return new Promise((resolve, reject) => {
       this.video.src = src;

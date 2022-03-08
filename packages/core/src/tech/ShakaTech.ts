@@ -5,6 +5,7 @@ import BaseTech, { PlaybackState, IVideoLevel } from './BaseTech';
 import { PlayerEvent } from '../util/constants';
 
 export default class DashPlayer extends BaseTech {
+  public name = "ShakaTech";
   private shakaPlayer: any;
 
   constructor(opts: IWebPlayerOptions) {
@@ -26,6 +27,14 @@ export default class DashPlayer extends BaseTech {
   load(src: string): Promise<void> {
     this.updateState({
       playbackState: PlaybackState.LOADING,
+      currentTime: 0,
+      duration: 0,
+      isLive: false,
+      isAtLiveEdge: false,
+      isSeekable: true,
+      isMuted: this.video.muted,
+      audioTracks: [],
+      textTracks: [],
     });
     return this.shakaPlayer.load(src).catch(() => {
       // TODO error handling
