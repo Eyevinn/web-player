@@ -31,7 +31,7 @@ The simplest way to use the Eyevinn WebPlayer is to use the `<eyevinn-video>` we
 
 ```html
 <script async type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@latest/dist/web-player.component.js"></script>
-<eyevinn-video source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8" starttime="30" muted autoplay></eyevinn-video>
+<eyevinn-video source="htps://lab.cdn.eyevinn.technology/VINN-OpbZjryxa3.mp4/manifest.m3u8" starttime="30" muted autoplay></eyevinn-video>
 ```
 
 ### Web Player Javascript
