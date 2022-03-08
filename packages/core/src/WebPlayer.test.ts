@@ -129,4 +129,46 @@ describe("WebPlayer core", () => {
     expect(videoElement.autoplay).toEqual(true);
   });
 
+  it("can change volume using a percentage", async () => {
+    jest.spyOn(contentType, "getManifestType").mockImplementation(async () => ManifestType.HLS);
+    jest.spyOn(contentType, "canPlayManifestType").mockImplementation(() => true);
+    jest.spyOn(browser, "isSafari").mockImplementation(() => true );
+
+    const videoElement = window.document.createElement("video");
+    const player = new WebPlayer({ video: videoElement });
+    await player.load("mock-stream");
+
+    player.setVolume({ percentage: 50 });
+    expect(player.getVolume()).toEqual(0.5);
+    player.setVolume({ percentage: 40 });
+    expect(player.getVolume()).toEqual(0.4);
+    player.setVolume( {percentage: -1 })
+    expect(player.getVolume()).toEqual(0)
+    player.setVolume( {percentage: 101})
+    expect(player.getVolume()).toEqual(1)
+  });
+
+  it("can change volume using a relative change", async () => {
+    jest.spyOn(contentType, "getManifestType").mockImplementation(async () => ManifestType.HLS);
+    jest.spyOn(contentType, "canPlayManifestType").mockImplementation(() => true);
+    jest.spyOn(browser, "isSafari").mockImplementation(() => true );
+
+    const videoElement = window.document.createElement("video");
+    const player = new WebPlayer({ video: videoElement });
+    await player.load("mock-stream");
+
+    player.setVolume({ percentage: 100 });
+    expect(player.getVolume()).toEqual(1);
+    
+    player.setVolume({ change: -0.5 });
+    expect(player.getVolume()).toEqual(0.5);
+    player.setVolume({ change: 0.4 });
+    expect(player.getVolume()).toEqual(0.9);
+    player.setVolume({ change: -0.9 });
+    expect(player.getVolume()).toEqual(0);
+    player.setVolume({ change: -0.4 });
+    expect(player.getVolume()).toEqual(0);
+    player.setVolume({ change: 0.5 });
+    expect(player.getVolume()).toEqual(0.5);
+  });
 });
