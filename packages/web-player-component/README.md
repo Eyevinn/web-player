@@ -28,7 +28,7 @@ This web component is powered by the Eyevinn WebPlayer and can be used on an HTM
     <!-- Import the web component script --->
     <script async type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@latest/dist/web-player.component.js"></script>
     <!-- Use the 'eyevinn-video' element as such --->
-    <eyevinn-video source="htps://lab.cdn.eyevinn.technology/VINN-OpbZjryxa3.mp4/manifest.m3u8" starttime="30" muted autoplay></eyevinn-video>
+    <eyevinn-video source="https://lab.cdn.eyevinn.technology/VINN-OpbZjryxa3.mp4/manifest.m3u8" starttime="30" muted autoplay></eyevinn-video>
 
 </body>
 </html>
