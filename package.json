@@ -6,7 +6,8 @@
     "build": "lerna run build",
     "dev": "lerna run dev --stream --parallel",
     "test": "lerna run test",
-    "example:web-component": "parcel -p 1234 examples/web-component/index.html",
+    "test:e2e": "playwright test",
+    "examples": "parcel -p 1234 examples/index.html",
     "lerna:version": "lerna version --conventional-commits --no-changelog",
     "publish": "lerna publish from-package --yes --ignore-scripts --no-verify-access"
   },
@@ -24,6 +25,7 @@
     "video-player"
   ],
   "devDependencies": {
+    "@playwright/test": "^1.19.2",
     "@types/jest": "27.4.1",
     "lerna": "^3.22.1",
     "microbundle": "^0.12.4",
