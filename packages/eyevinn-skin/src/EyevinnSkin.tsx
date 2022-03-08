@@ -181,7 +181,7 @@ export default function EyevinnSkin({
 					<div class={style.divider} />
 					<CastButton />
 					{airplayAvailable && <AirPlayButton onClick={toggleAirPlay} />}
-					{state?.isCasting === false && state?.textTracks.length > 1 && (
+					{state?.isCasting === false && state?.textTracks.length > 0 && (
 						<TextTrackButton
 							textTracks={state?.textTracks}
 							onChange={changeTextTrack}

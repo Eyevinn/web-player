@@ -43,7 +43,7 @@ export default function TextTrackButton({ textTracks = [], onChange }) {
 								checked={textTrack.enabled}
 								onClick={onRadioChange}
 							/>
-							<span>{textTrack.label}</span>
+							<span>{textTrack.label || textTrack.language}</span>
 						</label>
 					</li>
 				))}

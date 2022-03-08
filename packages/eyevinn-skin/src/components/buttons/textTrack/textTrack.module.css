@@ -23,7 +23,9 @@
 	transform: translateX(-50%);
 	padding: 0.5em;
 	white-space: nowrap;
+
 	background: rgba(20, 20, 20, 0.6);
+	color: white;
 
 	display: none;
 }

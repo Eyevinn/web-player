@@ -15,6 +15,7 @@ const LIVE_EDGE = 5; // seconds from liveEdge
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
 export default class HlsJsTech extends BaseTech {
+  public name = "HlsJsTech";
   static isSupported() {
     return Hls.isSupported();
   }
@@ -56,9 +57,7 @@ export default class HlsJsTech extends BaseTech {
     if (this.state.playbackState !== PlaybackState.IDLE) {
       this.stop();
     }
-    this.updateState({
-      playbackState: PlaybackState.LOADING,
-    });
+    super.setDefaultState();
     return new Promise((resolve) => {
       this.hls.loadSource(src);
       this.hls.once(Hls.Events.MANIFEST_PARSED, () => {
@@ -77,7 +76,7 @@ export default class HlsJsTech extends BaseTech {
   private removeUnsupportedLevels() {
     const unsupportedLevelIndex = this.hls.levels.findIndex((level) => {
       return !MediaSource.isTypeSupported(`video/mp4; codecs="${level.attrs.CODECS}"`);
-    }); 
+    });
     if (unsupportedLevelIndex !== -1) {
         this.hls.removeLevel(unsupportedLevelIndex);
         this.removeUnsupportedLevels();
