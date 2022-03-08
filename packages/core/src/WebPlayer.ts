@@ -166,6 +166,10 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
+  getVolume(): number {
+    return this.tech?.volume;
+  }
+
   mute() {
     this.tech?.mute();
   }
