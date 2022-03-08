@@ -109,6 +109,7 @@ export default class HlsJsTech extends BaseTech {
     }
 
     this.playlistDuration = data?.details?.totalduration;
+    this.emit(PlayerEvent.LOADED_METADATA, this.state);
   }
 
   getVideoLevels() {

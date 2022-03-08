@@ -27,6 +27,8 @@ export enum PlayerEvent {
 	READYING = 'readying',
 	READY = 'ready',
 
+	LOADED_METADATA = 'loadedmetadata',
+
 	STATE_CHANGE = 'state_change',
 	AUDIO_TRACK_CHANGE = 'audio_track_change',
 	TEXT_TRACK_CHANGE = 'text_track_change',

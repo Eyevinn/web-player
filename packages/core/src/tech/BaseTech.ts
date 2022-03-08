@@ -146,6 +146,7 @@ export default class BaseTech extends EventEmitter {
       audioTracks: this.audioTracks,
       textTracks: this.textTracks,
     });
+    this.emit(PlayerEvent.LOADED_METADATA, this.state);
   }
 
   protected onPlay() {
