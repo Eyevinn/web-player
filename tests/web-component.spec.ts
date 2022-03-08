@@ -7,3 +7,10 @@ test('video element with correct attributes are created', async ({ page }) => {
   await expect(page.locator('video')).toHaveAttribute('autoplay', '');
   await expect(page.locator('video')).toHaveAttribute('playsinline', '');
 });
+
+test('web component sends tracking events when not in incognito mode', async ({ page }) => {
+  const [request] = await Promise.all([
+    page.waitForRequest(req => req.url().match('https://sink.epas') && req.method() === 'POST'),
+    page.goto('http://localhost:1234/web-component/index.html'),
+  ]);
+});
