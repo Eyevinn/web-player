@@ -73,7 +73,7 @@ export default class PlayerComponent extends HTMLElement {
 
   setupAnalytics({ incognito, epasUrl }) {
     this.playerAnalytics = null;
-    if (isSet(incognito)) {
+    if (!isSet(incognito)) {
       this.playerAnalytics = new PlayerAnalyticsConnector(epasUrl || "https://sink.epas.eyevinn.technology");
     }
   }
