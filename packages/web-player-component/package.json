@@ -26,7 +26,7 @@
     "url": "https://github.com/Eyevinn/web-player/issues"
   },
   "dependencies": {
-    "@eyevinn/player-analytics-client-sdk-web": "0.1.0",
+    "@eyevinn/player-analytics-client-sdk-web": "0.1.2",
     "@eyevinn/web-player-core": "^0.8.2",
     "@eyevinn/web-player-eyevinn-skin": "^0.6.5"
   },
