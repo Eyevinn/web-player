@@ -3,48 +3,82 @@ import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import style from '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
 
+const ComponentAttribute = {
+  DYNAMIC: {
+    SOURCE: 'source',
+    STARTTIME: 'starttime',
+    AUTOPLAY: 'autoplay',
+    MUTED: 'muted',
+  },
+  STATIC: {
+    AUTOPLAY_VISIBLE: 'autoplay-visible',
+    INCOGNITO: 'incognito',
+    EPAS_URL: 'epas-url',
+  }
+}
+
+const isSet = (value) => value === "" || !!value;
+
 export default class PlayerComponent extends HTMLElement {
   static get observedAttributes() {
-    return ['source', 'starttime', 'muted', 'autoplay'];
+    return Object.values(ComponentAttribute.DYNAMIC);
   };
   constructor() {
-    //Call constructor of HTMLElement
     super();
-    //Attach shadow DOM
-    this.attachShadow({ mode: 'open' });
-    const { shadowRoot } = this;
-    //Create style and attach to shadow DOM
-    let styleTag = document.createElement('style');
-    styleTag.innerHTML = style;
-    shadowRoot.appendChild(styleTag);
-    //Create wrapper and attach to shadow DOM
-    const wrapper = document.createElement('div');
-    shadowRoot.appendChild(wrapper);
-    //Create video element and attach to shadow DOM
-    this.video = document.createElement('video');
-    wrapper.appendChild(this.video);
+    const wrapper = this.setupDOM();
 
     // if we only want to play when in view, init observer
-    if (!this.hasAttribute('autoplay') && this.hasAttribute('autoplay-visible')) {
-      this.observer = new IntersectionObserver(this.inview.bind(this));
+    const autoplay = this.getAttribute(ComponentAttribute.DYNAMIC.AUTOPLAY);
+    const autoplayVisible = this.getAttribute(ComponentAttribute.STATIC.AUTOPLAY_VISIBLE);
+    if (!isSet(autoplay) && isSet(autoplayVisible)) {
+      this.observer = new IntersectionObserver(this.inViewHandler.bind(this));
       this.observer.observe(this.video);
     }
 
-    //Init player and skin
+    this.setupPlayer(wrapper);
+
+    this.setupAnalytics({
+      incognito: this.getAttribute(ComponentAttribute.STATIC.INCOGNITO),
+      epasUrl: this.getAttribute(ComponentAttribute.STATIC.EPAS_URL)
+    });
+
+    this.setupPlayerEventListener();
+  }
+
+  setupDOM() {
+    this.attachShadow({ mode: 'open' });
+    const { shadowRoot } = this;
+
+    let styleTag = document.createElement('style');
+    styleTag.innerHTML = style;
+    shadowRoot.appendChild(styleTag);
+
+    // We create a wrapper to put the skin along with the video element
+    const wrapper = document.createElement('div');
+    shadowRoot.appendChild(wrapper);
+    this.video = document.createElement('video');
+    wrapper.appendChild(this.video);
+
+    return wrapper;
+  }
+
+  setupPlayer(wrapper) {
     this.player = new WebPlayer({ video: this.video });
     renderEyevinnSkin({
       root: wrapper,
       player: this.player,
       castAppId: {}
     });
+  }
 
-    // initiate EPAS analytics unless in incognito mode
+  setupAnalytics({ incognito, epasUrl }) {
     this.playerAnalytics = null;
-    if (!this.hasAttribute('incognito')) {
-      const epasUrl = this.getAttribute('epas-url') || "https://sink.epas.eyevinn.technology";
-      this.playerAnalytics = new PlayerAnalyticsConnector(epasUrl);
+    if (!isSet(incognito)) {
+      this.playerAnalytics = new PlayerAnalyticsConnector(epasUrl || "https://sink.epas.eyevinn.technology");
     }
+  }
 
+  setupPlayerEventListener() {
     this.player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
       console.error('player reported error', errorData);
       if (this.playerAnalytics) {
@@ -70,7 +104,7 @@ export default class PlayerComponent extends HTMLElement {
     });
   }
 
-  async analyticsInit() {
+  async initAnalytics() {
     if (!this.playerAnalytics) return;
     try {
       await this.playerAnalytics.init({
@@ -83,30 +117,35 @@ export default class PlayerComponent extends HTMLElement {
     }
   }
 
-  analyticsLoad() {
+  loadAnalytics() {
     if (!this.playerAnalytics) return;
     this.playerAnalytics.load(this.video);
 
     this.player.on(PlayerEvent.LOADED_METADATA, this.metadataReporter = () => {
       this.playerAnalytics.reportMetadata({
         live: this.player.isLive,
-        contentUrl: this.getAttribute('source'),
+        contentUrl: this.getAttribute(ComponentAttribute.DYNAMIC.SOURCE),
       });
       this.player.off(PlayerEvent.LOADED_METADATA, this.metadataReporter);
     })
   }
 
   async attributeChangedCallback(name) {
-    if (name === 'source') {
-      if (this.hasAttribute('source')) {
-        await this.analyticsInit();
-        await this.player.load(this.getAttribute('source'));
-        this.analyticsLoad();
-        if (this.hasAttribute('starttime')) {
-          this.video.currentTime = this.getAttribute('starttime');
+    const src = this.getAttribute(ComponentAttribute.DYNAMIC.SOURCE);
+    const starttime = this.getAttribute(ComponentAttribute.DYNAMIC.STARTTIME);
+    const autoplay = this.getAttribute(ComponentAttribute.DYNAMIC.AUTOPLAY);
+    const muted = this.getAttribute(ComponentAttribute.DYNAMIC.MUTED);
+
+    if (name === ComponentAttribute.DYNAMIC.SOURCE) {
+      if (isSet(src)) {
+        await this.initAnalytics();
+        await this.player.load(src);
+        this.loadAnalytics();
+        if (isSet(starttime)) {
+          this.video.currentTime = starttime;
         }
-        if (this.hasAttribute('autoplay')) {
-          this.video.muted = this.hasAttribute('muted');
+        if (isSet(autoplay)) {
+          this.video.muted = isSet(muted);
           this.video.autoplay = true;
           this.player.play();
         }
@@ -115,8 +154,8 @@ export default class PlayerComponent extends HTMLElement {
         console.error("Invalid source was provided to <eyevinn-video> element");
       }
     }
-    if (name === 'muted') {
-      this.video.muted = !!this.hasAttribute('muted'); // cast to boolean
+    if (name === ComponentAttribute.DYNAMIC.MUTED) {
+      this.video.muted = isSet(muted);
     }
   }
 
@@ -135,7 +174,7 @@ export default class PlayerComponent extends HTMLElement {
     });
   }
 
-  inview(entries) {
+  inViewHandler(entries) {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         this.video.muted = true;
@@ -149,5 +188,4 @@ export default class PlayerComponent extends HTMLElement {
     });
   }
 }
-//Register custom element
 customElements.define('eyevinn-video', PlayerComponent);
