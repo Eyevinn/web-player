@@ -44,7 +44,7 @@ export default class PlayerComponent extends HTMLElement {
       const epasUrl = this.getAttribute('epas-url') || "https://sink.epas.eyevinn.technology";
       this.playerAnalytics = new PlayerAnalyticsConnector(epasUrl);
     }
-    
+
     this.player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
       console.error('player reported error', errorData);
       if (this.playerAnalytics) {
@@ -86,10 +86,14 @@ export default class PlayerComponent extends HTMLElement {
   analyticsLoad() {
     if (!this.playerAnalytics) return;
     this.playerAnalytics.load(this.video);
-    this.playerAnalytics.reportMetadata({
-      live: this.player.isLive,
-      contentUrl: this.getAttribute('source'),
-    });
+
+    this.player.on(PlayerEvent.LOADED_METADATA, this.metadataReporter = () => {
+      this.playerAnalytics.reportMetadata({
+        live: this.player.isLive,
+        contentUrl: this.getAttribute('source'),
+      });
+      this.player.off(PlayerEvent.LOADED_METADATA, this.metadataReporter);
+    })
   }
 
   async attributeChangedCallback(name) {

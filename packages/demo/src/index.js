@@ -108,6 +108,7 @@ async function main() {
   // const player = webplayer(root);
 
   let analyticsInitiated = false;
+  let metadataReporter;
 
   async function load() {
     try {
@@ -118,11 +119,17 @@ async function main() {
       });
       await player.load(manifestInput.value, autoplayCheckbox.checked);
       playerAnalytics.load(video);
-      playerAnalytics.reportMetadata({
-        live: player.isLive,
-        contentUrl: manifestInput.value,
+
+      player.on(PlayerEvent.LOADED_METADATA, metadataReporter = () => {
+        if (analyticsInitiated) return;
+        playerAnalytics.reportMetadata({
+          live: player.isLive,
+          contentUrl: manifestInput.value,
+        });
+        analyticsInitiated = true;
+        player.off(PlayerEvent.LOADED_METADATA, metadataReporter);
       });
-      analyticsInitiated = true;
+
     } catch (err) {
       console.error(err);
       analyticsInitiated && playerAnalytics.deinit();
