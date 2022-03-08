@@ -21,11 +21,9 @@ const isSet = (value) => value === "" || !!value;
 
 export default class PlayerComponent extends HTMLElement {
   static get observedAttributes() {
-    const dynamicAttributes = Object.values(ComponentAttribute.DYNAMIC);
-    return dynamicAttributes;
+    return Object.values(ComponentAttribute.DYNAMIC);
   };
   constructor() {
-    //Call constructor of HTMLElement
     super();
     const wrapper = this.setupDOM();
 
@@ -33,7 +31,7 @@ export default class PlayerComponent extends HTMLElement {
     const autoplay = this.getAttribute(ComponentAttribute.DYNAMIC.AUTOPLAY);
     const autoplayVisible = this.getAttribute(ComponentAttribute.STATIC.AUTOPLAY_VISIBLE);
     if (!isSet(autoplay) && isSet(autoplayVisible)) {
-      this.observer = new IntersectionObserver(this.inview.bind(this));
+      this.observer = new IntersectionObserver(this.inViewHandler.bind(this));
       this.observer.observe(this.video);
     }
 
@@ -48,17 +46,16 @@ export default class PlayerComponent extends HTMLElement {
   }
 
   setupDOM() {
-    //Attach shadow DOM
     this.attachShadow({ mode: 'open' });
     const { shadowRoot } = this;
-    //Create style and attach to shadow DOM
+
     let styleTag = document.createElement('style');
     styleTag.innerHTML = style;
     shadowRoot.appendChild(styleTag);
-    //Create wrapper and attach to shadow DOM
+
+    // We create a wrapper to put the skin along with the video element
     const wrapper = document.createElement('div');
     shadowRoot.appendChild(wrapper);
-    //Create video element and attach to shadow DOM
     this.video = document.createElement('video');
     wrapper.appendChild(this.video);
 
@@ -66,7 +63,6 @@ export default class PlayerComponent extends HTMLElement {
   }
 
   setupPlayer(wrapper) {
-    //Init player and skin
     this.player = new WebPlayer({ video: this.video });
     renderEyevinnSkin({
       root: wrapper,
@@ -76,7 +72,6 @@ export default class PlayerComponent extends HTMLElement {
   }
 
   setupAnalytics({ incognito, epasUrl }) {
-    // initiate EPAS analytics unless in incognito mode
     this.playerAnalytics = null;
     if (isSet(incognito)) {
       this.playerAnalytics = new PlayerAnalyticsConnector(epasUrl || "https://sink.epas.eyevinn.technology");
@@ -179,7 +174,7 @@ export default class PlayerComponent extends HTMLElement {
     });
   }
 
-  inview(entries) {
+  inViewHandler(entries) {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         this.video.muted = true;
@@ -193,5 +188,4 @@ export default class PlayerComponent extends HTMLElement {
     });
   }
 }
-//Register custom element
 customElements.define('eyevinn-video', PlayerComponent);
