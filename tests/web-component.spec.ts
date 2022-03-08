@@ -6,8 +6,6 @@ test('video element with correct attributes are created', async ({ page }) => {
   await expect(page.locator('eyevinn-video')).toHaveAttribute('autoplay', '');
   await expect(page.locator('video')).toHaveAttribute('autoplay', '');
   await expect(page.locator('video')).toHaveAttribute('playsinline', '');
-  await expect(page.locator('video')).toHaveCSS('width', '1264px');
-  await expect(page.locator('video')).toHaveCSS('height', '712px');
 });
 
 test('web component sends tracking events when not in incognito mode', async ({ page }) => {
