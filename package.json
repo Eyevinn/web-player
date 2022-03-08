@@ -23,6 +23,7 @@
     "video-player"
   ],
   "devDependencies": {
+    "@types/jest": "27.4.1",
     "lerna": "^3.22.1",
     "microbundle": "^0.12.4",
     "prettier": "^2.1.1",
