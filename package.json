@@ -7,7 +7,7 @@
     "dev": "lerna run dev --stream --parallel",
     "test": "lerna run test",
     "test:e2e": "playwright test",
-    "examples": "parcel -p 1234 examples/index.html",
+    "examples": "parcel -p 1234 examples/index.html --no-cache",
     "lerna:version": "lerna version --conventional-commits --no-changelog",
     "publish": "lerna publish from-package --yes --ignore-scripts --no-verify-access"
   },
