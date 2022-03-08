@@ -46,6 +46,5 @@
 }
 
 .list :checked + span {
-	color: rgba(255, 255, 255, 1);
-	text-decoration:  underline;
+	color: rgb(30, 129, 160);
 }
