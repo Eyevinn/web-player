@@ -1,6 +1,6 @@
 {
   "name": "@eyevinn/web-player-component",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": "Eyevinn Technology <work@eyevinn.se>",
   "contributors": [
     "Benjamin Wallberg <benjamin.wallberg@eyevinn.se> (Eyevinn Technology AB)",
@@ -28,7 +28,7 @@
   "dependencies": {
     "@eyevinn/player-analytics-client-sdk-web": "0.1.3",
     "@eyevinn/web-player-core": "^0.9.0",
-    "@eyevinn/web-player-eyevinn-skin": "^0.6.6"
+    "@eyevinn/web-player-eyevinn-skin": "^0.6.7"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^6.3.2",
