@@ -30,7 +30,8 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: './src/logo.png', to: 'logo.png' },
+        { from: './src/logo-darkmode.png', to: 'logo-darkmode.png' },
+        { from: './src/logo-lightmode.png', to: 'logo-lightmode.png' },
         { from: './src/style.css', to: 'style.css' },
       ],
     }),
