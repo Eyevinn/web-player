@@ -5,6 +5,9 @@ import classNames from 'classnames';
 import Timeline from './components/timeline/Timeline';
 import PlayPauseButton from './components/buttons/playPause/PlayPauseButton';
 import VolumeButton from './components/buttons/volume/VolumeButton';
+
+import VolumeControls from './components/buttons/volume/VolumeControls';
+
 import AudioTrackButton from './components/buttons/audioTrack/AudioTrackButton';
 import FullscreenButton from './components/buttons/fullscreen/FullscreenButton';
 
@@ -43,6 +46,8 @@ export default function EyevinnSkin({
 		seekByPercentage,
 		seekByChange,
 		seekToLive,
+		setVolumeByPercentage,
+		setVolumeByChange,
 	] = usePlayer(player, castAppId);
 	const [airplayAvailable, toggleAirPlay] = useAirPlay(player);
 
@@ -107,6 +112,12 @@ export default function EyevinnSkin({
 					case 'ArrowLeft':
 						seekByChange(-5);
 						break;
+					case 'ArrowUp':
+						setVolumeByChange(0.1);
+            			break;
+          			case 'ArrowDown':
+						setVolumeByChange(-0.1);
+            			break;
 				}
 			};
 			skinContainer.addEventListener('keydown', onKeyDown);
@@ -193,7 +204,7 @@ export default function EyevinnSkin({
 							onChange={changeAudioTrack}
 						/>
 					)}
-					<VolumeButton muted={state?.isMuted} onClick={toggleMute} />
+					<VolumeControls muted={state?.isMuted} onVolumeButtonClick={toggleMute} onSliderInput={setVolumeByPercentage} volume={state?.volume}></VolumeControls>
 					<FullscreenButton
 						isFullscreen={isFullscreen()}
 						onClick={toggleFullscreen}
