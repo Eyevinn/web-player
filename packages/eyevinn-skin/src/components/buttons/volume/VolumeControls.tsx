@@ -7,7 +7,7 @@ import VolumeButton from './VolumeButton';
 import VolumeSlider from './VolumeSlider';
 import Slider from './Slider';
 
-export default function VolumeControls({ muted, onVolumeButtonClick, onSliderInput, volume }) {
+export default function VolumeControls({ muted, toggleMute, onSliderInput, volume }) {
   const [showVolSlider, setShowVolSlider] = useState(false);
 
   return (
@@ -15,8 +15,8 @@ export default function VolumeControls({ muted, onVolumeButtonClick, onSliderInp
       onMouseEnter={() => setShowVolSlider(true)}
       onMouseLeave={() => setShowVolSlider(false)}
     >
-      <VolumeButton muted={muted} onClick={onVolumeButtonClick} />
-    {showVolSlider && <Slider muted={muted} onClick={onSliderInput} value={volume}></Slider> }
+      <VolumeButton muted={muted} onClick={toggleMute} />
+    {showVolSlider && <Slider muted={muted} toggleMute={toggleMute} onClick={onSliderInput} value={volume}></Slider> }
       {/* {showVolSlider && <VolumeSlider muted={muted} onInput={onSliderInput} volume={volume} />} */}
     </div>
   );

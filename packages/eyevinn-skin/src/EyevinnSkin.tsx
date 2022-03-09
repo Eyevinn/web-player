@@ -112,12 +112,18 @@ export default function EyevinnSkin({
 					case 'ArrowLeft':
 						seekByChange(-5);
 						break;
-					case 'ArrowUp':
-						setVolumeByChange(0.1);
+					case 'ArrowUp':			
+						setVolumeByChange(0.1);	
+						if(player.isMuted) {
+							toggleMute();		
+						}						
             			break;
-          			case 'ArrowDown':
-						setVolumeByChange(-0.1);
-            			break;
+          			case 'ArrowDown':						
+						setVolumeByChange(-0.1);	
+						if(player.getVolume() === 0 && !player.isMuted) {
+							toggleMute();					
+						}
+						break;
 				}
 			};
 			skinContainer.addEventListener('keydown', onKeyDown);
@@ -204,7 +210,7 @@ export default function EyevinnSkin({
 							onChange={changeAudioTrack}
 						/>
 					)}
-					<VolumeControls muted={state?.isMuted} onVolumeButtonClick={toggleMute} onSliderInput={setVolumeByPercentage} volume={state?.volume}></VolumeControls>
+					<VolumeControls muted={state?.isMuted} toggleMute={toggleMute} onSliderInput={setVolumeByPercentage} volume={state?.volume}></VolumeControls>
 					<FullscreenButton
 						isFullscreen={isFullscreen()}
 						onClick={toggleFullscreen}

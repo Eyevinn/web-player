@@ -1,3 +1,4 @@
+
 import { h } from 'preact';
 import style from './volume.module.css';
 import { useCallback, useState } from 'preact/hooks';
@@ -40,7 +41,7 @@ import classNames from 'classnames';
 //     );
 //   }
 
-export default function Slider({ muted, onClick, value }) {
+export default function Slider({ muted, onClick, toggleMute, value }) {
     const [mousePos, setMousePos] = useState(-1);
     const onMouseMove = useCallback((evt: MouseEvent) => {
       evt.preventDefault();
@@ -56,7 +57,13 @@ export default function Slider({ muted, onClick, value }) {
         onMouseMove={onMouseMove}
         onMouseLeave={onMouseLeave}
         onClick={() => {
-          if (mousePos < 0) return;
+          if (mousePos < 5 && !muted) {
+             toggleMute(); 
+            return;
+          }
+          if(mousePos > 5 && muted) {
+              toggleMute();
+          }
           onClick(mousePos);
         }}
         className={classNames(style.sliderContainer)}
