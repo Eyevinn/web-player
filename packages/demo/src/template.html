@@ -18,7 +18,10 @@
   </head>
   <body>
     <header>
-      <img src="./logo.png" />
+      <picture>
+        <source srcset="./logo-darkmode.png" media="(prefers-color-scheme: dark)">
+        <img src="./logo-lightmode.png" />
+      </picture>
       <h1>WebPlayer@<%= htmlWebpackPlugin.options.title %></h1>
     </header>
     <div id="ui-container">
