@@ -5,6 +5,8 @@ import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
 
+const EmbedVersion = "0.6.1";
+
 const ExampleStreams = [
   { title: "HLS VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/1c63bf88e2664639a6c293b4d055e6bb/ade303f83e8444d69b7658f988abb054/2a647c0cf9b7409598770b9f11799178/manifest.m3u8" },
   { title: "MPD VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/1c63bf88e2664639a6c293b4d055e6bb/64651f16da554640930b7ce2cd9f758b/66d211307b7d43d3bd515a3bfb654e1c/manifest.mpd" },
@@ -13,6 +15,7 @@ const ExampleStreams = [
   { title: "MPD LIVE", url: "https://d2fz24s2fts31b.cloudfront.net/out/v1/3b6879c0836346c2a44c9b4b33520f4e/manifest.mpd" },
   { title: "HLS LIVE SSAI", url: "https://edfaeed9c7154a20828a30a26878ade0.mediatailor.eu-west-1.amazonaws.com/v1/master/1b8a07d9a44fe90e52d5698704c72270d177ae74/AdTest/master.m3u8" }
 ];
+
 
 // Uncomment this to demo the player package
 // import webplayer from '@eyevinn/web-player';
@@ -189,7 +192,7 @@ async function main() {
   };
 
   embedButton.onclick = () => {
-    const embedString = `<script async type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@0.3.2/dist/web-player.component.js"></script>
+    const embedString = `<script async type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@${EmbedVersion}/dist/web-player.component.js"></script>
     <eyevinn-video source="${manifestInput.value}" ${autoplayCheckbox.checked ? 'muted autoplay' : ''} ></eyevinn-video>`;
     updateEmbedStatus('Copy this code ➡️');
     embedPopUp(embedString);
