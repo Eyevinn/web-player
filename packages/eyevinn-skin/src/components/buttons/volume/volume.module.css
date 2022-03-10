@@ -13,68 +13,21 @@
 	fill: rgba(255, 255, 255, 1);
 }
 
-
-.controls {
-	display: flex;
-}
-.slider {
-	height: 1.5em;
-	cursor: pointer;
-    background-color: greenyellow;
-}
-
-/* .volumeSliderWrapper {
-    cursor: pointer;
-    background-color: aqua;
-    width: 7em;
-    height:  1em;
-    position: relative;
-    margin-bottom: 0.25em;
-    margin-top: 0.25em;
-}
-
-.progress {
-    background-color: pink;
-}
-
-.knob {
-    border-radius: 50%;
-    background-color: red;
-    width: 10px;
-    height: 10px;
-} */
-
 .sliderContainer {
-    background-color: rgba(255, 255, 255, 0.3);
-    height: 7rem;
-    width: 0.6rem;
+    background-color: rgba(228, 227, 227, 0.3);
+    height: 7em;
+    width: 0.7em;
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: 0.1em;
     position: absolute;
-    bottom: 67px;
-    right: 47px;
+    bottom: 4em;
+    right: 2.8em;
     transform: rotate(180deg);
-    padding: 1px;
-    border: 1px, solid, rgba(187, 186, 186, 0.5);
+    border: 0.05em, solid, rgba(187, 186, 186, 0.5);
   }
   .sliderProgress {
     background-color: rgba(255, 255, 255, 1);
-    /* height: 0.4rem; */
-    width: 0.6rem;
-    border: 0px 1px, solid, rgba(187, 186, 186, 0.3);
-    border-radius: 2px;
+    width: 0.7em;
+    border-radius: 0.1em;
+    border-bottom: 0.05em, solid, rgba(187, 186, 186, 0.7);
   }
-
-/* .knob {
-
-    height: 1em;
-    width: 1em;
-
-
-    border-radius: 50%;
-
-
-    background-color: rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    z-index: 100;
-} */
