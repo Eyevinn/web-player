@@ -14,6 +14,7 @@ export default function VolumeSlider({ muted, onClick, toggleMute, value }) {
     setMousePos(-1);
   }, []);
   return (
+    <div class={style.sliderWrapper}>
     <div
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
@@ -39,6 +40,7 @@ export default function VolumeSlider({ muted, onClick, toggleMute, value }) {
         class={style.sliderProgress}
         style={{ height: `${muted ? 0 : value * 100}%` }}
       ></div>
+    </div>
     </div>
   );
 }
