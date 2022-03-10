@@ -38,12 +38,12 @@ export default function TextTrackButton({ textTracks = [], onChange }) {
 						<label>
 							<input
 								type="radio"
-								name="audioTrack"
+								name="textTrack"
 								value={textTrack.id}
 								checked={textTrack.enabled}
 								onClick={onRadioChange}
 							/>
-							<span>{textTrack.label || textTrack.language}</span>
+							<span>{textTrack.label || textTrack.language || "und"}</span>
 						</label>
 					</li>
 				))}

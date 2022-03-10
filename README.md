@@ -3,13 +3,73 @@ The Eyevinn WebPlayer is a simplistic video (audio is on the roadmap) player for
 The player is built using a modular approach which means that a lot of functionality is put into separate modules and can be used independently from each other, we also provide a player module that bundles it all together in a neat package.
 
 Demo: https://web.player.eyevinn.technology/
+NPM: https://www.npmjs.com/package/@eyevinn/web-player
 
 ## Development
 - `npm install`
 - `npm run dev`
 
-## Run Unit Tests
+## Run Unit and E2E Tests
 - `npm test`
+- `npm run test:e2e`
+
+## Modules
+
+| Module | Description |
+| ------ | ----------- |
+| [@eyevinn/web-player-component](https://www.npmjs.com/package/@eyevinn/web-player-component) | Eyevinn Video Web Component |
+| [@eyevinn/web-player](https://www.npmjs.com/package/@eyevinn/web-player) | Ready-to-use Javascript Web Player with support for HLS and MPEG-DASH |
+| [@eyevinn/web-player-core](https://www.npmjs.com/package/@eyevinn/web-player-core) | Core package that enables playback of HLS and MPEG-DASH on any HTMLMediaElement in any browser |
+| [@eyevinn/web-player-eyevinn-skin](https://www.npmjs.com/package/@eyevinn/web-player-eyevinn-skin) | The skin package is a simple skin written in preact for the @eyevinn/web-player, it uses material icons for all icons. |
+| [@eyevinn/web-player-cast](https://www.npmjs.com/package/@eyevinn/web-player-cast) | Provides a `CastSender` class for switching between casting & playing locally |
+| [@eyevinn/web-player-airplay](https://www.npmjs.com/package/@eyevinn/web-player-airplay) | Handle switching between airplay & local playback |
+| [@eyevinn/web-player-demo](https://www.npmjs.com/package/@eyevinn/web-player-demo) | [Demo page](https://web.player.eyevinn.technology) |
+
+### Web Player Web Component
+
+The simplest way to use the Eyevinn WebPlayer is to use the `<eyevinn-video>` web component.
+
+```html
+<script async type="text/javascript" src="https://unpkg.com/@eyevinn/web-player-component@latest/dist/web-player.component.js"></script>
+<eyevinn-video source="https://lab.cdn.eyevinn.technology/VINN-OpbZjryxa3.mp4/manifest.m3u8" starttime="30" muted autoplay></eyevinn-video>
+```
+
+### Web Player Javascript
+
+Download the latest release of this package from [jsdelivr](https://registry.npmjs.org/@eyevinn/web-player/-/web-player-0.7.6.tgz) and include the javascript & css files in your HTML.
+
+The snippet below shows an example on how to implement the player
+
+```html
+<html>
+<head>
+  <!-- Eyevinn WebPlayer CSS -->
+  <link rel="stylesheet" href="webplayer.css"></link>
+</head>
+<body>
+  <!-- The element where the player will be placed -->
+  <div id="player-wrapper"></div>
+
+  <!-- Eyevinn WebPlayer Javascript -->
+  <script src="webplayer.min.js" type="text/javascript"></script>
+
+  <!-- Initiate the player and auto-play (if allowed by browser) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function(event) {
+      const player = webplayer(document.querySelector("#player-wrapper"));
+      player.load(src).then(function() {
+        player.play();
+      });
+    });
+  </script>
+</body>
+</html>
+```
+
+### Web Player Core Component
+
+This is the Core package of the `@eyevinn/web-player`, this package enables playback of HLS and MPEG-DASH on any HTMLMediaElement in any browser. It automagically detects what type of manifest the src is and selects the best underlying open-source or native tech to use. This package can be used without any of the other packages from the `@eyevinn/web-player`.
+
 
 ## Authors
 
@@ -19,6 +79,7 @@ This open source project is maintained by Eyevinn Technology
 
 - Benjamin Wallberg (benjamin.wallberg@eyevinn.se)
 - Jonas Birmé (jonas.birme@eyevinn.se)
+- Erik Hoffman (erik.hoffman@eyevinn.se)
 
 You are welcome to either contribute to this project or spin-off a fork of your own. This code is released under the Apache 2.0 license.
 

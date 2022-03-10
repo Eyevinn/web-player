@@ -43,9 +43,9 @@
 
 .list label span {
 	color: rgba(255, 255, 255, 0.8);
+	cursor: pointer;
 }
 
 .list :checked + span {
-	color: rgba(255, 255, 255, 1);
-	text-decoration:  underline;
+	color: rgb(30, 129, 160);
 }
