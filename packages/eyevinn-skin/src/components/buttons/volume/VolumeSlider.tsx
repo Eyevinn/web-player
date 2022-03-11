@@ -20,7 +20,7 @@ export default function VolumeSlider({ muted, onClick, toggleMute, value }) {
       onMouseLeave={onMouseLeave}
       onClick={() => {
         let newVolumePercentage = mousePos < 5 ? 0 : mousePos > 95 ? 100: mousePos;
-        if((muted && newVolumePercentage) || (!muted && !newVolumePercentage)) {
+        if((muted && newVolumePercentage > 0) || (!muted && newVolumePercentage === 0)) {
           toggleMute();
         }
         onClick(newVolumePercentage);
