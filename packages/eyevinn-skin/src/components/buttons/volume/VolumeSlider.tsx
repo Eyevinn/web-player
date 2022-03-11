@@ -7,7 +7,7 @@ export default function VolumeSlider({ muted, onClick, toggleMute, value }) {
   const onMouseMove = useCallback((evt: MouseEvent) => {
     evt.preventDefault();
     const height = (evt.currentTarget as HTMLDivElement).offsetHeight;
-    setMousePos(evt.offsetY / height * 100);
+    setMousePos(100 - evt.offsetY / height * 100);
   }, []);
   const onMouseLeave = useCallback((evt: MouseEvent) => {
     evt.preventDefault();
