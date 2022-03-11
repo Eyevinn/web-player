@@ -31,7 +31,7 @@ function VolumeMute() {
 
 export default function VolumeButton({ muted, onClick }) {
 	return (
-		<div class={style.container} onClick={onClick}>
+		<div class={style.volumeButtonContainer} onClick={onClick}>
 			{muted ? <VolumeMute /> : <VolumeUp />}
 		</div>
 	);

@@ -115,6 +115,14 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		[player]
 	);
 	const seekToLive = useCallback(() => player.seekToLive(), [player]);
+	const setVolumeByPercentage = useCallback(
+		(percentage: number) => player.setVolume({ percentage }),
+		[player]
+	);
+	const setVolumeByChange = useCallback(
+		(change: number) => player.setVolume({ change }),
+		[player]
+	);
 
 	return [
 		ready,
@@ -126,6 +134,8 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		seekByPercentage,
 		seekByChange,
 		seekToLive,
+		setVolumeByPercentage,
+		setVolumeByChange
 	];
 }
 
