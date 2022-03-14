@@ -9,17 +9,24 @@ export default function VolumeControls({
   onSliderInput,
   volume,
 }) {
+  const isMobile =
+    /iPhone|iPod|iPad|Android/.test(navigator.userAgent) ||
+    (/Macintosh/.test(navigator.userAgent) &&
+      'ontouchstart' in document.documentElement)
+      ? true
+      : false;
+
   return (
-    <div
-      class={style.controls}
-    >
-      <VolumeButton muted={muted} onClick={toggleMute} />     
+    <div class={style.controls}>
+      <VolumeButton muted={muted} onClick={toggleMute} />
+      {!isMobile && (
         <VolumeSlider
           muted={muted}
           toggleMute={toggleMute}
           onClick={onSliderInput}
           value={volume}
-        ></VolumeSlider>      
+        />
+      )}
     </div>
   );
 }
