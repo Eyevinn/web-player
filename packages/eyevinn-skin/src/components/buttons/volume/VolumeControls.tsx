@@ -9,12 +9,12 @@ export default function VolumeControls({
   onSliderInput,
   volume,
 }) {
-  const isMobile = /iPhone|iPod|iPad|Android/.test(navigator.userAgent)
-    ? true
-    : /Macintosh/.test(navigator.userAgent) &&
-      'ontouchstart' in document.documentElement
-    ? true
-    : false;
+  const isMobile =
+    /iPhone|iPod|iPad|Android/.test(navigator.userAgent) ||
+    (/Macintosh/.test(navigator.userAgent) &&
+      'ontouchstart' in document.documentElement)
+      ? true
+      : false;
 
   return (
     <div class={style.controls}>
