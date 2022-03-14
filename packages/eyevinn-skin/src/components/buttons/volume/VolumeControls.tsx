@@ -1,5 +1,4 @@
 import { h } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
 import style from './volume.module.css';
 import VolumeButton from './VolumeButton';
 import VolumeSlider from './VolumeSlider';
@@ -10,16 +9,13 @@ export default function VolumeControls({
   onSliderInput,
   volume,
 }) {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    if (
-      /iPhone|iPod|iPad|Android/.test(navigator.userAgent) ||
-      (/Macintosh/.test(navigator.userAgent) &&
-        'ontouchstart' in document.documentElement)
-    ) {
-      setIsMobile(true);
-    }
-  }, []);
+  const isMobile = /iPhone|iPod|iPad|Android/.test(navigator.userAgent)
+    ? true
+    : /Macintosh/.test(navigator.userAgent) &&
+      'ontouchstart' in document.documentElement
+    ? true
+    : false;
+
   return (
     <div class={style.controls}>
       <VolumeButton muted={muted} onClick={toggleMute} />
