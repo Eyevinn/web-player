@@ -26,12 +26,6 @@
     </header>
     <div id="ui-container">
       <section id="example-streams"></section>
-      <div id="snackbar">
-        <button id="snackbar-close-button" type="button">
-          &times;
-        </button>
-        <span id="embed-code"></span>
-      </div>
       <section class="input-section">
         <input
           type="text"
@@ -40,13 +34,13 @@
           placeholder="Paste a Stream URI Here..."
         />
         <div class="input-buttons">
-          <button id="load-button">LOAD</button>
-          <div>
+          <button class="input-button" id="load-button">LOAD</button>
+          <div class="autoplay-wrapper">
             <input type="checkbox" name="autoplay" id="autoplay" />
             <label for="autoplay">Autoplay</label>
           </div>
-          <button id="share-button">Share 📋</button>
-          <button id="embed-button">Embed 📋</button>
+          <button class="input-button" id="share-button">Share 📋</button>
+          <button class="input-button" id="embed-button">Embed 📋</button>
         </div>
       </section>
       <div id="player"></div>
@@ -56,6 +50,12 @@
           Video Quality
           <option value="-1">AUTO</option>
         </select>
+      </div>
+      <div id="snackbar">
+        <button id="snackbar-close-button" type="button">
+          &times;
+        </button>
+        <span id="embed-code"></span>
       </div>
     </div>
   </body>
