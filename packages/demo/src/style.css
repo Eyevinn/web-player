@@ -24,7 +24,6 @@ video {
 .input-buttons {
 	display: flex;
 	justify-content: space-between;
-	float: left;
 	flex-wrap: wrap;
 }
 
@@ -33,8 +32,6 @@ video {
 	flex-direction: row;
 	justify-content: center;
 	align-items: center;
-	border-radius: 0.2em;
-	min-width: 5em;
 }
 
 .input-section .input-buttons .input-button, .input-section .input-buttons .autoplay-wrapper {
@@ -44,14 +41,20 @@ video {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	min-width: 5.5em;
 }
 
-@media (max-width: 750px) {
+@media (max-width: 790px) {
 	.input-section .input-buttons .input-button, .input-section .input-buttons .autoplay-wrapper {
-		width: 45%;
+		width: 47%;
 	}
 }
-@media (max-width: 500px) {
+@media (max-width: 615px) {
+	.input-section .input-buttons .input-button, .input-section .input-buttons .autoplay-wrapper {
+		width: 44%;
+	}
+}
+@media (max-width: 340px) {
 	.input-section .input-buttons .input-button, .input-section .input-buttons .autoplay-wrapper {
 		width: 100%;
 		height: 2.15em;
