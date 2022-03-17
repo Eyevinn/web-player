@@ -166,8 +166,10 @@ async function main() {
     ExampleStreams.forEach(async (exampleStream) => {
 
       const manifestType = await getManifestType(exampleStream.url);
-      const supportedManifestType = canPlayManifestType(manifestType);
-      if (/iPhone|iPad|macOS/.test(navigator.userAgent) && !supportedManifestType) return false;
+      const nativelySupportedManifestType = canPlayManifestType(manifestType);
+      const isIOS = /iPhone|iPod/.test(navigator.userAgent);
+      const isIPadOS = /iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && "ontouchstart" in document.documentElement);
+      if ((isIOS || isIPadOS) && !nativelySupportedManifestType) return false;
 
       const btn = document.createElement("button");
       btn.innerHTML = exampleStream.title;
