@@ -163,13 +163,13 @@ async function main() {
 
   async function renderExampleButtons() {
     const buttonContainer = document.querySelector('#example-streams');
+    const isIOS = /iPhone|iPod/.test(navigator.userAgent);
+    const isIPadOS = /iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document.documentElement);
 
     const playableStreams = await Promise.all(
       ExampleStreams.map(async (exampleStream) => {
         const manifestType = await getManifestType(exampleStream.url);
         const nativelySupportedManifestType = canPlayManifestType(manifestType);
-        const isIOS = /iPhone|iPod/.test(navigator.userAgent);
-        const isIPadOS = /iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document.documentElement);
         return (isIOS || isIPadOS) && !nativelySupportedManifestType ? false : exampleStream;
       })
     );
