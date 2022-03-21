@@ -162,18 +162,29 @@ async function main() {
   }
 
   async function renderExampleButtons() {
-    const buttonContainer = document.querySelector("#example-streams");
-    ExampleStreams.forEach(async (exampleStream) => {
-
+    const buttonContainer = document.querySelector('#example-streams'); 
+    
+    const playableStreams = await Promise.all(ExampleStreams.map(async (exampleStream) => {
       const manifestType = await getManifestType(exampleStream.url);
-      const supportedManifestType = canPlayManifestType(manifestType);
-      if (/iPhone|iPad|macOS/.test(navigator.userAgent) && !supportedManifestType) return false;
+          const supportedManifestType = canPlayManifestType(manifestType); 
+          return (/iPhone|iPod|iPad/.test(navigator.userAgent) ||
+                  (/Macintosh/.test(navigator.userAgent) &&
+                    'ontouchstart' in document.documentElement)) &&
+                !supportedManifestType
+                    ? false
+                    : exampleStream;
+    }));
 
-      const btn = document.createElement("button");
+    playableStreams.forEach(exampleStream => {
+      if(!exampleStream) {
+        return
+      }
+      
+      const btn = document.createElement('button');
       btn.innerHTML = exampleStream.title;
       buttonContainer.appendChild(btn);
 
-      btn.addEventListener("click", async () => {
+      btn.addEventListener('click', async () => {
         manifestInput.value = exampleStream.url;
         await load();
         resetEmbed();
