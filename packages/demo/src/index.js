@@ -162,24 +162,23 @@ async function main() {
   }
 
   async function renderExampleButtons() {
-    const buttonContainer = document.querySelector('#example-streams'); 
-    
-    const playableStreams = await Promise.all(ExampleStreams.map(async (exampleStream) => {
-      const manifestType = await getManifestType(exampleStream.url);
-          const supportedManifestType = canPlayManifestType(manifestType); 
-          return (/iPhone|iPod|iPad/.test(navigator.userAgent) ||
-                  (/Macintosh/.test(navigator.userAgent) &&
-                    'ontouchstart' in document.documentElement)) &&
-                !supportedManifestType
-                    ? false
-                    : exampleStream;
-    }));
+    const buttonContainer = document.querySelector('#example-streams');
 
-    playableStreams.forEach(exampleStream => {
-      if(!exampleStream) {
-        return
+    const playableStreams = await Promise.all(
+      ExampleStreams.map(async (exampleStream) => {
+        const manifestType = await getManifestType(exampleStream.url);
+        const nativelySupportedManifestType = canPlayManifestType(manifestType);
+        const isIOS = /iPhone|iPod/.test(navigator.userAgent);
+        const isIPadOS = /iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document.documentElement);
+        return (isIOS || isIPadOS) && !nativelySupportedManifestType ? false : exampleStream;
+      })
+    );
+
+    playableStreams.forEach((exampleStream) => {
+      if (!exampleStream) {
+        return;
       }
-      
+
       const btn = document.createElement('button');
       btn.innerHTML = exampleStream.title;
       buttonContainer.appendChild(btn);
