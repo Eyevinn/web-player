@@ -134,12 +134,11 @@ async function main() {
         player.off(PlayerEvent.LOADED_METADATA, metadataReporter);
       });
 
+      populateQualityPicker();
     } catch (err) {
       console.error(err);
       analyticsInitiated && playerAnalytics.deinit();
     }
-
-    populateQualityPicker();
   }
 
   function populateQualityPicker() {

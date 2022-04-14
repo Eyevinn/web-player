@@ -38,7 +38,7 @@ describe("content type utils", () => {
     expect(await getManifestType("manifest.mpd")).toEqual(ManifestType.DASH);
     setupContentTypeResponseMock("");
     expect(await getManifestType("/Manifest")).toEqual(ManifestType.MSS);
-    setupContentTypeResponseMock("application/octet-stream");
+    setupContentTypeResponseMock("");
     expect(await getManifestType("/manifest")).toEqual(ManifestType.MSS);
 
     // If it can't be decided we should get unknown
