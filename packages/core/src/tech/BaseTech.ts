@@ -374,7 +374,7 @@ export default class BaseTech extends EventEmitter {
     });
   }
 
-  setDefaultState() {
+  setDefaultState(defaultState?: Partial<IPlayerState>) {
     this.updateState({
       playbackState: PlaybackState.LOADING,
       currentTime: 0,
@@ -385,7 +385,8 @@ export default class BaseTech extends EventEmitter {
       isMuted: this.video.muted,
       audioTracks: [],
       textTracks: [],
-      volume: this.video.volume
+      volume: this.video.volume,
+      ...defaultState
     });
   }
 

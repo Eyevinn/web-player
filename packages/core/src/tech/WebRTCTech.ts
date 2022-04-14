@@ -13,8 +13,7 @@ export default class WebRTCTech extends BaseTech {
   }
 
   load(src: string): Promise<void> {
-    super.setDefaultState();
-    this.updateState({
+    super.setDefaultState({
       isSeekable: false
     });
     return this.player.load(new URL(src));
