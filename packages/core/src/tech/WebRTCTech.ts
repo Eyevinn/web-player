@@ -29,7 +29,7 @@ export default class WebRTCTech extends BaseTech {
   }
 
   destroy() {
-    this.player = null;
+    this.player.destroy();
     super.destroy();
   }
 }
