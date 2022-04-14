@@ -5,30 +5,33 @@ import type { IPlayerState } from '@eyevinn/web-player-core';
 const LIVE_EDGE = 20; // seconds from edge considered live
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
+let castInitPromise: Promise<void>;
 export function initializeCast(
   appId?: string,
   autoJoinPolicy?: chrome.cast.AutoJoinPolicy
 ) {
-  return new Promise((resolve, reject) => {
-    window['__onGCastApiAvailable'] = (isAvailable) => {
-      if (isAvailable) {
-        cast.framework.CastContext.getInstance().setOptions({
-          receiverApplicationId:
-            appId || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-          autoJoinPolicy:
-            autoJoinPolicy || chrome.cast.AutoJoinPolicy.PAGE_SCOPED,
-        });
-        resolve();
-      } else {
-        reject(new Error('[Cast] not available'));
-      }
-    };
+  return castInitPromise
+    ? castInitPromise
+    : (castInitPromise = new Promise((resolve, reject) => {
+        window['__onGCastApiAvailable'] = (isAvailable) => {
+          if (isAvailable) {
+            cast.framework.CastContext.getInstance().setOptions({
+              receiverApplicationId:
+                appId || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+              autoJoinPolicy:
+                autoJoinPolicy || chrome.cast.AutoJoinPolicy.PAGE_SCOPED,
+            });
+            resolve();
+          } else {
+            reject(new Error('[Cast] not available'));
+          }
+        };
 
-    const castScript = document.createElement('script');
-    castScript.src =
-      '//www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
-    document.body.appendChild(castScript);
-  });
+        const castScript = document.createElement('script');
+        castScript.src =
+          '//www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1';
+        document.body.appendChild(castScript);
+      }));
 }
 
 export enum CastSenderEvent {
