@@ -1,8 +1,9 @@
 export enum ManifestType {
-	UNKNOWN,
-	HLS,
-	DASH,
-	MSS,
+	UNKNOWN = "UNKNOWN",
+	HLS = "HLS",
+	DASH = "DASH",
+	MSS = "MSS",
+	WEBRTC = "WEBRTC"	
 }
 
 export enum ErrorCode {

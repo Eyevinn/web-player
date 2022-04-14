@@ -11,6 +11,7 @@ import {
 	PlayerEvent,
 	IPlayerState,
 	PlaybackState,
+	ManifestType,
 } from '@eyevinn/web-player-core';
 import type WebPlayer from '@eyevinn/web-player-core';
 
@@ -23,10 +24,17 @@ export function useCastSender(
 	castAppId?: string
 ): [CastSender, ISkinState] {
 	const [state, setState] = useState<ISkinState>(null);
-	const castSender = useMemo(
-		() => castAppId !== null && new CastSender(castAppId),
-		[]
-	);
+	const [castSender, setCastSender] = useState<CastSender>(null);
+
+	useEffect(() => {
+		const onReady = () => {
+			if (castAppId !== null && player.manifestType !== ManifestType.WEBRTC) {
+				setCastSender(new CastSender(castAppId));
+			}
+		};
+		player.on(PlayerEvent.READY, onReady);
+		return () => player.off(PlayerEvent.READY, onReady);
+	}, []);
 
 	const castStateRef = useRef<ISkinState>(null);
 	castStateRef.current = state;
@@ -49,7 +57,8 @@ export function useCastSender(
 				});
 			});
 		}
-	}, []);
+	}, [castSender]);
+
 	return [castSender, state];
 }
 
@@ -135,7 +144,7 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		seekByChange,
 		seekToLive,
 		setVolumeByPercentage,
-		setVolumeByChange
+		setVolumeByChange,
 	];
 }
 

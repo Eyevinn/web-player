@@ -17,7 +17,8 @@ export default class WebPlayer extends EventEmitter {
   private tech: BaseTech;
 
   public video: HTMLVideoElement;
-  public currentSrc: string;
+  public currentSrc?: string;
+  public manifestType: ManifestType = ManifestType.UNKNOWN;
 
   constructor({ video }: IWebPlayerOptions) {
     super();
@@ -35,6 +36,7 @@ export default class WebPlayer extends EventEmitter {
     this.currentSrc = src;
 
     const manifestType = await getManifestType(src);
+    this.manifestType = manifestType;
     if (manifestType === ManifestType.UNKNOWN) {
       throw { errorCode: ErrorCode.UNKNOWN_MANIFEST_TYPE };
     }
@@ -52,6 +54,9 @@ export default class WebPlayer extends EventEmitter {
         break;
       case ManifestType.MSS:
         Tech = (await import('./tech/DashJsTech')).default;
+        break;
+      case ManifestType.WEBRTC:
+        Tech = (await import('./tech/WebRTCTech')).default;
         break;
     }
     this.tech = new Tech({ video: this.video });
