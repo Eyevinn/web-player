@@ -8,7 +8,7 @@ const CONTENT_TYPE_MAP = {
   'application/dash+xml': ManifestType.DASH,
   'application/vnd.apple.mpegurl;charset=UTF-8': ManifestType.HLS,
   'application/vnd.ms-sstr+xml': ManifestType.MSS,
-  'application/json': ManifestType.WEBRTC,
+  'application/json': ManifestType.EYEVINN_WEBRTC_CHANNEL,
 };
 
 export const MANIFEST_TYPE_MAP = {

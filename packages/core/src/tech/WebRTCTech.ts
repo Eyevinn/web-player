@@ -8,6 +8,7 @@ export default class WebRTCTech extends BaseTech {
     super(opts);
     this.player = new WebRTCPlayer({
       video: this.video,
+      // hardcoded to EYEVINN_WEBRTC_CHANNEL for now.
       type: "se.eyevinn.webrtc"
     });
   }

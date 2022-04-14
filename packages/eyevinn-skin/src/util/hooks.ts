@@ -28,7 +28,7 @@ export function useCastSender(
 
 	useEffect(() => {
 		const onReady = () => {
-			if (castAppId !== null && player.manifestType !== ManifestType.WEBRTC) {
+			if (castAppId !== null && player.manifestType !== ManifestType.EYEVINN_WEBRTC_CHANNEL) {
 				setCastSender(new CastSender(castAppId));
 			}
 		};

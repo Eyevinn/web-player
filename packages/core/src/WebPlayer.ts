@@ -55,7 +55,7 @@ export default class WebPlayer extends EventEmitter {
       case ManifestType.MSS:
         Tech = (await import('./tech/DashJsTech')).default;
         break;
-      case ManifestType.WEBRTC:
+      case ManifestType.EYEVINN_WEBRTC_CHANNEL:
         Tech = (await import('./tech/WebRTCTech')).default;
         break;
     }

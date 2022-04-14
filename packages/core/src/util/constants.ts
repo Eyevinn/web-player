@@ -3,7 +3,7 @@ export enum ManifestType {
 	HLS = "HLS",
 	DASH = "DASH",
 	MSS = "MSS",
-	WEBRTC = "WEBRTC"	
+	EYEVINN_WEBRTC_CHANNEL = "EYEVINN_WEBRTC_CHANNEL"	
 }
 
 export enum ErrorCode {
