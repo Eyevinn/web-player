@@ -1,6 +1,6 @@
 import { MediaPlayer, MediaPlayerClass } from 'dashjs';
 import { PlayerEvent } from '../util/constants';
-import BaseTech, { IBaseTechOptions, PlaybackState } from './BaseTech';
+import BaseTech, { IBaseTechOptions } from './BaseTech';
 import WebRTCTech from './WebRTCTech';
 
 export default class MssPlayer extends BaseTech {
@@ -16,47 +16,53 @@ export default class MssPlayer extends BaseTech {
     this.mediaPlayer.attachView(this.video);
   }
 
-  private doRTCMagic(mpd: any) {
-    const periods = mpd?.manifest?.Period_asArray;
+  private doRTCMagic(manifest: any) {
+    const periods = manifest?.Period_asArray;
     if (periods.length === 1) {
-      const rtcAdaptionSet = periods[0].AdaptationSet?.find(
-        (adaptionSet) =>
-          adaptionSet['xlink:rel'] ===
-          'urn:ietf:params:whip:eyevinn-wrtc-channel'
-      );
-      if (rtcAdaptionSet) {
-        this.startWebRTC(rtcAdaptionSet["xlink:href"]);
+      if (
+        periods[0]['xlink:rel'] === 'urn:ietf:params:whip:eyevinn-wrtc-channel'
+      ) {
+        this.startWebRTC(periods[0]['xlink:href']);
+      } else if (periods[0].AdaptationSet) {
+        const rtcAdaptionSet = periods[0].AdaptationSet_asArray?.find(
+          (adaptionSet) =>
+            adaptionSet['xlink:rel'] ===
+            'urn:ietf:params:whip:eyevinn-wrtc-channel'
+        );
+        if (rtcAdaptionSet) {
+          this.startWebRTC(rtcAdaptionSet['xlink:href']);
+        }
       }
     } else {
       let start = 0;
-      const rtcPeriod = periods?.find(
-        (period) => {
-          const isRtcChannel = period['xlink:rel'] ===
-          'urn:ietf:params:whip:eyevinn-wrtc-channel'
-          if (!isRtcChannel) {
-            start += period.duration;
-          }
-          return isRtcChannel;
+      const rtcPeriod = periods?.find((period) => {
+        const isRtcChannel =
+          period['xlink:rel'] === 'urn:ietf:params:whip:eyevinn-wrtc-channel';
+        if (!isRtcChannel) {
+          start += period.duration;
         }
-      );
+        return isRtcChannel;
+      });
 
       this.webRTCPeriod = {
         start,
-        channel: rtcPeriod["xlink:href"]
-      }
+        channel: rtcPeriod['xlink:href'],
+      };
     }
   }
 
   private startWebRTC(channel) {
-    if (this.webRTCPeriod) {
-        this.mediaPlayer.reset();
-        this.setDefaultState();
+    if (channel) {
+      this.mediaPlayer.reset();
+      this.setDefaultState();
 
-        this.webRTCTech = new WebRTCTech({
-          video: this.video,
-        });
-        this.webRTCTech.load(channel);
-        this.webRTCTech.once(PlayerEvent.LOADED_METADATA, () => this.webRTCTech.play())
+      this.webRTCTech = new WebRTCTech({
+        video: this.video,
+      });
+      this.webRTCTech.load(channel);
+      this.webRTCTech.once(PlayerEvent.LOADED_METADATA, () =>
+        this.webRTCTech.play()
+      );
     }
   }
 
@@ -64,12 +70,9 @@ export default class MssPlayer extends BaseTech {
     super.setDefaultState();
     return new Promise((resolve, reject) => {
       this.mediaPlayer.attachSource(src);
-      this.mediaPlayer.on(MediaPlayer.events.MANIFEST_LOADED, () => {
+      this.mediaPlayer.on(MediaPlayer.events.MANIFEST_LOADED, ({ data }) => {
+        this.doRTCMagic(data);
         resolve();
-      });
-      this.mediaPlayer.on(MediaPlayer.events.PLAYBACK_LOADED_DATA, () => {
-        const mpd = this.mediaPlayer.getDashAdapter().getMpd() as any;
-        this.doRTCMagic(mpd);
       });
       this.mediaPlayer.on(MediaPlayer.events.ERROR, (ev) => {
         reject(`Failed to load Mss Player`);
@@ -78,7 +81,10 @@ export default class MssPlayer extends BaseTech {
   }
 
   onTimeUpdate() {
-    if (this.webRTCPeriod && this.video.currentTime >= this.webRTCPeriod?.start - 1) {
+    if (
+      this.webRTCPeriod &&
+      this.video.currentTime >= this.webRTCPeriod?.start - 1
+    ) {
       this.startWebRTC(this.webRTCPeriod.channel);
       this.webRTCPeriod = null;
       return;
