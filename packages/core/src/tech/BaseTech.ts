@@ -6,7 +6,6 @@ const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on liv
 
 export interface IBaseTechOptions {
   video: HTMLVideoElement;
-  src: string;
 }
 
 export interface ITrack {

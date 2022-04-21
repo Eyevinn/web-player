@@ -40,6 +40,7 @@ export default class WebPlayer extends EventEmitter {
     if (manifestType === ManifestType.UNKNOWN) {
       throw { errorCode: ErrorCode.UNKNOWN_MANIFEST_TYPE };
     }
+    console.log("bwallberg manifestType", manifestType)
     let Tech;
     switch (manifestType) {
       case ManifestType.HLS:
@@ -50,7 +51,7 @@ export default class WebPlayer extends EventEmitter {
         }
         break;
       case ManifestType.DASH:
-        Tech = (await import('./tech/ShakaTech')).default;
+        Tech = (await import('./tech/DashJsTech')).default;
         break;
       case ManifestType.MSS:
         Tech = (await import('./tech/DashJsTech')).default;
