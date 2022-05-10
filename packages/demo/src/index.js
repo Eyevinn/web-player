@@ -5,7 +5,7 @@ import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
 
-const EmbedVersion = "0.6.1";
+const EmbedVersion = "0.6.5";
 
 const ExampleStreams = [
   { title: "HLS VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/1c63bf88e2664639a6c293b4d055e6bb/ade303f83e8444d69b7658f988abb054/2a647c0cf9b7409598770b9f11799178/manifest.m3u8" },
