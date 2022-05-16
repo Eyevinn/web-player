@@ -9,6 +9,7 @@ const CONTENT_TYPE_MAP = {
   'application/vnd.apple.mpegurl;charset=UTF-8': ManifestType.HLS,
   'application/vnd.ms-sstr+xml': ManifestType.MSS,
   'application/json': ManifestType.EYEVINN_WEBRTC_CHANNEL,
+  'application/whpp+json': ManifestType.EYEVINN_WHPP_CHANNEL,
 };
 
 export const MANIFEST_TYPE_MAP = {

@@ -36,6 +36,7 @@ export default class WebPlayer extends EventEmitter {
     this.currentSrc = src;
 
     const manifestType = await getManifestType(src);
+    console.log(manifestType);
     this.manifestType = manifestType;
     if (manifestType === ManifestType.UNKNOWN) {
       throw { errorCode: ErrorCode.UNKNOWN_MANIFEST_TYPE };
@@ -57,6 +58,9 @@ export default class WebPlayer extends EventEmitter {
         break;
       case ManifestType.EYEVINN_WEBRTC_CHANNEL:
         Tech = (await import('./tech/WebRTCTech')).default;
+        break;
+      case ManifestType.EYEVINN_WHPP_CHANNEL:
+        Tech = (await import('./tech/WHPPTech')).default;
         break;
     }
     this.tech = new Tech({ video: this.video });
