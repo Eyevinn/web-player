@@ -36,7 +36,6 @@ export default class WebPlayer extends EventEmitter {
     this.currentSrc = src;
 
     const manifestType = await getManifestType(src);
-    console.log(manifestType);
     this.manifestType = manifestType;
     if (manifestType === ManifestType.UNKNOWN) {
       throw { errorCode: ErrorCode.UNKNOWN_MANIFEST_TYPE };
