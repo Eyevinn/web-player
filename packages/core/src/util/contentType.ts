@@ -18,9 +18,13 @@ export const MANIFEST_TYPE_MAP = {
 };
 
 export function canPlayManifestType(manifestType: ManifestType): boolean {
-  return !!document
-    .createElement('video')
-    .canPlayType(MANIFEST_TYPE_MAP[manifestType]);
+  if (manifestType === ManifestType.EYEVINN_WEBRTC_CHANNEL) {
+    return !!window.RTCPeerConnection;
+  } else {
+    return !!document
+      .createElement('video')
+      .canPlayType(MANIFEST_TYPE_MAP[manifestType]);
+  }
 }
 
 export function getManifestType(uri): Promise<ManifestType> {
