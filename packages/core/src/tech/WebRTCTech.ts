@@ -1,6 +1,8 @@
 import { WebRTCPlayer } from '@eyevinn/webrtc-player';
 import BaseTech, { IBaseTechOptions } from './BaseTech';
 
+// Deprecated and will be removed soon in favour of WHPPTech
+// Kept for backward compat
 export default class WebRTCTech extends BaseTech {
   private player: WebRTCPlayer;
 
