@@ -31,15 +31,17 @@
     "@eyevinn/web-player-eyevinn-skin": "^0.8.2"
   },
   "devDependencies": {
+    "buffer": "^6.0.3",
     "copy-webpack-plugin": "^6.3.2",
     "css-loader": "^4.3.0",
     "html-webpack-plugin": "^4.5.0",
     "mini-css-extract-plugin": "^0.11.2",
     "source-map-loader": "^1.1.2",
+    "stream-browserify": "^3.0.0",
     "style-loader": "^1.2.1",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.3"
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.9.0"
   },
   "publishConfig": {
     "access": "public"
