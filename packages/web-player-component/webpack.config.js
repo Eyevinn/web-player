@@ -33,7 +33,7 @@ module.exports = {
   ],
   devtool: 'source-map',
   devServer: {
-    contentBase: './src',
+    static: path.resolve(__dirname, 'dist'),
     compress: true,
     port: 1338,
     host: '0.0.0.0',
@@ -41,4 +41,10 @@ module.exports = {
   stats: {
     warningsFilter: [/Failed to parse source map/],
   },
+  resolve: {
+    fallback: {
+      buffer: require.resolve("buffer/"),
+      stream: require.resolve("stream-browserify")
+    }
+  }
 };

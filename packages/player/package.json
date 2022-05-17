@@ -33,10 +33,12 @@
     "@eyevinn/web-player-eyevinn-skin": "^0.8.2"
   },
   "devDependencies": {
+    "buffer": "^6.0.3",
     "css-loader": "^4.3.0",
     "mini-css-extract-plugin": "^0.11.2",
-    "webpack": "^4.44.2",
-    "webpack-cli": "^3.3.12"
+    "stream-browserify": "^3.0.0",
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2"
   },
   "publishConfig": {
     "access": "public"
