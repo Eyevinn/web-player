@@ -1,17 +1,14 @@
 import { WebRTCPlayer } from '@eyevinn/webrtc-player';
 import BaseTech, { IBaseTechOptions } from './BaseTech';
 
-// Deprecated and will be removed soon in favour of WHPPTech
-// Kept for backward compat
-export default class WebRTCTech extends BaseTech {
+export default class WHPPTech extends BaseTech {
   private player: WebRTCPlayer;
 
   constructor(opts: IBaseTechOptions) {
     super(opts);
     this.player = new WebRTCPlayer({
       video: this.video,
-      // hardcoded to EYEVINN_WEBRTC_CHANNEL for now.
-      type: "se.eyevinn.webrtc"
+      type: "se.eyevinn.whpp"
     });
   }
 

@@ -1,9 +1,13 @@
-// Comment out these imports if you want to demo the player package
 import WebPlayer, { PlayerEvent, getManifestType, canPlayManifestType } from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
+
+// Uncomment this to demo the player package
+// NOTE! you must also comment out some code in main()
+// import webplayer from '@eyevinn/web-player';
+// import '@eyevinn/web-player/dist/webplayer.css';
 
 const EmbedVersion = "0.6.5";
 
@@ -18,9 +22,6 @@ const ExampleStreams = [
 ];
 
 
-// Uncomment this to demo the player package
-// import webplayer from '@eyevinn/web-player';
-// import '@eyevinn/web-player/dist/webplayer.css';
 
 function isClipboardAvailable() {
   return !!navigator.clipboard;

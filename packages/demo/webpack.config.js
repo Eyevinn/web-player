@@ -36,9 +36,15 @@ module.exports = {
       ],
     }),
   ],
+  resolve: {
+    fallback: {
+      buffer: require.resolve("buffer/"),
+      stream: require.resolve("stream-browserify")
+    }
+  },
   devtool: 'source-map',
   devServer: {
-    contentBase: './src',
+    static: path.resolve(__dirname, 'dist'),
     compress: true,
     port: 1337,
     host: '0.0.0.0',
