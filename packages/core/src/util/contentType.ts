@@ -19,7 +19,9 @@ export const MANIFEST_TYPE_MAP = {
 };
 
 export function canPlayManifestType(manifestType: ManifestType): boolean {
-  if (manifestType === ManifestType.EYEVINN_WEBRTC_CHANNEL) {
+  if (manifestType === ManifestType.EYEVINN_WEBRTC_CHANNEL || 
+      manifestType === ManifestType.EYEVINN_WHPP_CHANNEL) 
+  {
     return !!window.RTCPeerConnection;
   } else {
     return !!document
