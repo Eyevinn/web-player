@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Chaos Stream Proxy Dash</title>
+  <script async src="../../packages/web-player-component/dist/web-player.component.js"></script>
+</head>
+<body>
+  <!-- VOD: With segment delay of 1500ms and response code 400 on sixth (response of 400 will be sent after 1500ms): -->
+  
+<!-- VOD: dash VOD with response of status code 400 on sixth segment -->
+<eyevinn-video
+  source="https://chaos-proxy.prod.eyevinn.technology/api/v2/manifests/dash/proxy-master.mpd?url=https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/8212bb91a3854cf59e1d71d599455dcf/64651f16da554640930b7ce2cd9f758b/66d211307b7d43d3bd515a3bfb654e1c/manifest.mpd&delay=[{i:5,ms:1500}]&statusCode=[{i:5,code:400}]"
+  muted autoplay>
+</eyevinn-video>
+<eyevinn-video
+  source="https://chaos-proxy.prod.eyevinn.technology/api/v2/manifests/dash/proxy-master.mpd?url=https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/8212bb91a3854cf59e1d71d599455dcf/64651f16da554640930b7ce2cd9f758b/66d211307b7d43d3bd515a3bfb654e1c/manifest.mpd&statusCode=[{i:3,code:418}]"
+  muted autoplay>
+</eyevinn-video>
+</body>
+</html>
