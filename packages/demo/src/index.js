@@ -11,6 +11,8 @@ import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-w
 
 const EmbedVersion = "0.6.5";
 
+const VmapUrl = "https://eyevinn.adtest.eyevinn.technology/api/v1/vmap?bp=0&dur=10";
+
 const ExampleStreams = [
   { title: "HLS VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/8212bb91a3854cf59e1d71d599455dcf/ade303f83e8444d69b7658f988abb054/2a647c0cf9b7409598770b9f11799178/manifest.m3u8" },
   { title: "MPD VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/8212bb91a3854cf59e1d71d599455dcf/64651f16da554640930b7ce2cd9f758b/66d211307b7d43d3bd515a3bfb654e1c/manifest.mpd" },
@@ -71,6 +73,7 @@ function shareDemoUrl(manifestUrl) {
 async function main() {
   const manifestInput = document.querySelector('#manifest-input');
   const autoplayCheckbox = document.querySelector('#autoplay');
+  const adsCheckbox = document.querySelector('#ads');
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
   const embedButton = document.querySelector('#embed-button');
@@ -99,8 +102,11 @@ async function main() {
     debugEvents(video);
   }
 
+  const ads = { vmapUrl: VmapUrl };
+  
   // Comment out this if you want to demo the player package
-  const player = new WebPlayer({ video });
+  const player = new WebPlayer({ video, ads });
+
   renderEyevinnSkin({
     root,
     player,
@@ -123,7 +129,7 @@ async function main() {
       await playerAnalytics.init({
         sessionId: `web-player-demo-${Date.now()}`,
       });
-      await player.load(manifestInput.value, autoplayCheckbox.checked);
+      await player.load(manifestInput.value, autoplayCheckbox.checked, adsCheckbox.checked);
       playerAnalytics.load(video);
 
       player.on(PlayerEvent.LOADED_METADATA, metadataReporter = () => {
