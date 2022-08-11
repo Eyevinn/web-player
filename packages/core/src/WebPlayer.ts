@@ -69,7 +69,7 @@ export default class WebPlayer extends EventEmitter {
         Tech = (await import('./tech/WHPPTech')).default;
         break;
     }
-    this.tech = new Tech({ video: this.video, vmap: ads && this.ads?.vmapUrl });
+    this.tech = new Tech({ video: this.video, vmap: ads ? this.ads?.vmapUrl : undefined });
     this.tech.on('*', this.onEvent.bind(this));
 
     this.emit(PlayerEvent.READY);
