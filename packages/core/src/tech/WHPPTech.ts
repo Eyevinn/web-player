@@ -9,7 +9,7 @@ export default class WHPPTech extends BaseTech {
     this.player = new WebRTCPlayer({
       video: this.video,
       type: "se.eyevinn.whpp",
-      vmapUrl: opts.vmap
+      vmapUrl: opts.ads?.displayAds ? opts.ads?.vmapUrl : undefined,
     });
   }
 

@@ -9,11 +9,11 @@ export { IPlayerState, IVideoLevel } from './tech/BaseTech';
 
 export interface IWebPlayerAdOptions {
   vmapUrl: string;
+  displayAds: boolean;
 }
 
 export interface IWebPlayerOptions {
   video: HTMLVideoElement;
-  ads?: IWebPlayerAdOptions;
 }
 
 export { PlaybackState, canPlayManifestType, ManifestType, getManifestType };
@@ -26,16 +26,16 @@ export default class WebPlayer extends EventEmitter {
   public currentSrc?: string;
   public manifestType: ManifestType = ManifestType.UNKNOWN;
 
-  constructor({ video, ads }: IWebPlayerOptions) {
+  constructor({ video }: IWebPlayerOptions) {
     super();
     this.video = video;
-    this.ads = ads;
   }
 
-  async load(src: string, autoplay = false, ads = false) {
+  async load(src: string, autoplay = false, ads?: IWebPlayerAdOptions) {
     this.video.muted = autoplay;
     this.video.autoplay = autoplay;
     this.video.setAttribute("playsinline", "");
+    this.ads = ads;
 
     this.emit(PlayerEvent.READYING);
     this.reset();
@@ -69,7 +69,7 @@ export default class WebPlayer extends EventEmitter {
         Tech = (await import('./tech/WHPPTech')).default;
         break;
     }
-    this.tech = new Tech({ video: this.video, vmap: ads ? this.ads?.vmapUrl : undefined });
+    this.tech = new Tech({ video: this.video, ads: this.ads });
     this.tech.on('*', this.onEvent.bind(this));
 
     this.emit(PlayerEvent.READY);

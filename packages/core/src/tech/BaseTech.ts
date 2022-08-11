@@ -1,5 +1,6 @@
 import { PlayerEvent } from '../util/constants';
 import EventEmitter from '../util/EventEmitter';
+import { IWebPlayerAdOptions } from '../WebPlayer';
 
 const LIVE_EDGE = 10; // minimum seconds from edge
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
@@ -7,7 +8,7 @@ const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on liv
 export interface IBaseTechOptions {
   video: HTMLVideoElement;
   src: string;
-  vmap?: string;
+  ads?: IWebPlayerAdOptions;
 }
 
 export interface ITrack {
