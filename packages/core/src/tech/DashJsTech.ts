@@ -1,7 +1,8 @@
 import { MediaPlayer, MediaPlayerClass } from 'dashjs';
-import BaseTech, { IBaseTechOptions, PlaybackState } from './BaseTech';
+import { IBaseTechOptions, PlaybackState } from './BaseTech';
+import BaseTechAds from './BaseTechAds';
 
-export default class MssPlayer extends BaseTech {
+export default class MssPlayer extends BaseTechAds {
   private mediaPlayer: MediaPlayerClass;
 
   constructor(opts: IBaseTechOptions) {

@@ -51,7 +51,11 @@ export default class WebPlayer extends EventEmitter {
     switch (manifestType) {
       case ManifestType.HLS:
         if (canPlayManifestType(ManifestType.HLS) && isSafari()) {
-          Tech = BaseTech;
+          if (this.ads && this.ads.displayAds) {
+            Tech = (await import('./tech/BaseTechAds')).default;
+          } else {
+            Tech = BaseTech;
+          }
         } else {
           Tech = (await import('./tech/HlsJsTech')).default;
         }

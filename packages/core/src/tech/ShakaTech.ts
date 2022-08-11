@@ -1,14 +1,15 @@
 //@ts-ignore
 import { Player } from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
-import BaseTech, { IVideoLevel, ITrack, getTextTrackId } from './BaseTech';
+import { IVideoLevel, ITrack, getTextTrackId, IBaseTechOptions } from './BaseTech';
+import BaseTechAds from './BaseTechAds';
 import { PlayerEvent } from '../util/constants';
 
-export default class DashPlayer extends BaseTech {
+export default class DashPlayer extends BaseTechAds {
   public name = "ShakaTech";
   private shakaPlayer: any;
 
-  constructor(opts: IWebPlayerOptions) {
+  constructor(opts: IBaseTechOptions) {
     super(opts);
     this.shakaPlayer = new Player(this.video);
     this.shakaPlayer.addEventListener(

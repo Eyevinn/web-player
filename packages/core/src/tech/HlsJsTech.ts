@@ -1,8 +1,9 @@
-import BaseTech, {
+import {
   IBaseTechOptions,
   IVideoLevel,
   PlaybackState,
 } from './BaseTech';
+import BaseTechAds from './BaseTechAds';
 import Hls from 'hls.js';
 import { PlayerEvent } from '../util/constants';
 
@@ -14,7 +15,7 @@ const DEFAULT_CONFIG = {
 const LIVE_EDGE = 5; // seconds from liveEdge
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
-export default class HlsJsTech extends BaseTech {
+export default class HlsJsTech extends BaseTechAds {
   public name = "HlsJsTech";
   static isSupported() {
     return Hls.isSupported();
