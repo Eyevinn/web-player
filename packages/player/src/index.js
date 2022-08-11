@@ -2,7 +2,7 @@ import WebPlayer from '@eyevinn/web-player-core';
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
 
-export default function webplayer(wrapper, { castAppId } = {}, ads) {
+export default function webplayer(wrapper, { castAppId, ads } = {}) {
   const video = document.createElement('video');
   wrapper.appendChild(video);
   const player = new WebPlayer({ video, ads });

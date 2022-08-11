@@ -1,5 +1,6 @@
-import WebPlayer from '@eyevinn/web-player-core';
+import WebPlayer, { IWebPlayerAdOptions } from '@eyevinn/web-player-core';
 interface WebPlayerOptions {
-  castAppId?: string
+  castAppId?: string;
+  ads?: IWebPlayerAdOptions
 }
 export default function webplayer(wrapper: HTMLElement, options: WebPlayerOptions): WebPlayer;
