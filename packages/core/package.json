@@ -34,9 +34,9 @@
   "dependencies": {
     "@eyevinn/webrtc-player": "^0.6.1",
     "dashjs": "^3.2.2",
-    "hls.js": "^1.1.4",
+    "hls.js": "^1.2.1",
     "mitt": "^2.1.0",
-    "shaka-player": "^3.1.0"
+    "shaka-player": "4.2.0"
   },
   "publishConfig": {
     "access": "public"
