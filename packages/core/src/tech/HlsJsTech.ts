@@ -1,10 +1,10 @@
 import BaseTech, {
-  IBaseTechOptions,
   IVideoLevel,
   PlaybackState,
 } from './BaseTech';
 import Hls from 'hls.js';
 import { PlayerEvent } from '../util/constants';
+import { IWebPlayerOptions } from '../WebPlayer';
 
 const DEFAULT_CONFIG = {
   capLevelOnFPSDrop: true,
@@ -25,9 +25,13 @@ export default class HlsJsTech extends BaseTech {
   private isLiveFlag: boolean;
   private playlistDuration = 0;
 
-  constructor(opts: IBaseTechOptions) {
+  constructor(opts: IWebPlayerOptions) {
     super(opts);
-    this.hls = new Hls(DEFAULT_CONFIG);
+
+    const conf = Object.assign({}, DEFAULT_CONFIG, {
+      capLevelToPlayerSize: !opts.disablePlayerSizeLevelCap
+    });
+    this.hls = new Hls(conf);
 
     this.hls.attachMedia(this.video);
 

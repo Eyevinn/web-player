@@ -14,6 +14,7 @@ const ComponentAttribute = {
     AUTOPLAY_VISIBLE: 'autoplay-visible',
     INCOGNITO: 'incognito',
     EPAS_URL: 'epas-url',
+    DISABLE_LEVEL_CAP: 'disable-level-cap',
   }
 }
 
@@ -35,7 +36,8 @@ export default class PlayerComponent extends HTMLElement {
       this.observer.observe(this.video);
     }
 
-    this.setupPlayer(wrapper);
+    const disablePlayerSizeLevelCap = this.getAttribute(ComponentAttribute.STATIC.DISABLE_LEVEL_CAP);
+    this.setupPlayer(wrapper, disablePlayerSizeLevelCap);
 
     this.setupAnalytics({
       incognito: this.getAttribute(ComponentAttribute.STATIC.INCOGNITO),
@@ -62,8 +64,11 @@ export default class PlayerComponent extends HTMLElement {
     return wrapper;
   }
 
-  setupPlayer(wrapper) {
-    this.player = new WebPlayer({ video: this.video });
+  setupPlayer(wrapper, disablePlayerSizeLevelCap) {
+    this.player = new WebPlayer({
+      video: this.video,
+      disablePlayerSizeLevelCap: !!disablePlayerSizeLevelCap
+    });
     renderEyevinnSkin({
       root: wrapper,
       player: this.player,

@@ -11,6 +11,9 @@ export default class DashPlayer extends BaseTech {
   constructor(opts: IWebPlayerOptions) {
     super(opts);
     this.shakaPlayer = new Player(this.video);
+
+    const restrictToElementSize = !opts.disablePlayerSizeLevelCap;
+    this.shakaPlayer.configure({ abr: { restrictToElementSize: restrictToElementSize } });
     this.shakaPlayer.addEventListener(
       'variantchanged',
       (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
