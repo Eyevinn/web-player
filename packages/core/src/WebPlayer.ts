@@ -9,6 +9,7 @@ export { IPlayerState, IVideoLevel } from './tech/BaseTech';
 
 export interface IWebPlayerOptions {
   video: HTMLVideoElement;
+  disablePlayerSizeLevelCap?: boolean;
 }
 
 export { PlaybackState, canPlayManifestType, ManifestType, getManifestType };
@@ -155,12 +156,12 @@ export default class WebPlayer extends EventEmitter {
     }
   }
 
-  setVolume({ 
-    change, 
-    percentage 
-  }: { 
-    change?: number; 
-    percentage?: number 
+  setVolume({
+    change,
+    percentage
+  }: {
+    change?: number;
+    percentage?: number
   }) {
     if (this.tech) {
       let newVolume = change ? this.tech.volume + change : percentage / 100;
