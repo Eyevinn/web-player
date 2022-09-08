@@ -8,7 +8,7 @@ const CONTENT_TYPE_MAP = {
   'application/dash+xml': ManifestType.DASH,
   'application/vnd.apple.mpegurl;charset=UTF-8': ManifestType.HLS,
   'application/vnd.ms-sstr+xml': ManifestType.MSS,
-  'application/json': ManifestType.EYEVINN_WEBRTC_CHANNEL,
+  'application/json': ManifestType.EYEVINN_WHPP_CHANNEL,
   'application/whpp+json': ManifestType.EYEVINN_WHPP_CHANNEL,
 };
 
@@ -30,24 +30,34 @@ export function canPlayManifestType(manifestType: ManifestType): boolean {
   }
 }
 
-export function getManifestType(uri): Promise<ManifestType> {
-  return fetch(uri)
-    .then((resp) => {
-      let type =
-        CONTENT_TYPE_MAP[resp.headers.get('content-type')?.split(';')[0]];
-      if (!type) {
-        if (uri.match(/\.m3u8/)) {
-          return ManifestType.HLS;
-        } else if (uri.match(/\.mpd/)) {
-          return ManifestType.DASH;
-        } else if (uri.toLowerCase().match(/\/manifest/)) {
-          return ManifestType.MSS;
-        }
-        return ManifestType.UNKNOWN;
+async function getContentTypeHeader(uri): Promise<string|undefined> {
+  let resp = await fetch(uri);
+  if (resp.ok) {
+    return resp.headers.get('content-type')?.split(';')[0];
+  } else {
+    // try with OPTIONS
+    resp = await fetch(uri, { method: "OPTIONS" });
+    const accepts = resp.headers.get('accept').split(',');
+    return accepts[accepts.length - 1].trim();
+  }
+}
+
+export async function getManifestType(uri): Promise<ManifestType> {
+  try {
+    const contentTypeHeader = await getContentTypeHeader(uri);
+    let type = CONTENT_TYPE_MAP[contentTypeHeader];
+    if (!type) {
+      if (uri.match(/\.m3u8/)) {
+        return ManifestType.HLS;
+      } else if (uri.match(/\.mpd/)) {
+        return ManifestType.DASH;
+      } else if (uri.toLowerCase().match(/\/manifest/)) {
+        return ManifestType.MSS;
       }
-      return type;
-    })
-    .catch(() => {
       return ManifestType.UNKNOWN;
-    });
+    }
+    return type;
+  } catch (e) {
+    return ManifestType.UNKNOWN;
+  }
 }
