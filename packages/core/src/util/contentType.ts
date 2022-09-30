@@ -34,11 +34,11 @@ export function canPlayManifestType(manifestType: ManifestType): boolean {
 
 async function getContentTypeHeader(uri): Promise<string|undefined> {
   // Temporary hack to be removed once Cloudflare signals correctly in the accept header
-  if (uri.match(/webRTC\/play/)) {
+  if (uri.match(/cloudflarestream\.com\/.*\/webRTC\/play$/)) {
     return 'application/sdp';
   }
   // End hack
-  
+
   let resp = await fetch(uri);
   if (resp.ok) {
     return resp.headers.get('content-type')?.split(';')[0];
