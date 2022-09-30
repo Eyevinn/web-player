@@ -1,6 +1,8 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const { EnvironmentPlugin } = require('webpack');
+
 const package = require('./package.json');
 
 module.exports = {
@@ -35,6 +37,7 @@ module.exports = {
         { from: './src/style.css', to: 'style.css' },
       ],
     }),
+    new EnvironmentPlugin(['ICE_SERVERS'])
   ],
   resolve: {
     fallback: {

@@ -10,20 +10,23 @@ export { IPlayerState, IVideoLevel } from './tech/BaseTech';
 export interface IWebPlayerOptions {
   video: HTMLVideoElement;
   disablePlayerSizeLevelCap?: boolean;
+  iceServers?: RTCIceServer[];
 }
 
 export { PlaybackState, canPlayManifestType, ManifestType, getManifestType };
 
 export default class WebPlayer extends EventEmitter {
   private tech: BaseTech;
+  private opts: IWebPlayerOptions;
 
   public video: HTMLVideoElement;
   public currentSrc?: string;
   public manifestType: ManifestType = ManifestType.UNKNOWN;
 
-  constructor({ video }: IWebPlayerOptions) {
+  constructor(opts: IWebPlayerOptions) {
     super();
-    this.video = video;
+    this.opts = opts;
+    this.video = opts.video;
   }
 
   async load(src: string, autoplay = false) {
@@ -66,7 +69,7 @@ export default class WebPlayer extends EventEmitter {
         Tech = (await import('./tech/WHEPTech')).default;
         break;
     }
-    this.tech = new Tech({ video: this.video });
+    this.tech = new Tech(this.opts);
     this.tech.on('*', this.onEvent.bind(this));
 
     this.emit(PlayerEvent.READY);

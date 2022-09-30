@@ -99,8 +99,22 @@ async function main() {
     debugEvents(video);
   }
 
+  let iceServers;
+  
+  if (process.env.ICE_SERVERS) {
+    iceServers = [];
+    process.env.ICE_SERVERS.split(",").forEach(server => {
+      // turn:<username>:<password>@turn.eyevinn.technology:3478
+      const m = server.match(/^turn:(\S+):(\S+)@(\S+):(\d+)/);
+      if (m) {
+        const [ _, username, credential, host, port ] = m;
+        iceServers.push({ urls: "turn:" + host + ":" + port, username: username, credential: credential });
+      }
+    });
+  }
+
   // Comment out this if you want to demo the player package
-  const player = new WebPlayer({ video });
+  const player = new WebPlayer({ video: video, iceServers: iceServers });
   renderEyevinnSkin({
     root,
     player,

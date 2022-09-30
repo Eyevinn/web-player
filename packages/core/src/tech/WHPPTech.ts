@@ -1,14 +1,16 @@
 import { WebRTCPlayer } from '@eyevinn/webrtc-player';
-import BaseTech, { IBaseTechOptions } from './BaseTech';
+import { IWebPlayerOptions } from '../WebPlayer';
+import BaseTech from './BaseTech';
 
 export default class WHPPTech extends BaseTech {
   private player: WebRTCPlayer;
 
-  constructor(opts: IBaseTechOptions) {
+  constructor(opts: IWebPlayerOptions) {
     super(opts);
     this.player = new WebRTCPlayer({
       video: this.video,
-      type: "se.eyevinn.whpp"
+      type: "se.eyevinn.whpp",
+      iceServers: opts.iceServers,
     });
   }
 
