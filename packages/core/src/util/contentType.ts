@@ -10,6 +10,7 @@ const CONTENT_TYPE_MAP = {
   'application/vnd.ms-sstr+xml': ManifestType.MSS,
   'application/json': ManifestType.EYEVINN_WHPP_CHANNEL,
   'application/whpp+json': ManifestType.EYEVINN_WHPP_CHANNEL,
+  'application/sdp': ManifestType.WHEP,
 };
 
 export const MANIFEST_TYPE_MAP = {
@@ -20,7 +21,8 @@ export const MANIFEST_TYPE_MAP = {
 
 export function canPlayManifestType(manifestType: ManifestType): boolean {
   if (manifestType === ManifestType.EYEVINN_WEBRTC_CHANNEL || 
-      manifestType === ManifestType.EYEVINN_WHPP_CHANNEL) 
+      manifestType === ManifestType.EYEVINN_WHPP_CHANNEL ||
+      manifestType === ManifestType.WHEP) 
   {
     return !!window.RTCPeerConnection;
   } else {
@@ -31,6 +33,12 @@ export function canPlayManifestType(manifestType: ManifestType): boolean {
 }
 
 async function getContentTypeHeader(uri): Promise<string|undefined> {
+  // Temporary hack to be removed once Cloudflare signals correctly in the accept header
+  if (uri.match(/cloudflarestream\.com\/.*\/webRTC\/play$/)) {
+    return 'application/sdp';
+  }
+  // End hack
+
   let resp = await fetch(uri);
   if (resp.ok) {
     return resp.headers.get('content-type')?.split(';')[0];

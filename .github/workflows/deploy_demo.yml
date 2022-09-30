@@ -19,6 +19,7 @@ jobs:
           npm ci
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+          ICE_SERVERS: ${{secrets.ICE_SERVERS}}
       - name: deploy demo site
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:
