@@ -62,6 +62,9 @@ export default class WebPlayer extends EventEmitter {
       case ManifestType.EYEVINN_WHPP_CHANNEL:
         Tech = (await import('./tech/WHPPTech')).default;
         break;
+      case ManifestType.WHEP:
+        Tech = (await import('./tech/WHEPTech')).default;
+        break;
     }
     this.tech = new Tech({ video: this.video });
     this.tech.on('*', this.onEvent.bind(this));
