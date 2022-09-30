@@ -1,6 +1,5 @@
 import { PlayerEvent } from '../util/constants';
 import EventEmitter from '../util/EventEmitter';
-import { IWebPlayerOptions } from '../WebPlayer'; 
 
 const LIVE_EDGE = 10; // minimum seconds from edge
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
