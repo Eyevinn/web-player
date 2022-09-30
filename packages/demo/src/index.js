@@ -101,7 +101,7 @@ async function main() {
 
   let iceServers;
   
-  if (process.env.ICE_SERVERS) {
+  if (process.env.ICE_SERVERS && process.env.ICE_SERVERS !== 'DEFAULT') {
     iceServers = [];
     process.env.ICE_SERVERS.split(",").forEach(server => {
       // turn:<username>:<password>@turn.eyevinn.technology:3478

@@ -37,7 +37,9 @@ module.exports = {
         { from: './src/style.css', to: 'style.css' },
       ],
     }),
-    new EnvironmentPlugin(['ICE_SERVERS'])
+    new EnvironmentPlugin({
+      ICE_SERVERS: 'DEFAULT'
+    }),
   ],
   resolve: {
     fallback: {
