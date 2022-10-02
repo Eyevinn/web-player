@@ -57,7 +57,7 @@ class webplayer {
 ```
 
 ### CDN 
-Download the latest release of this package [from jsdelivr](https://registry.npmjs.org/@eyevinn/web-player/-/web-player-0.8.4.tgz) and include the javascript & css files in your HTML.
+Download the latest release of this package [from jsdelivr](https://registry.npmjs.org/@eyevinn/web-player/-/web-player-<version>.tgz) and include the javascript & css files in your HTML.
 
 The snippet below shows an example on how to implement the player
 ```html
