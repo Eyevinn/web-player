@@ -114,7 +114,11 @@ async function main() {
   }
 
   // Comment out this if you want to demo the player package
-  const player = new WebPlayer({ video: video, iceServers: iceServers });
+  const player = new WebPlayer({ 
+    video: video, 
+    iceServers: iceServers,
+    enableCloudflareWhepBeta: process.env.CLOUDFLARE_BETA === "true",
+  });
   renderEyevinnSkin({
     root,
     player,
