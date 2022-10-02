@@ -38,7 +38,8 @@ module.exports = {
       ],
     }),
     new EnvironmentPlugin({
-      ICE_SERVERS: 'DEFAULT'
+      ICE_SERVERS: 'DEFAULT',
+      CLOUDFLARE_BETA: 'false'
     }),
   ],
   resolve: {

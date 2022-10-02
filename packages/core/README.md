@@ -6,14 +6,25 @@ It automagically detects what type of manifest the src is and selects the best u
 ## Usage
 ```html
 <video controls></video>
+
 ```
 ```javascript
 const player = new WebPlayer({ video: document.querySelector('video') });
 
 // You're now ready to load any HLS, MPEG-DASH or SmoothStreaming manifest
 player.load("https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8")
+```
 
-````
+### Available options
+
+```
+WebPlayer({
+    video: HTMLVideoElement;
+    disablePlayerSizeLevelCap?: boolean;
+    iceServers?: RTCIceServer[];
+    enableCloudflareWhepBeta?: boolean; // Enable Cloudflare WHEP beta support
+})
+```
 
 ## Contribution
 

@@ -11,6 +11,7 @@ export interface IWebPlayerOptions {
   video: HTMLVideoElement;
   disablePlayerSizeLevelCap?: boolean;
   iceServers?: RTCIceServer[];
+  enableCloudflareWhepBeta?: boolean;
 }
 
 export { PlaybackState, canPlayManifestType, ManifestType, getManifestType };
@@ -41,11 +42,19 @@ export default class WebPlayer extends EventEmitter {
 
     const manifestType = await getManifestType(src);
     this.manifestType = manifestType;
-    if (manifestType === ManifestType.UNKNOWN) {
+
+    // Temporary hack to be removed once Cloudflare signals content-type in the accept header
+    if (this.opts.enableCloudflareWhepBeta && 
+      src.match(/cloudflarestream\.com\/.*\/webRTC\/play$/)) {
+      this.manifestType = ManifestType.WHEP;
+    }
+    // End hack
+
+    if (this.manifestType === ManifestType.UNKNOWN) {
       throw { errorCode: ErrorCode.UNKNOWN_MANIFEST_TYPE };
     }
     let Tech;
-    switch (manifestType) {
+    switch (this.manifestType) {
       case ManifestType.HLS:
         if (canPlayManifestType(ManifestType.HLS) && isSafari()) {
           Tech = BaseTech;
