@@ -20,8 +20,44 @@ player.load("<src-here>").then(() => {
 });
 ```
 
+### API
+
+```javascript
+class webplayer {
+  constructor(wrapper: HTMLElement, opts?: {
+    castAppId?: string;
+    disablePlayerSizeLevelCap?: boolean; // When disabled do not cap bandwidth based on player size
+    iceServers?: RTCIceServer[]; // Override default list of ICE servers (for WebRTC based streaming)
+    enableCloudflareWhepBeta?: boolean;
+  });
+
+  async load(src: string, autoplay?: boolean = false): Promise<void>;
+  async play(): Promise<boolean>;
+  pause();
+  stop();
+  mute();
+  unmute();
+  reset();
+
+  seekTo(position: number, change: number, percentage:number );
+  seekToLive();
+  setAudioTrack(id: string);
+  setTextTrack(id: string);
+  setVolume(change: number, percentage: number);
+  getVolume(): number;
+  getVideoLevels(): IVideoLevel[];
+
+  isPlaying: boolean; // read-only
+  isMuted: boolean; // read-only
+  isLive: boolean; // read-only
+  currentTime: number; // read-only
+  currentLevel: number;
+}
+
+```
+
 ### CDN 
-Download the latest release of this package [from jsdelivr](https://registry.npmjs.org/@eyevinn/web-player/-/web-player-0.4.0.tgz) and include the javascript & css files in your HTML.
+Download the latest release of this package [from jsdelivr](https://registry.npmjs.org/@eyevinn/web-player/-/web-player-<version>.tgz) and include the javascript & css files in your HTML.
 
 The snippet below shows an example on how to implement the player
 ```html
@@ -69,6 +105,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+# Support
+
+Join our [community on Slack](http://slack.streamingtech.se) where you can post any questions regarding any of our open source projects. Eyevinn's consulting business can also offer you:
+
+- Further development of this component
+- Customization and integration of this component into your platform
+- Support and maintenance agreement
+
+Contact [sales@eyevinn.se](mailto:sales@eyevinn.se) if you are interested.
 
 ## About Eyevinn Technology
 
