@@ -20,8 +20,44 @@ player.load("<src-here>").then(() => {
 });
 ```
 
+### API
+
+```javascript
+class webplayer {
+  constructor(wrapper: HTMLElement, opts?: {
+    castAppId?: string;
+    disablePlayerSizeLevelCap?: boolean; // When disabled do not cap bandwidth based on player size
+    iceServers?: RTCIceServer[]; // Override default list of ICE servers (for WebRTC based streaming)
+    enableCloudflareWhepBeta?: boolean;
+  });
+
+  async load(src: string, autoplay?: boolean = false): Promise<void>;
+  async play(): Promise<boolean>;
+  pause();
+  stop();
+  mute();
+  unmute();
+  reset();
+
+  seekTo(position: number, change: number, percentage:number );
+  seekToLive();
+  setAudioTrack(id: string);
+  setTextTrack(id: string);
+  setVolume(change: number, percentage: number);
+  getVolume(): number;
+  getVideoLevels(): IVideoLevel[];
+
+  isPlaying: boolean; // read-only
+  isMuted: boolean; // read-only
+  isLive: boolean; // read-only
+  currentTime: number; // read-only
+  currentLevel: number;
+}
+
+```
+
 ### CDN 
-Download the latest release of this package [from jsdelivr](https://registry.npmjs.org/@eyevinn/web-player/-/web-player-0.4.0.tgz) and include the javascript & css files in your HTML.
+Download the latest release of this package [from jsdelivr](https://registry.npmjs.org/@eyevinn/web-player/-/web-player-0.8.4.tgz) and include the javascript & css files in your HTML.
 
 The snippet below shows an example on how to implement the player
 ```html
