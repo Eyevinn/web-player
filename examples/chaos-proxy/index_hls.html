@@ -9,13 +9,13 @@
 <body>
   <!-- VOD: With segment delay of 1500ms and response code 400 on sixth (response of 400 will be sent after 1500ms): -->
   <eyevinn-video
-    source="https://chaos-proxy.prod.eyevinn.technology/api/v2/manifests/hls/proxy-master.m3u8?url=https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8&delay=[{i:5,ms:1500}]&statusCode=[{i:5,code:400}]"
+    source= "https://chaos-proxy.prod.eyevinn.technology/api/v2/manifests/hls/proxy-master.m3u8?url=https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8&delay=[{i:5,ms:1500}]&statusCode=[{i:5,code:400}]"
     muted autoplay>
   </eyevinn-video>
   <!-- VOD: With response of status code 404 on all segments: -->
   <eyevinn-video
   source="https://chaos-proxy.prod.eyevinn.technology/api/v2/manifests/hls/proxy-master.m3u8?url=https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8&statusCode=[{i:*,code:404}]"
   muted autoplay>
-</eyevinn-video>
+</eyevinn-video> 
 </body>
 </html>
