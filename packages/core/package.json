@@ -33,10 +33,10 @@
   },
   "dependencies": {
     "@eyevinn/webrtc-player": "^0.8.1",
-    "dashjs": "^3.2.2",
-    "hls.js": "^1.2.1",
-    "mitt": "^2.1.0",
-    "shaka-player": "4.2.0"
+    "dashjs": "^4.5.1",
+    "hls.js": "^1.2.7",
+    "mitt": "^3.0.0",
+    "shaka-player": "^4.3.0"
   },
   "publishConfig": {
     "access": "public"
