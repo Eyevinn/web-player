@@ -5,6 +5,11 @@ const webpack = require('webpack');
 
 module.exports = {
   mode: 'production',
+  performance: {
+    hints: false,
+    maxEntrypointSize: 2512000,
+    maxAssetSize: 2512000
+  },
   entry: './src/index.js',
   output: {
     library: 'webplayer.component',

@@ -25,31 +25,31 @@
         <h1>EPAS (autoplay)</h1>
         <eyevinn-video 
             source="https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8"
+            analytics
             muted autoplay>
         </eyevinn-video>
         <h1>Live</h1>
         <eyevinn-video
             source="https://d2fz24s2fts31b.cloudfront.net/out/v1/6484d7c664924b77893f9b4f63080e5d/manifest.m3u8"
-            incognito
+            analytics
             muted autoplay>
         </eyevinn-video>
-        <h1>Incognito (no EPAS)</h1>
+        <h1>No analytics</h1>
         <eyevinn-video 
             source="https://lab.cdn.eyevinn.technology/stswe19-three-roads-to-jerusalem.mp4/manifest.m3u8" 
-            starttime="25" 
-            incognito>
+            starttime="25">
         </eyevinn-video>
         <h1>Broken EPAS url</h1>
         <eyevinn-video 
-            source="https://lab.cdn.eyevinn.technology/stswe19-three-roads-to-jerusalem.mp4/manifest.m3u8" 
+            source="https://lab.cdn.eyevinn.technology/stswe19-three-roads-to-jerusalem.mp4/manifest.m3u8"
+            analytics 
             epas-url="https://bad-sink.epas.eyevinn.technology/" 
             starttime="25">
         </eyevinn-video>
-        <h1>Autoplay when visible and incognito</h1>
+        <h1>Autoplay when visible and no analytics</h1>
         <eyevinn-video 
             source="https://lab.cdn.eyevinn.technology/stswe19-global-but-local-ott-platform.mp4/manifest.m3u8" 
             starttime="25"
-            incognito
             muted autoplay-visible>
         </eyevinn-video>
     </div>
