@@ -12,7 +12,7 @@ const ComponentAttribute = {
   },
   STATIC: {
     AUTOPLAY_VISIBLE: 'autoplay-visible',
-    INCOGNITO: 'incognito',
+    ANALYTICS: 'analytics',
     EPAS_URL: 'epas-url',
     DISABLE_LEVEL_CAP: 'disable-level-cap',
   }
@@ -40,7 +40,7 @@ export default class PlayerComponent extends HTMLElement {
     this.setupPlayer(wrapper, disablePlayerSizeLevelCap);
 
     this.setupAnalytics({
-      incognito: this.getAttribute(ComponentAttribute.STATIC.INCOGNITO),
+      enabled: this.getAttribute(ComponentAttribute.STATIC.ANALYTICS),
       epasUrl: this.getAttribute(ComponentAttribute.STATIC.EPAS_URL)
     });
 
@@ -76,9 +76,9 @@ export default class PlayerComponent extends HTMLElement {
     });
   }
 
-  setupAnalytics({ incognito, epasUrl }) {
+  setupAnalytics({ enabled, epasUrl }) {
     this.playerAnalytics = null;
-    if (!isSet(incognito)) {
+    if (isSet(enabled)) {
       this.playerAnalytics = new PlayerAnalyticsConnector(epasUrl || "https://sink.epas.eyevinn.technology");
     }
   }
