@@ -9,7 +9,7 @@ import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-w
 // import webplayer from '@eyevinn/web-player';
 // import '@eyevinn/web-player/dist/webplayer.css';
 
-const EmbedVersion = "0.8.1";
+const EmbedVersion = "0.8.4";
 
 const ExampleStreams = [
   { title: "HLS VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/8212bb91a3854cf59e1d71d599455dcf/ade303f83e8444d69b7658f988abb054/2a647c0cf9b7409598770b9f11799178/manifest.m3u8" },
