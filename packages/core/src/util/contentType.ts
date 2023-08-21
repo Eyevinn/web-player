@@ -39,7 +39,12 @@ async function getContentTypeHeader(uri): Promise<string|undefined> {
   } else {
     // try with OPTIONS
     resp = await fetch(uri, { method: "OPTIONS" });
-    const accepts = resp.headers.get('accept').split(',');
+    let accepts;
+    if (resp.headers.get('accept')) {
+      accepts = resp.headers.get('accept').split(',');
+    } else if (resp.headers.get('accept-post')) {
+      accepts = resp.headers.get('accept-post').split(',');
+    }
     return accepts[accepts.length - 1].trim();
   }
 }
