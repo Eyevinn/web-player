@@ -18,4 +18,7 @@ export function renderEyevinnSkin({
 		<EyevinnSkin player={player} rootElement={root} castAppId={castAppId} />,
 		root
 	);
+	return () => {
+		render(null, root);
+	};
 }

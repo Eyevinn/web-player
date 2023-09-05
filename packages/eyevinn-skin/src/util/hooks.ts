@@ -8,6 +8,7 @@ import {
 import { AirPlay, AirPlayEvent } from '@eyevinn/web-player-airplay';
 import { CastSender, CastSenderEvent } from '@eyevinn/web-player-cast';
 import {
+	ReadyState,
 	PlayerEvent,
 	IPlayerState,
 	PlaybackState,
@@ -28,13 +29,16 @@ export function useCastSender(
 
 	useEffect(() => {
 		const onReady = () => {
-			if (castAppId !== null && player.manifestType !== ManifestType.EYEVINN_WEBRTC_CHANNEL) {
+			if (
+				castAppId !== null &&
+				player.manifestType !== ManifestType.EYEVINN_WEBRTC_CHANNEL
+			) {
 				setCastSender(new CastSender(castAppId));
 			}
 		};
 		player.on(PlayerEvent.READY, onReady);
 		return () => player.off(PlayerEvent.READY, onReady);
-	}, []);
+	}, [player]);
 
 	const castStateRef = useRef<ISkinState>(null);
 	castStateRef.current = state;
@@ -71,17 +75,17 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 	isCastingRef.current = castState?.isCasting ?? false;
 
 	useEffect(() => {
-		webPlayer.on(PlayerEvent.UNREADY, () => {
+		const onUnready = () => {
 			setReady(null);
 			setPlayerState(null);
-		});
-		webPlayer.on(PlayerEvent.READYING, () => {
+		};
+		const onReadying = () => {
 			setReady(false);
-		});
-		webPlayer.on(PlayerEvent.READY, () => {
+		};
+		const onReady = () => {
 			setReady(true);
-		});
-		webPlayer.on(PlayerEvent.STATE_CHANGE, ({ state }) => {
+		};
+		const onStateChange = ({ state }) => {
 			if (isCastingRef.current && webPlayer.isPlaying) {
 				webPlayer.pause();
 			}
@@ -89,8 +93,30 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 				isCasting: false,
 				...state,
 			});
-		});
-	}, []);
+		};
+
+		webPlayer.on(PlayerEvent.UNREADY, onUnready);
+		webPlayer.on(PlayerEvent.READYING, onReadying);
+		webPlayer.on(PlayerEvent.READY, onReady);
+		webPlayer.on(PlayerEvent.STATE_CHANGE, onStateChange);
+
+		// If the skin is rendered after the player has begun set the initial ready state
+		switch (webPlayer.readyState) {
+			case ReadyState.READYING:
+				setReady(false);
+				break;
+			case ReadyState.READY:
+				setReady(true);
+				break;
+		}
+
+		return () => {
+			webPlayer.off(PlayerEvent.UNREADY, onUnready);
+			webPlayer.off(PlayerEvent.READYING, onReadying);
+			webPlayer.off(PlayerEvent.READY, onReady);
+			webPlayer.off(PlayerEvent.STATE_CHANGE, onStateChange);
+		};
+	}, [webPlayer]);
 
 	let state, player;
 	if (castState && castState.playbackState !== PlaybackState.IDLE) {

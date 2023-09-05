@@ -14,10 +14,13 @@ import webplayer from '@eyevinn/web-player';
 import '@eyevinn/web-player/dist/webplayer.css'; // requires the use of a bundler supporting CSS 
 
 // assumes the HTML contains an element <div id="player"></div>
-const player = webplayer(document.querySelector('#player'));
+const { player, destroy } = webplayer(document.querySelector('#player'));
 player.load("<src-here>").then(() => {
   player.play()
 });
+...
+// time to cleanup
+destroy();
 ```
 
 ### API
@@ -76,7 +79,7 @@ The snippet below shows an example on how to implement the player
   <!-- Initiate the player and auto-play (if allowed by browser) -->
   <script>
     document.addEventListener('DOMContentLoaded', function(event) {
-      const player = webplayer(document.querySelector("#player-wrapper"));
+      const { player } = webplayer(document.querySelector("#player-wrapper"));
       player.load(src).then(function() {
         player.play();
       });
