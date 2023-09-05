@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@eyevinn/web-player-demo",
-  "version": "0.16.7",
+  "version": "0.16.8",
   "author": "Benjamin Wallberg <benjamin.wallberg@eyevinn.se>",
   "homepage": "https://github.com/Eyevinn/web-player#readme",
   "license": "Apache-2.0",
@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@eyevinn/player-analytics-client-sdk-web": "0.1.3",
-    "@eyevinn/web-player": "^0.8.7",
-    "@eyevinn/web-player-core": "^0.14.3",
+    "@eyevinn/web-player": "^0.9.0",
+    "@eyevinn/web-player-core": "^0.14.4",
     "@eyevinn/web-player-debug": "^0.2.1",
-    "@eyevinn/web-player-eyevinn-skin": "^0.9.6"
+    "@eyevinn/web-player-eyevinn-skin": "^0.9.7"
   },
   "devDependencies": {
     "buffer": "^6.0.3",
