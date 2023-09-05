@@ -11,6 +11,7 @@ module.exports = {
     libraryTarget: 'umd',
     filename: 'webplayer.min.js',
     path: path.resolve(__dirname, 'dist'),
+    globalObject: 'this'
   },
   plugins: [
     new MiniCssExtractPlugin({
