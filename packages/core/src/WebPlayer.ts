@@ -14,9 +14,17 @@ export interface IWebPlayerOptions {
   enableCloudflareWhepBeta?: boolean;
 }
 
+export enum ReadyState {
+  UNREADY,
+  READYING,
+  READY
+}
+
 export { PlaybackState, canPlayManifestType, ManifestType, getManifestType };
 
 export default class WebPlayer extends EventEmitter {
+  private _readyState: ReadyState = ReadyState.UNREADY;
+
   private tech: BaseTech;
   private opts: IWebPlayerOptions;
 
@@ -28,6 +36,10 @@ export default class WebPlayer extends EventEmitter {
     super();
     this.opts = opts;
     this.video = opts.video;
+
+    this.on(PlayerEvent.UNREADY, () => this._readyState = ReadyState.UNREADY);
+    this.on(PlayerEvent.READYING, () => this._readyState = ReadyState.READYING);
+    this.on(PlayerEvent.READY, () => this._readyState = ReadyState.READY);
   }
 
   async load(src: string, autoplay = false) {
@@ -87,6 +99,10 @@ export default class WebPlayer extends EventEmitter {
 
   private onEvent(type, data) {
     this.emit(type, data);
+  }
+
+  get readyState(): ReadyState {
+    return this._readyState;
   }
 
   get isPlaying(): boolean {
@@ -208,5 +224,10 @@ export default class WebPlayer extends EventEmitter {
       this.tech = null;
       this.emit(PlayerEvent.UNREADY);
     }
+  }
+
+  destroy() {
+    this.reset();
+    super.destroy();
   }
 }

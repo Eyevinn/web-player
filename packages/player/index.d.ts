@@ -5,4 +5,13 @@ interface WebPlayerOptions {
   iceServers?: RTCIceServer[];
   enableCloudflareWhepBeta?: boolean;
 }
-export default function webplayer(wrapper: HTMLElement, options: WebPlayerOptions): WebPlayer;
+
+export * from '@eyevinn/web-player-core';
+
+export default function webplayer(
+  wrapper: HTMLElement,
+  options: WebPlayerOptions
+): {
+  player: WebPlayer;
+  destroy: () => void;
+};

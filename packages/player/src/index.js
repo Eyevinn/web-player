@@ -12,10 +12,17 @@ export default function webplayer(wrapper, opts) {
     iceServers: opts.iceServers,
     enableCloudflareWhepBeta: opts.enableCloudflareWhepBeta
   });
-  renderEyevinnSkin({
+  const destroySkin = renderEyevinnSkin({
     root: wrapper,
     player,
     castAppId
   });
-  return player;
+  return {
+    player,
+    destroy: () => {
+      player.destroy();
+      destroySkin();
+      wrapper.removeChild(video);
+    }
+  };
 }
