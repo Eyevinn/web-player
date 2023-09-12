@@ -1,7 +1,4 @@
-import BaseTech, {
-  IVideoLevel,
-  PlaybackState,
-} from './BaseTech';
+import BaseTech, { IVideoLevel, PlaybackState } from './BaseTech';
 import Hls from 'hls.js';
 import { PlayerEvent } from '../util/constants';
 import { IWebPlayerOptions } from '../WebPlayer';
@@ -15,7 +12,7 @@ const LIVE_EDGE = 5; // seconds from liveEdge
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
 
 export default class HlsJsTech extends BaseTech {
-  public name = "HlsJsTech";
+  public name = 'HlsJsTech';
   static isSupported() {
     return Hls.isSupported();
   }
@@ -29,7 +26,7 @@ export default class HlsJsTech extends BaseTech {
     super(opts);
 
     const conf = Object.assign({}, DEFAULT_CONFIG, {
-      capLevelToPlayerSize: !opts.disablePlayerSizeLevelCap
+      capLevelToPlayerSize: !opts.disablePlayerSizeLevelCap,
     });
     this.hls = new Hls(conf);
 
@@ -47,14 +44,8 @@ export default class HlsJsTech extends BaseTech {
 
     this.hls.on(Hls.Events.LEVEL_LOADED, this.onLevelLoaded.bind(this));
 
-    this.hls.on(
-      Hls.Events.LEVEL_SWITCHED,
-      this.onBitrateChange.bind(this)
-    );
-    this.hls.on(
-      Hls.Events.ERROR,
-      this.onErrorEvent.bind(this)
-    );
+    this.hls.on(Hls.Events.LEVEL_SWITCHED, this.onBitrateChange.bind(this));
+    this.hls.on(Hls.Events.ERROR, this.onErrorEvent.bind(this));
   }
 
   load(src: string): Promise<void> {
@@ -79,14 +70,15 @@ export default class HlsJsTech extends BaseTech {
    */
   private removeUnsupportedLevels() {
     const unsupportedLevelIndex = this.hls.levels.findIndex((level) => {
-      return !MediaSource.isTypeSupported(`video/mp4; codecs="${level.attrs.CODECS}"`);
+      return !MediaSource.isTypeSupported(
+        `video/mp4; codecs="${level.attrs.CODECS}"`
+      );
     });
     if (unsupportedLevelIndex !== -1) {
-        this.hls.removeLevel(unsupportedLevelIndex);
-        this.removeUnsupportedLevels();
+      this.hls.removeLevel(unsupportedLevelIndex);
+      this.removeUnsupportedLevels();
     }
   }
-
 
   protected onTimeUpdate() {
     this.updateState({
@@ -197,7 +189,7 @@ export default class HlsJsTech extends BaseTech {
         language: audioTrack.lang,
         enabled: this.audioTrack === audioTrack.id.toString(),
       })) || []
-    )
+    );
   }
 
   get textTrack() {
@@ -211,19 +203,18 @@ export default class HlsJsTech extends BaseTech {
       } else {
         this.hls.subtitleTrack = parseInt(id);
       }
-
     }
   }
 
   get textTracks() {
     return (
-      this.hls?.subtitleTracks.map(textTrack => ({
+      this.hls?.subtitleTracks.map((textTrack) => ({
         id: textTrack.id.toString(),
         label: textTrack.name,
         language: textTrack.lang,
         enabled: this.textTrack === textTrack.id.toString(),
       })) || []
-    )
+    );
   }
 
   seekToLive() {
@@ -233,21 +224,21 @@ export default class HlsJsTech extends BaseTech {
   errorFormat(data) {
     let errorData = {
       category: data?.type, // optional, eg. NETWORK, DECODER, etc.
-      code: "-1",
-      message: "", // optional
+      code: '-1',
+      message: '', // optional
       data: data, // optional
-    }
+    };
     const errorDetails = data?.details;
     switch (errorDetails) {
       //All Fatal
       case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
       case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
       case Hls.ErrorDetails.FRAG_LOAD_ERROR: //fatal = true || false
-          errorData.code = `${data.response.code}`,
-          errorData.message = data.response.text
+        (errorData.code = `${data.response.code}`),
+          (errorData.message = data.response.text);
         break;
       case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
-          errorData.message = data.reason
+        errorData.message = data.reason;
         break;
       case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
       case Hls.ErrorDetails.FRAG_LOAD_TIMEOUT: //fatal = true || false
@@ -256,9 +247,9 @@ export default class HlsJsTech extends BaseTech {
       //Non Fatal
       case Hls.ErrorDetails.AUDIO_TRACK_LOAD_ERROR:
       case Hls.ErrorDetails.KEY_LOAD_ERROR:
-          errorData.code = `${data.response.code}`,
-          errorData.message = data.response.text
-      break;
+        (errorData.code = `${data.response.code}`),
+          (errorData.message = data.response.text);
+        break;
       case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
       case Hls.ErrorDetails.AUDIO_TRACK_LOAD_TIMEOUT:
       default:
