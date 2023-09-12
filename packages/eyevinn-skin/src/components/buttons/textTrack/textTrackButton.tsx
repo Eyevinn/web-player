@@ -26,6 +26,9 @@ export default function TextTrackButton({ textTracks = [], onChange }) {
 		},
 		[onChange]
 	);
+
+	const isTextTrackEnabled = textTracks.some((textTrack) => textTrack.enabled);
+
 	return (
 		<div
 			class={style.container}
@@ -33,6 +36,19 @@ export default function TextTrackButton({ textTracks = [], onChange }) {
 		>
 			<TextTracksIcon />
 			<ul class={classNames(style.list, { [style.open]: open })}>
+				<li>
+					<label>
+						<input
+							type="radio"
+							name="textTrack"
+							value={undefined}
+							checked={!isTextTrackEnabled}
+							onClick={onRadioChange}
+						/>
+						<span>{'off'}</span>
+					</label>
+				</li>
+
 				{textTracks.map((textTrack) => (
 					<li>
 						<label>
@@ -43,7 +59,7 @@ export default function TextTrackButton({ textTracks = [], onChange }) {
 								checked={textTrack.enabled}
 								onClick={onRadioChange}
 							/>
-							<span>{textTrack.label || textTrack.language || "und"}</span>
+							<span>{textTrack.label || textTrack.language || 'und'}</span>
 						</label>
 					</li>
 				))}
