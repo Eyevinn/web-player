@@ -32,7 +32,7 @@
     "ts-jest": "^27.1.2"
   },
   "dependencies": {
-    "@eyevinn/webrtc-player": "^0.12.0",
+    "@eyevinn/webrtc-player": "^0.12.1",
     "dashjs": "^4.5.1",
     "hls.js": "^1.4.12",
     "mitt": "^3.0.0",
