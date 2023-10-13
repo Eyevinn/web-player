@@ -1,6 +1,6 @@
 {
   "name": "@eyevinn/web-player-eyevinn-skin",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "author": "Eyevinn Technology <work@eyevinn.se>",
   "contributors": [
     "Benjamin Wallberg <benjamin.wallberg@eyevinn.se> (Eyevinn Technology AB)"
@@ -30,8 +30,8 @@
   },
   "dependencies": {
     "@eyevinn/web-player-airplay": "^0.7.2",
-    "@eyevinn/web-player-cast": "^0.9.9",
-    "@eyevinn/web-player-core": "^0.15.1",
+    "@eyevinn/web-player-cast": "^0.9.10",
+    "@eyevinn/web-player-core": "^0.15.2",
     "classnames": "^2.2.6",
     "preact": "^10.4.8"
   },
