@@ -47,8 +47,8 @@ export default class WebPlayer extends EventEmitter {
     this.video.autoplay = autoplay;
     this.video.setAttribute("playsinline", "");
 
-    this.emit(PlayerEvent.READYING);
     this.reset();
+    this.emit(PlayerEvent.READYING);
 
     this.currentSrc = src;
 
@@ -89,6 +89,10 @@ export default class WebPlayer extends EventEmitter {
       case ManifestType.WHEP:
         Tech = (await import('./tech/WHEPTech')).default;
         break;
+    }
+    if (this._readyState === ReadyState.UNREADY) {
+      // load aborted
+      return;
     }
     this.tech = new Tech(this.opts);
     this.tech.on('*', this.onEvent.bind(this));
@@ -138,6 +142,7 @@ export default class WebPlayer extends EventEmitter {
       const videoLevels: IVideoLevel[] = this.tech.getVideoLevels();
       return videoLevels;
     }
+    return [];
   }
 
   play(): Promise<boolean> {
@@ -222,8 +227,8 @@ export default class WebPlayer extends EventEmitter {
     if (this.tech) {
       this.tech.destroy();
       this.tech = null;
-      this.emit(PlayerEvent.UNREADY);
     }
+    this.emit(PlayerEvent.UNREADY);
   }
 
   destroy() {
