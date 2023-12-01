@@ -2,7 +2,6 @@ import WebPlayer, { PlayerEvent, getManifestType, canPlayManifestType } from '@e
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
-import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
 
 // Uncomment this to demo the player package
 // NOTE! you must also comment out some code in main()
@@ -125,40 +124,24 @@ async function main() {
     player,
   });
 
-  const playerAnalytics = new PlayerAnalyticsConnector(
-    'https://sink.epas.eyevinn.technology/'
-  );
-
   // Uncomment out this if you want to demo the player package
   // const player = webplayer(root);
 
-  let analyticsInitiated = false;
   let metadataReporter;
 
   async function load() {
     try {
       player.reset();
 
-      await playerAnalytics.init({
-        sessionId: `web-player-demo-${Date.now()}`,
-      });
       await player.load(manifestInput.value, autoplayCheckbox.checked);
-      playerAnalytics.load(video);
 
       player.on(PlayerEvent.LOADED_METADATA, metadataReporter = () => {
-        if (analyticsInitiated) return;
-        playerAnalytics.reportMetadata({
-          live: player.isLive,
-          contentUrl: manifestInput.value,
-        });
-        analyticsInitiated = true;
         player.off(PlayerEvent.LOADED_METADATA, metadataReporter);
       });
 
       populateQualityPicker();
     } catch (err) {
       console.error(err);
-      analyticsInitiated && playerAnalytics.deinit();
     }
   }
 
@@ -286,30 +269,13 @@ async function main() {
   });
 
   player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
-    if (analyticsInitiated) {
-      playerAnalytics.reportBitrateChange({
-        bitrate: data.bitrate / 1000, // bitrate in Kbps
-        width: data.width, // optional, video width in pixels
-        height: data.height, // optional, video height in pixels
-      });
-    }
   });
 
   player.on(PlayerEvent.PLAYER_STOPPED, () => {
-    if (analyticsInitiated) {
-      playerAnalytics.reportStop();
-    }
   });
 
   player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
     console.error('player reported error', errorData);
-    if (analyticsInitiated) {
-      if (fatal) {
-        playerAnalytics.reportError(errorData);
-      } else {
-        playerAnalytics.reportWarning(errorData);
-      }
-    }
     if (fatal) {
       player.destroy();
       console.log('player destroyed due to error');
@@ -318,10 +284,6 @@ async function main() {
 
   player.on(PlayerEvent.UNREADY, () => {
     console.log('player unready');
-    if (analyticsInitiated) {
-      playerAnalytics.deinit();
-      analyticsInitiated = false;
-    }
   });
 }
 window.onload = main;
