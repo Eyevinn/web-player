@@ -18,3 +18,5 @@ jobs:
       run: npx playwright install --with-deps
     - name: Run Playwright tests
       run: npm run test:e2e
+      env:
+        OSC_ACCESS_TOKEN: ${{secrets.OSC_ACCESS_TOKEN}}
