@@ -17,8 +17,23 @@ const config: PlaywrightTestConfig = {
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'setup csp',
+      testMatch: /global\.setup\.ts/,
+      teardown: 'cleanup csp'
+    },
+    {
+      name: 'cleanup csp',
+      testMatch: /global\.teardown\.ts/
+    },
+    {
+      name: 'chromium with csp',
+      use: { 
+        ...devices['Desktop Chrome'],
+        launchOptions: {
+          args: ['--disable-web-security']
+        }  
+      },
+      dependencies: ['setup csp'],
     },
     // Don't work with channel set to 'chrome'
     // {
