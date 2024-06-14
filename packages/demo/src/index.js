@@ -223,12 +223,6 @@ async function main() {
    * Loads the video content and initializes IMA ad playback.
    */
   async function playAds() {
-    // Initialize the container. Must be done through a user action on mobile
-    // devices.
-    const player = new WebPlayer({ 
-      video: video
-    });
-
     adDisplayContainer.initialize();
 
     try {
@@ -259,7 +253,7 @@ async function main() {
     );
 
     // Add listeners to the required events.
-    adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onAdError);
+    adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onAdError());
     adsManager.addEventListener(
       google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
       onContentPauseRequested
@@ -343,6 +337,22 @@ async function main() {
     // setupUIForAds();
   }
 
+  // Handle page visibility change events, so add is paused when user is redirected,
+  // and when the user returns the ad resumes playing
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      if (isAdPlaying) {
+        adsManager.pause();
+        isAdPlaying = false;
+      }
+    } else {
+      if (!isAdPlaying && adsManager) {
+        adsManager.resume();
+        isAdPlaying = true;
+      }
+    }
+  });
+
   /**
    * Resumes video content and removes ad UI.
    */
@@ -363,6 +373,9 @@ async function main() {
     event.preventDefault();
     event.stopImmediatePropagation();
 
+    if (isAdPlaying) {
+      video.pause();
+    }
     playAds();
   }, true);  
 
