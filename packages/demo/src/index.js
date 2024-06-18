@@ -253,7 +253,7 @@ async function main() {
     );
 
     // Add listeners to the required events.
-    adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onAdError());
+    adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onAdError);
     adsManager.addEventListener(
       google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
       onContentPauseRequested
