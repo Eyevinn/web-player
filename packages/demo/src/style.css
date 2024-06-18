@@ -72,6 +72,21 @@ video {
 	position: relative;
 }
 
+#main-container {
+	position: relative;
+	width: 640px;
+	height: 360px;
+}
+
+#player,
+#ad-container {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 640px;
+	height: 360px;
+}
+
 #example-streams button {
 	margin-right: 3px;
 	margin-top: 1px;
