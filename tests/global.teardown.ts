@@ -2,6 +2,7 @@ import { test as teardown } from '@playwright/test';
 import { Context, removeInstance } from '@osaas/client-core';
 
 teardown('remove chaos stream proxy', async ({}) => {
+  /*
   console.log('Remomving Chaos Stream Proxy in Open Source Cloud...');
 
   const ctx = new Context();
@@ -17,5 +18,6 @@ teardown('remove chaos stream proxy', async ({}) => {
     );
   } catch (err) {
     console.error('Failed to remove Chaos Stream Proxy:', err);
-  }  
+  }
+  */
 });

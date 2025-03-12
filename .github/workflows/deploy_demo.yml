@@ -21,6 +21,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
           ICE_SERVERS: ${{secrets.ICE_SERVERS}}
           CLOUDFLARE_BETA: 'true'
+          ANALYTICS_URL: ${{secrets.ANALYTICS_URL}}
       - name: deploy demo site
         uses: jakejarvis/s3-sync-action@v0.5.1
         with:

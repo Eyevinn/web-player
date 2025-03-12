@@ -26,7 +26,7 @@
   ],
   "devDependencies": {
     "@osaas/client-core": "^0.3.0",
-    "@playwright/test": "^1.44.0",
+    "@playwright/test": "^1.51.0",
     "@types/jest": "^28.1.7",
     "events": "^3.3.0",
     "jest-environment-jsdom": "^28.1.3",

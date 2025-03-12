@@ -2,22 +2,23 @@ import WebPlayer, { PlayerEvent, getManifestType, canPlayManifestType } from '@e
 import { renderEyevinnSkin } from '@eyevinn/web-player-eyevinn-skin';
 import { debugEvents } from '@eyevinn/web-player-debug';
 import '@eyevinn/web-player-eyevinn-skin/dist/index.css';
+import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-web';
 
 // Uncomment this to demo the player package
 // NOTE! you must also comment out some code in main()
 // import webplayer from '@eyevinn/web-player';
 // import '@eyevinn/web-player/dist/webplayer.css';
 
-const EmbedVersion = "0.8.4";
+const EmbedVersion = "0.9.4";
 
 const ExampleStreams = [
-  { title: "HLS VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/6dfccb0406c74fa3ac21d262db7384b1/ade303f83e8444d69b7658f988abb054/2a647c0cf9b7409598770b9f11799178/manifest.m3u8" },
-  { title: "MPD VOD", url: "https://f53accc45b7aded64ed8085068f31881.egress.mediapackage-vod.eu-north-1.amazonaws.com/out/v1/6dfccb0406c74fa3ac21d262db7384b1/64651f16da554640930b7ce2cd9f758b/66d211307b7d43d3bd515a3bfb654e1c/manifest.mpd" },
+  { title: "HLS VOD", url: "https://lab.cdn.eyevinn.technology/osc/osc-reel/a4e1156e-f872-455f-9f1f-be73b5effba8/index.m3u8" },
+  { title: "MPD VOD", url: "https://lab.cdn.eyevinn.technology/osc/osc-reel/a4e1156e-f872-455f-9f1f-be73b5effba8/manifest.mpd" },
   // { title: "HLS VOD SUBS & AUDIO", url: "http://sample.vodobox.com/planete_interdite/planete_interdite_alternate.m3u8"},
   { title: "HLS LIVE", url: "https://d2fz24s2fts31b.cloudfront.net/out/v1/6484d7c664924b77893f9b4f63080e5d/manifest.m3u8" },
   { title: "MPD LIVE", url: "https://d2fz24s2fts31b.cloudfront.net/out/v1/3b6879c0836346c2a44c9b4b33520f4e/manifest.mpd" },
   { title: "HLS LIVE SSAI", url: "https://edfaeed9c7154a20828a30a26878ade0.mediatailor.eu-west-1.amazonaws.com/v1/master/1b8a07d9a44fe90e52d5698704c72270d177ae74/AdTest/master.m3u8" },
-  { title: "WHEP", url: "https://srtwhep.lab.sto.eyevinn.technology:8443/channel" }
+  // { title: "WHEP", url: "https://srtwhep.lab.sto.eyevinn.technology:8443/channel" }
   // { title: "WEBRTC", url: "https://broadcaster.lab.sto.eyevinn.technology:8443/broadcaster/channel/sthlm" }
 ];
 
@@ -124,24 +125,40 @@ async function main() {
     player,
   });
 
+  const playerAnalytics = new PlayerAnalyticsConnector(
+    process.env.ANALYTICS_URL
+  )
+
   // Uncomment out this if you want to demo the player package
   // const player = webplayer(root);
 
+  let analyticsInitiated = false;
   let metadataReporter;
 
   async function load() {
     try {
       player.reset();
 
+      await playerAnalytics.init({
+        sessionId: `web-player-demo-${Date.now()}`,
+      });
       await player.load(manifestInput.value, autoplayCheckbox.checked);
+      playerAnalytics.load(video);
 
       player.on(PlayerEvent.LOADED_METADATA, metadataReporter = () => {
+        if (analyticsInitiated) return;
+        playerAnalytics.reportMetadata({
+          live: player.isLive,
+          contentUrl: manifestInput.value,
+        });
+        analyticsInitiated = true;
         player.off(PlayerEvent.LOADED_METADATA, metadataReporter);
       });
 
       populateQualityPicker();
     } catch (err) {
       console.error(err);
+      analyticsInitiated && playerAnalytics.deinit();
     }
   }
 
@@ -269,13 +286,30 @@ async function main() {
   });
 
   player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
+    if (analyticsInitiated) {
+      playerAnalytics.reportBitrateChange({
+        bitrate: data.bitrate / 1000, // bitrate in Kbps
+        width: data.width, // optional, video width in pixels
+        height: data.height, // optional, video height in pixels
+      });
+    }
   });
 
   player.on(PlayerEvent.PLAYER_STOPPED, () => {
+    if (analyticsInitiated) {
+      playerAnalytics.reportStop();
+    }
   });
 
   player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
     console.error('player reported error', errorData);
+    if (analyticsInitiated) {
+      if (fatal) {
+        playerAnalytics.reportError(errorData);
+      } else {
+        playerAnalytics.reportWarning(errorData);
+      }
+    }
     if (fatal) {
       player.destroy();
       console.log('player destroyed due to error');
@@ -284,6 +318,10 @@ async function main() {
 
   player.on(PlayerEvent.UNREADY, () => {
     console.log('player unready');
+    if (analyticsInitiated) {
+      playerAnalytics.deinit();
+      analyticsInitiated = false;
+    }
   });
 }
 window.onload = main;

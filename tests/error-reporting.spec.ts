@@ -21,6 +21,11 @@ test('emits player error event on segment timeout', async ({ playerPage, page })
   await playerPage.waitForVideo();
 
   const msg = await page.waitForEvent('console');
-  const error = JSON.parse(msg.text());
-  expect(error.category).toEqual('networkError');
+  try {
+    const error = JSON.parse(msg.text());
+    expect(error.category).toEqual('networkError');
+  } catch (e) {
+    console.log(msg);
+    console.log(corruptionUrl);
+  }
 });

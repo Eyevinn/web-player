@@ -39,7 +39,8 @@ module.exports = {
     }),
     new EnvironmentPlugin({
       ICE_SERVERS: 'DEFAULT',
-      CLOUDFLARE_BETA: 'false'
+      CLOUDFLARE_BETA: 'false',
+      ANALYTICS_URL: 'https://eyevinnlab-epasdev.eyevinn-player-analytics-eventsink.auto.prod.osaas.io'
     }),
   ],
   resolve: {
