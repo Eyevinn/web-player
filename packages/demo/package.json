@@ -11,7 +11,7 @@
     "build": "webpack"
   },
   "dependencies": {
-    "@eyevinn/player-analytics-client-sdk-web": "0.1.3",
+    "@eyevinn/player-analytics-client-sdk-web": "^0.2.0",
     "@eyevinn/web-player": "^0.9.4",
     "@eyevinn/web-player-core": "^0.15.3",
     "@eyevinn/web-player-debug": "^0.2.1",
