@@ -78,8 +78,8 @@ export default class PlayerComponent extends HTMLElement {
 
   setupAnalytics({ enabled, epasUrl }) {
     this.playerAnalytics = null;
-    if (isSet(enabled)) {
-      this.playerAnalytics = new PlayerAnalyticsConnector(epasUrl || "https://sink.epas.eyevinn.technology");
+    if (isSet(enabled) && epasUrl) {
+      this.playerAnalytics = new PlayerAnalyticsConnector(epasUrl);
     }
   }
 
