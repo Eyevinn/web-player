@@ -11,7 +11,7 @@ test('video element with correct attributes are created', async ({ page }) => {
 
 test('web component sends tracking events when not in incognito mode', async ({ page }) => {
   const [request] = await Promise.all([
-    page.waitForRequest(req => req.url().match('https://sink.epas') && req.method() === 'POST'),
+    page.waitForRequest(req => req.url().match('https://eyevinnlab-epasdev') && req.method() === 'POST'),
     page.goto('/web-component/index.html'),
   ]);
 });
