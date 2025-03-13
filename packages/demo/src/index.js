@@ -75,6 +75,7 @@ async function main() {
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
   const embedButton = document.querySelector('#embed-button');
+  const epasUrlInput = document.querySelector('#epas-eventsink-url');
   renderExampleButtons();
 
   if (!manifestInput.value) {
@@ -114,6 +115,10 @@ async function main() {
     });
   }
 
+  if (process.env.ANALYTICS_URL) {
+    epasUrlInput.value = process.env.ANALYTICS_URL;
+  }
+
   // Comment out this if you want to demo the player package
   const player = new WebPlayer({ 
     video: video, 
@@ -125,33 +130,43 @@ async function main() {
     player,
   });
 
-  const playerAnalytics = new PlayerAnalyticsConnector(
-    process.env.ANALYTICS_URL
-  )
-
   // Uncomment out this if you want to demo the player package
   // const player = webplayer(root);
 
   let analyticsInitiated = false;
   let metadataReporter;
+  let playerAnalytics;
 
-  async function load() {
+  async function load() {  
     try {
+      if (epasUrlInput.value) {
+        playerAnalytics = new PlayerAnalyticsConnector(
+          epasUrlInput.value
+        );
+      }
+  
       player.reset();
 
-      await playerAnalytics.init({
-        sessionId: `web-player-demo-${Date.now()}`,
-      });
+      try {
+        playerAnalytics && await playerAnalytics.init({
+          sessionId: `web-player-demo-${Date.now()}`,
+        });
+      } catch (err) {
+        console.error('Failed to initiate analytics', err);
+        playerAnalytics = null;
+      }
       await player.load(manifestInput.value, autoplayCheckbox.checked);
-      playerAnalytics.load(video);
+      playerAnalytics && playerAnalytics.load(video);
 
       player.on(PlayerEvent.LOADED_METADATA, metadataReporter = () => {
         if (analyticsInitiated) return;
-        playerAnalytics.reportMetadata({
-          live: player.isLive,
-          contentUrl: manifestInput.value,
-        });
-        analyticsInitiated = true;
+        if (playerAnalytics) {
+          playerAnalytics.reportMetadata({
+            live: player.isLive,
+            contentUrl: manifestInput.value,
+          });
+          analyticsInitiated = true;
+        }
         player.off(PlayerEvent.LOADED_METADATA, metadataReporter);
       });
 
