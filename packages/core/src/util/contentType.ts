@@ -52,8 +52,9 @@ async function getContentTypeHeader(uri): Promise<string|undefined> {
 export async function getManifestType(uri): Promise<ManifestType> {
   try {
     const contentTypeHeader = await getContentTypeHeader(uri);
+
     let type = CONTENT_TYPE_MAP[contentTypeHeader];
-    if (!type) {
+    if (!type || type == ManifestType.UNKNOWN) {
       if (uri.match(/\.m3u8/)) {
         return ManifestType.HLS;
       } else if (uri.match(/\.mpd/)) {

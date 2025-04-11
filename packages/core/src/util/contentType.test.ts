@@ -41,6 +41,16 @@ describe("content type utils", () => {
     setupContentTypeResponseMock("");
     expect(await getManifestType("/manifest")).toEqual(ManifestType.MSS);
 
+    // If content-type is too general fallback to determine on file suffix
+    setupContentTypeResponseMock("binary/octet-stream");
+    expect(await getManifestType("hls.m3u8")).toEqual(ManifestType.HLS);
+    setupContentTypeResponseMock("binary/octet-stream");
+    expect(await getManifestType("manifest.mpd")).toEqual(ManifestType.DASH);
+    setupContentTypeResponseMock("binary/octet-stream");
+    expect(await getManifestType("/Manifest")).toEqual(ManifestType.MSS);
+    setupContentTypeResponseMock("binary/octet-stream");
+    expect(await getManifestType("/manifest")).toEqual(ManifestType.MSS);
+
     // If it can't be decided we should get unknown
     setupContentTypeResponseMock("application/octet-stream");
     expect(await getManifestType("fil.ts")).toEqual(ManifestType.UNKNOWN);
