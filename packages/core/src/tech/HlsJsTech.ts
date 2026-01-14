@@ -6,10 +6,43 @@ import { IWebPlayerOptions } from '../WebPlayer';
 const DEFAULT_CONFIG = {
   capLevelOnFPSDrop: true,
   capLevelToPlayerSize: true,
+  enableInterstitialPlayback: true,
 };
 
 const LIVE_EDGE = 5; // seconds from liveEdge
 const LIVE_SEEKABLE_MIN_DURATION = 300; // require 5 min to allow seeking on live content
+
+export interface InterstitialAsset {
+  identifier: string;
+  uri: string;
+  duration?: number;
+  startOffset: number;
+}
+
+export interface InterstitialEvent {
+  identifier: string;
+  startTime: number;
+  resumeTime: number;
+  duration?: number;
+  assetList: InterstitialAsset[];
+  dateRange?: {
+    attr: Record<string, string>;
+  };
+  assetListUrl?: string;
+}
+
+export interface InterstitialTrackingData {
+  event: InterstitialEvent;
+  asset?: InterstitialAsset;
+  progress?: number;
+  trackingUrls?: {
+    start?: string[];
+    firstQuartile?: string[];
+    midpoint?: string[];
+    thirdQuartile?: string[];
+    complete?: string[];
+  };
+}
 
 export default class HlsJsTech extends BaseTech {
   public name = 'HlsJsTech';
@@ -21,6 +54,16 @@ export default class HlsJsTech extends BaseTech {
 
   private isLiveFlag: boolean;
   private playlistDuration = 0;
+
+  
+  private currentInterstitialAsset: InterstitialAsset | null = null;
+  private currentInterstitialEvent: InterstitialEvent | null = null;
+  private interstitialTrackingFired: Set<string> = new Set();
+  private interstitialAssetStartTime: number = 0;
+  private currentInterstitialSessionId: string | null = null;
+  private trackingUrlsCache: Map<string, Promise<InterstitialTrackingData['trackingUrls']>> = new Map();
+  private isPlayingAd: boolean = false;
+
 
   constructor(opts: IWebPlayerOptions) {
     super(opts);
@@ -46,6 +89,13 @@ export default class HlsJsTech extends BaseTech {
 
     this.hls.on(Hls.Events.LEVEL_SWITCHED, this.onBitrateChange.bind(this));
     this.hls.on(Hls.Events.ERROR, this.onErrorEvent.bind(this));
+
+    
+    this.hls.on(Hls.Events.INTERSTITIAL_STARTED, this.onInterstitialStarted.bind(this));
+    this.hls.on(Hls.Events.INTERSTITIAL_ENDED, this.onInterstitialEnded.bind(this));
+    this.hls.on(Hls.Events.INTERSTITIAL_ASSET_STARTED, this.onInterstitialAssetStarted.bind(this));
+    this.hls.on(Hls.Events.INTERSTITIAL_ASSET_ENDED, this.onInterstitialAssetEnded.bind(this));
+    
   }
 
   load(src: string): Promise<void> {
@@ -62,12 +112,7 @@ export default class HlsJsTech extends BaseTech {
     });
   }
 
-  /**
-   * filter out any level not supported by hls.js
-   * recursive method that looks for a level and then removes it if unsupported, due to how
-   * hls.js is built we cannot remove all unsupported levels in one go because the underlying
-   * array changes.
-   */
+
   private removeUnsupportedLevels() {
     const unsupportedLevelIndex = this.hls.levels.findIndex((level) => {
       return !MediaSource.isTypeSupported(
@@ -93,6 +138,8 @@ export default class HlsJsTech extends BaseTech {
       currentTime: this.currentTime,
       duration: this.duration,
     });
+
+    this.checkInterstitialQuartiles();
   }
 
   private onLevelLoaded(event, data) {
@@ -169,6 +216,10 @@ export default class HlsJsTech extends BaseTech {
     } else {
       return isNaN(this.video.duration);
     }
+  }
+
+  get isPlayingInterstitial() {
+    return this.isPlayingAd;
   }
 
   get audioTrack() {
@@ -256,6 +307,309 @@ export default class HlsJsTech extends BaseTech {
     }
 
     return errorData;
+  }
+
+  // interstitials handelers
+
+  private async onInterstitialStarted(_event: string, data: { event: InterstitialEvent }) {
+    const interstitialEvent = data.event;
+    
+    console.log('[SGAI] *** onInterstitialStarted FIRED ***', interstitialEvent);
+    
+    const sessionId = `${interstitialEvent.identifier}-${Date.now()}`;
+    
+    if (this.currentInterstitialSessionId !== sessionId) {
+      this.interstitialTrackingFired.clear();
+      this.currentInterstitialSessionId = sessionId;
+      console.log('[SGAI] New interstitial session started:', sessionId);
+    }
+
+    console.log('[SGAI] Interstitial started:', interstitialEvent.identifier);
+    console.log('[SGAI] Asset list:', interstitialEvent.assetList);
+
+    const assetListUrl = interstitialEvent.dateRange?.attr?.['X-ASSET-LIST'] || interstitialEvent.assetListUrl;
+    if (assetListUrl && !this.trackingUrlsCache.has(interstitialEvent.identifier)) {
+      console.log('[SGAI] Starting tracking URL fetch for:', interstitialEvent.identifier);
+      
+      const fetchPromise = this.fetchTrackingFromAssetListUrl(assetListUrl);
+      this.trackingUrlsCache.set(interstitialEvent.identifier, fetchPromise);
+      
+      const trackingUrls = await fetchPromise;
+      console.log('[SGAI] Extracted tracking URLs:', trackingUrls);
+      
+      (interstitialEvent as any)._trackingUrls = trackingUrls;
+    }
+
+    const trackingData: InterstitialTrackingData = {
+      event: interstitialEvent,
+      trackingUrls: (interstitialEvent as any)._trackingUrls,
+    };
+
+    this.emit(PlayerEvent.INTERSTITIAL_STARTED, trackingData);
+  }
+
+  private onInterstitialEnded(_event: string, data: { event: InterstitialEvent }) {
+    const interstitialEvent = data.event;
+
+    const trackingData: InterstitialTrackingData = {
+      event: interstitialEvent,
+    };
+
+    this.emit(PlayerEvent.INTERSTITIAL_ENDED, trackingData);
+    this.currentInterstitialAsset = null;
+    this.currentInterstitialEvent = null;
+    this.currentInterstitialSessionId = null;
+    
+    // clear tracking cache 
+    this.trackingUrlsCache.delete(interstitialEvent.identifier);
+    console.log('[Interstitials] Interstitial session ended');
+  }
+
+  private async onInterstitialAssetStarted(_event: string, data: { event: InterstitialEvent; asset: InterstitialAsset }) {
+    const { event: interstitialEvent, asset } = data;
+    this.currentInterstitialAsset = asset;
+    this.currentInterstitialEvent = interstitialEvent;
+    this.isPlayingAd = true;  
+    
+    
+    this.interstitialAssetStartTime = 0;
+
+    console.log('[Interstitials] *** onInterstitialAssetStarted FIRED ***');
+    console.log('[Interstitials] Asset started:', asset.identifier, asset.uri);
+    console.log('[Interstitials] Asset duration:', asset.duration);
+
+    let trackingUrls = (interstitialEvent as any)._trackingUrls;
+    
+    if (!trackingUrls && this.trackingUrlsCache.has(interstitialEvent.identifier)) {
+      console.log('[Interstitials] Awaiting tracking URL fetch from onInterstitialStarted...');
+      trackingUrls = await this.trackingUrlsCache.get(interstitialEvent.identifier);
+      (interstitialEvent as any)._trackingUrls = trackingUrls;
+    }
+    
+    if (!trackingUrls) {
+      console.warn('[Interstitials] WARNING: Tracking URLs not found, fetching now');
+      const assetListUrl = interstitialEvent.dateRange?.attr?.['X-ASSET-LIST'] || interstitialEvent.assetListUrl;
+      if (assetListUrl) {
+        trackingUrls = await this.fetchTrackingFromAssetListUrl(assetListUrl);
+        (interstitialEvent as any)._trackingUrls = trackingUrls;
+      }
+    }
+
+    console.log('[Interstitials] Firing start tracking URLs:', trackingUrls?.start);
+
+    // Fire 'start' tracking URLs
+    this.fireTrackingUrls(trackingUrls?.start, asset.identifier, 'start');
+
+    // Store tracking URLs on the current event so checkQuartiles can use them
+    (this.currentInterstitialEvent as any)._trackingUrls = trackingUrls;
+
+    const trackingData: InterstitialTrackingData = {
+      event: interstitialEvent,
+      asset,
+      progress: 0,
+      trackingUrls,
+    };
+
+    this.emit(PlayerEvent.INTERSTITIAL_ASSET_STARTED, trackingData);
+  }
+
+  private onInterstitialAssetEnded(_event: string, data: { event: InterstitialEvent; asset: InterstitialAsset }) {
+    const { event: interstitialEvent, asset } = data;
+
+    // Use tracking URLs stored on the event
+    const trackingUrls = (this.currentInterstitialEvent as any)?._trackingUrls;
+
+    // Fire 'complete' tracking URLs
+    this.fireTrackingUrls(trackingUrls?.complete, asset.identifier, 'complete');
+
+    const trackingData: InterstitialTrackingData = {
+      event: interstitialEvent,
+      asset,
+      progress: 100,
+      trackingUrls,
+    };
+
+    this.emit(PlayerEvent.INTERSTITIAL_ASSET_ENDED, trackingData);
+    this.currentInterstitialAsset = null;
+    this.currentInterstitialEvent = null;
+    this.interstitialAssetStartTime = 0;
+    this.isPlayingAd = false;  // clear the ad playing flag
+  }
+
+  private async fetchTrackingFromAssetListUrl(assetListUrl: string): Promise<InterstitialTrackingData['trackingUrls']> {
+    try {
+      const response = await fetch(assetListUrl, {
+        headers: { 'Accept': 'application/json' },
+        cache: 'no-store'  
+      });
+      
+      if (!response.ok) {
+        console.warn('[Interstitials] Failed to fetch asset list, status:', response.status);
+        return undefined;
+      }
+      
+      const data = await response.json();
+      console.log('[Interstitials] Asset list response:', data);
+      
+      // Extract tracking from the ASSETS array
+      if (data.ASSETS && Array.isArray(data.ASSETS)) {
+        const allTrackingUrls: InterstitialTrackingData['trackingUrls'] = {
+          start: [],
+          firstQuartile: [],
+          midpoint: [],
+          thirdQuartile: [],
+          complete: [],
+        };
+
+        for (const asset of data.ASSETS) {
+          const signaling = asset['X-AD-CREATIVE-SIGNALING'];
+          console.log('[SGAI] Fetched asset signaling:', signaling);
+          if (signaling?.payload?.tracking) {
+            for (const trackItem of signaling.payload.tracking) {
+              const type = trackItem.type;
+              const urls = trackItem.urls || [];
+              if (type === 'start') allTrackingUrls.start.push(...urls);
+              else if (type === 'firstQuartile') allTrackingUrls.firstQuartile.push(...urls);
+              else if (type === 'midpoint') allTrackingUrls.midpoint.push(...urls);
+              else if (type === 'thirdQuartile') allTrackingUrls.thirdQuartile.push(...urls);
+              else if (type === 'complete') allTrackingUrls.complete.push(...urls);
+            }
+          }
+        }
+
+        if (allTrackingUrls.start.length > 0) {
+          console.log('[Interstitials] Successfully extracted tracking URLs from asset list');
+          return allTrackingUrls;
+        }
+      }
+    } catch (e) {
+      console.warn('[Interstitials] Failed to fetch tracking from asset list URL:', e);
+    }
+    return undefined;
+  }
+
+  private extractTrackingUrls(interstitialEvent: InterstitialEvent): InterstitialTrackingData['trackingUrls'] {
+    try {
+      console.log('[Interstitials] Full interstitial event:', interstitialEvent);
+      console.log('[Interstitials] Event dateRange:', interstitialEvent.dateRange);
+      
+      // extract tracking from assetList
+      const assetList = interstitialEvent.assetList;
+      if (assetList && assetList.length > 0) {
+        const allTrackingUrls: InterstitialTrackingData['trackingUrls'] = {
+          start: [],
+          firstQuartile: [],
+          midpoint: [],
+          thirdQuartile: [],
+          complete: [],
+        };
+
+        for (const asset of assetList) {
+          // The X-AD-CREATIVE-SIGNALING 
+          const signaling = (asset as any)['X-AD-CREATIVE-SIGNALING'];
+          console.log('[Interstitials] Asset signaling:', signaling);
+          if (signaling?.payload?.tracking) {
+            const trackingArray = signaling.payload.tracking;
+            for (const trackItem of trackingArray) {
+              const type = trackItem.type;
+              const urls = trackItem.urls || [];
+              if (type === 'start') allTrackingUrls.start.push(...urls);
+              else if (type === 'firstQuartile') allTrackingUrls.firstQuartile.push(...urls);
+              else if (type === 'midpoint') allTrackingUrls.midpoint.push(...urls);
+              else if (type === 'thirdQuartile') allTrackingUrls.thirdQuartile.push(...urls);
+              else if (type === 'complete') allTrackingUrls.complete.push(...urls);
+            }
+          }
+        }
+
+        if (allTrackingUrls.start.length > 0 || allTrackingUrls.complete.length > 0) {
+          return allTrackingUrls;
+        }
+      }
+
+      const attr = interstitialEvent.dateRange?.attr;
+      if (attr) {
+        console.log('[Interstitials] DateRange attributes:', attr);
+        const signalingData = attr['X-AD-CREATIVE-SIGNALING'];
+        if (signalingData) {
+          console.log('[Interstitials] Raw signaling data:', signalingData);
+          const parsed = typeof signalingData === 'string' ? JSON.parse(signalingData) : signalingData;
+          console.log('[Interstitials] Parsed signaling:', parsed);
+
+          if (parsed?.payload?.tracking) {
+            const allTrackingUrls: InterstitialTrackingData['trackingUrls'] = {
+              start: [],
+              firstQuartile: [],
+              midpoint: [],
+              thirdQuartile: [],
+              complete: [],
+            };
+
+            for (const trackItem of parsed.payload.tracking) {
+              const type = trackItem.type;
+              const urls = trackItem.urls || [];
+              if (type === 'start') allTrackingUrls.start.push(...urls);
+              else if (type === 'firstQuartile') allTrackingUrls.firstQuartile.push(...urls);
+              else if (type === 'midpoint') allTrackingUrls.midpoint.push(...urls);
+              else if (type === 'thirdQuartile') allTrackingUrls.thirdQuartile.push(...urls);
+              else if (type === 'complete') allTrackingUrls.complete.push(...urls);
+            }
+
+            return allTrackingUrls;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse interstitial tracking data:', e);
+    }
+    return undefined;
+  }
+
+  private fireTrackingUrls(urls: string[] | undefined, assetId: string, eventType: string) {
+    if (!urls || urls.length === 0) return;
+
+    for (const url of urls) {
+      const trackingKey = `${url}-${eventType}`;
+      if (this.interstitialTrackingFired.has(trackingKey)) {
+        console.log(`[Interstitials] Skipping duplicate tracking: ${eventType} for ${assetId}`);
+        return; // if already fired, duplicate
+      }
+
+      this.interstitialTrackingFired.add(trackingKey);
+      console.log(`[Interstitials] Firing ${eventType} tracking:`, url);
+
+      fetch(url, { mode: 'no-cors', keepalive: true }).catch(() => {
+        // ignore tracking failures
+      });
+    }
+  }
+
+  private checkInterstitialQuartiles() {
+    if (!this.currentInterstitialAsset || !this.currentInterstitialEvent) return;
+
+    const asset = this.currentInterstitialAsset;
+    const assetDuration = asset.duration;
+    if (!assetDuration || assetDuration <= 0) return;
+
+    const elapsed = this.video.currentTime - this.interstitialAssetStartTime;
+    const progress = (elapsed / assetDuration) * 100;
+
+    // debug to see progress of ad
+    console.log(`[Interstitials] Quartile check - Progress: ${progress.toFixed(1)}%, elapsed: ${elapsed.toFixed(2)}s, duration: ${assetDuration}s, currentTime: ${this.video.currentTime.toFixed(2)}s, startTime: ${this.interstitialAssetStartTime.toFixed(2)}s`);
+
+    const trackingUrls = (this.currentInterstitialEvent as any)._trackingUrls;
+    if (!trackingUrls) {
+      console.warn('[SGAI] No tracking URLs in quartile check');
+      return;
+    }
+
+    if (progress >= 25 && progress < 50) {
+      this.fireTrackingUrls(trackingUrls.firstQuartile, asset.identifier, 'firstQuartile');
+    } else if (progress >= 50 && progress < 75) {
+      this.fireTrackingUrls(trackingUrls.midpoint, asset.identifier, 'midpoint');
+    } else if (progress >= 75 && progress < 100) {
+      this.fireTrackingUrls(trackingUrls.thirdQuartile, asset.identifier, 'thirdQuartile');
+    }
   }
 
   destroy() {

@@ -6,7 +6,7 @@ export default class EventEmitter {
 		this.emitter.on.apply(this, arguments);
 	}
 	off(type: string, handler: Function) {
-		this.emitter.on.apply(this, arguments);
+		this.emitter.off.apply(this, arguments);
 	}
 	emit(type: string, data?: any) {
 		this.emitter.emit.apply(this, arguments);
