@@ -40,4 +40,10 @@ export enum PlayerEvent {
 	BITRATE_CHANGE = 'bitrate_change',
 	PLAYER_STOPPED = 'player_stopped',
 	ERROR = 'error',
+
+	// Interstitial Events 
+	INTERSTITIAL_STARTED = 'interstitial_started',
+	INTERSTITIAL_ENDED = 'interstitial_ended',
+	INTERSTITIAL_ASSET_STARTED = 'interstitial_asset_started',
+	INTERSTITIAL_ASSET_ENDED = 'interstitial_asset_ended',
 }

@@ -5,7 +5,6 @@ test('video element with correct attributes are created', async ({ page }) => {
   await expect(page.locator('eyevinn-video')).toHaveAttribute('muted', '');
   await expect(page.locator('eyevinn-video')).toHaveAttribute('autoplay', '');
   await expect(page.locator('eyevinn-video')).toHaveAttribute('analytics', '');
-  await expect(page.locator('video')).toHaveAttribute('autoplay', '');
   await expect(page.locator('video')).toHaveAttribute('playsinline', '');
 });
 

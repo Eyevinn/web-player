@@ -44,9 +44,14 @@ module.exports = {
     }),
   ],
   resolve: {
+    mainFields: ['module', 'main'],
     fallback: {
       buffer: require.resolve("buffer/"),
-      stream: require.resolve("stream-browserify")
+      stream: require.resolve("stream-browserify"),
+      url: false,
+      fs: false,
+      http: false,
+      https: false
     }
   },
   devtool: 'source-map',
