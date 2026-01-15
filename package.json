@@ -31,7 +31,7 @@
     "events": "^3.3.0",
     "jest-environment-jsdom": "^28.1.3",
     "lerna": "^3.22.1",
-    "microbundle": "^0.12.4",
+    "microbundle": "^0.15.1",
     "parcel": "^2.10.3",
     "prettier": "^2.1.1",
     "sass": "^1.26.10",
