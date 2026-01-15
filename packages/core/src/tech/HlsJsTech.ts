@@ -101,10 +101,6 @@ export default class HlsJsTech extends BaseTech {
     // Capture signaling data when HLS.js loads the asset list (avoids duplicate fetch)
     this.hls.on(Hls.Events.ASSET_LIST_LOADED, this.onAssetListLoaded.bind(this));
 
-    // Debug: Log when ASSET_LIST_LOADING fires too
-    this.hls.on(Hls.Events.ASSET_LIST_LOADING, (_event, data) => {
-      console.log('[Interstitials] ASSET_LIST_LOADING:', data);
-    });
     
   }
 
@@ -325,7 +321,6 @@ export default class HlsJsTech extends BaseTech {
    * Capture signaling data when HLS.js loads asset list (no duplicate fetch needed)
    */
   private onAssetListLoaded(_event: string, data: any) {
-    console.log('[Interstitials] ASSET_LIST_LOADED event:', data);
 
     const interstitialId = data?.event?.identifier;
     const assetListResponse = data?.assetListResponse;
@@ -337,7 +332,6 @@ export default class HlsJsTech extends BaseTech {
       if (!signaling?.payload?.tracking) {
         signaling = assetListResponse['X-AD-CREATIVE-SIGNALING'];
       }
-      console.log('[Interstitials] Found signaling:', signaling);
       if (signaling?.payload?.tracking) {
         const trackingUrls: InterstitialTrackingData['trackingUrls'] = {
           start: [],
@@ -358,12 +352,10 @@ export default class HlsJsTech extends BaseTech {
         }
 
         this.assetListSignalingCache.set(interstitialId, trackingUrls);
-        console.log('[Interstitials] Cached signaling from ASSET_LIST_LOADED for:', interstitialId, trackingUrls);
 
         // If an asset is already playing, update its tracking URLs and fire start tracking
         if (this.currentInterstitialAsset && this.currentInterstitialEvent?.identifier === interstitialId) {
           (this.currentInterstitialEvent as any)._trackingUrls = trackingUrls;
-          console.log('[Interstitials] Updated tracking URLs for already-playing asset, firing start tracking');
 
           // Fire start tracking now (since onInterstitialAssetStarted already fired without URLs)
           this.fireTrackingUrls(trackingUrls.start, this.currentInterstitialAsset.identifier, 'start');
@@ -375,36 +367,19 @@ export default class HlsJsTech extends BaseTech {
   private async onInterstitialStarted(_event: string, data: { event: InterstitialEvent }) {
     const interstitialEvent = data.event;
     
-    console.log('[SGAI] *** onInterstitialStarted FIRED ***', interstitialEvent);
     
     const sessionId = `${interstitialEvent.identifier}-${Date.now()}`;
     
     if (this.currentInterstitialSessionId !== sessionId) {
       this.interstitialTrackingFired.clear();
       this.currentInterstitialSessionId = sessionId;
-      console.log('[SGAI] New interstitial session started:', sessionId);
     }
 
-    console.log('[Interstitials] Interstitial started:', interstitialEvent.identifier);
-    console.log('[Interstitials] Full event object:', interstitialEvent);
-    console.log('[Interstitials] Asset list:', interstitialEvent.assetList);
-    console.log('[Interstitials] dateRange attr:', interstitialEvent.dateRange?.attr);
-    console.log('[Interstitials] assetListUrl:', interstitialEvent.assetListUrl);
-    // Check if HLS.js exposes session/primary ID
     const ic = (this.hls as any).interstitialsController;
-    // Check assetListLoader for session info
-    console.log('[Interstitials] assetListLoader:', ic?.assetListLoader);
-    console.log('[Interstitials] assetListLoader keys:', ic?.assetListLoader ? Object.keys(ic.assetListLoader) : null);
-    // Check main hls url for primary_id
-    console.log('[Interstitials] hls.url:', this.hls.url);
-    // Check if primary ID is in the URL HLS.js is using
+
     const hlsUrl = this.hls.url;
     const primaryIdMatch = hlsUrl?.match(/_HLS_primary_id=([^&]+)/);
-    console.log('[Interstitials] Primary ID from hls.url:', primaryIdMatch?.[1]);
 
-    // Don't fetch here - ASSET_LIST_LOADED fires AFTER INTERSTITIAL_STARTED
-    // Tracking URLs will be handled in onAssetListLoaded and used in onInterstitialAssetStarted
-    console.log('[Interstitials] Waiting for ASSET_LIST_LOADED to get tracking URLs');
 
     const trackingData: InterstitialTrackingData = {
       event: interstitialEvent,
@@ -429,7 +404,6 @@ export default class HlsJsTech extends BaseTech {
     // Clear caches
     this.trackingUrlsCache.delete(interstitialEvent.identifier);
     this.assetListSignalingCache.delete(interstitialEvent.identifier);
-    console.log('[Interstitials] Interstitial session ended');
   }
 
   private async onInterstitialAssetStarted(_event: string, data: { event: InterstitialEvent; asset: InterstitialAsset }) {
@@ -441,20 +415,9 @@ export default class HlsJsTech extends BaseTech {
     
     this.interstitialAssetStartTime = 0;
 
-    console.log('[Interstitials] *** onInterstitialAssetStarted FIRED ***');
-    console.log('[Interstitials] Asset started:', asset.identifier, asset.uri);
-    console.log('[Interstitials] Asset duration:', asset.duration);
-    // Check if asset list is populated now (after HLS.js fetched it)
-    console.log('[Interstitials] Asset list at asset start:', interstitialEvent.assetList);
-    console.log('[Interstitials] Full asset object:', asset);
-    console.log('[Interstitials] Asset keys:', Object.keys(asset));
-    // Check if signaling data is on the asset
-    console.log('[Interstitials] Asset signaling:', (asset as any)['X-AD-CREATIVE-SIGNALING']);
-
     // Get tracking URLs from ASSET_LIST_LOADED cache (should be populated by now)
     let trackingUrls = this.assetListSignalingCache.get(interstitialEvent.identifier);
     if (trackingUrls) {
-      console.log('[Interstitials] Got tracking from ASSET_LIST_LOADED cache (no duplicate fetch)');
       (interstitialEvent as any)._trackingUrls = trackingUrls;
     }
 
@@ -462,17 +425,10 @@ export default class HlsJsTech extends BaseTech {
     if (!trackingUrls) {
       trackingUrls = this.extractTrackingUrls(interstitialEvent);
       if (trackingUrls) {
-        console.log('[Interstitials] Extracted tracking URLs from event data');
         (interstitialEvent as any)._trackingUrls = trackingUrls;
       }
     }
 
-    // If still no tracking URLs, log warning (don't fetch - it would create duplicate session)
-    if (!trackingUrls) {
-      console.warn('[Interstitials] WARNING: No tracking URLs available (ASSET_LIST_LOADED may not have included signaling data)');
-    }
-
-    console.log('[Interstitials] Firing start tracking URLs:', trackingUrls?.start);
 
     // Fire 'start' tracking URLs
     this.fireTrackingUrls(trackingUrls?.start, asset.identifier, 'start');
@@ -521,12 +477,10 @@ export default class HlsJsTech extends BaseTech {
       });
       
       if (!response.ok) {
-        console.warn('[Interstitials] Failed to fetch asset list, status:', response.status);
         return undefined;
       }
       
       const data = await response.json();
-      console.log('[Interstitials] Asset list response:', data);
       
       // Extract tracking from the ASSETS array
       if (data.ASSETS && Array.isArray(data.ASSETS)) {
@@ -540,7 +494,6 @@ export default class HlsJsTech extends BaseTech {
 
         for (const asset of data.ASSETS) {
           const signaling = asset['X-AD-CREATIVE-SIGNALING'];
-          console.log('[SGAI] Fetched asset signaling:', signaling);
           if (signaling?.payload?.tracking) {
             for (const trackItem of signaling.payload.tracking) {
               const type = trackItem.type;
@@ -567,8 +520,6 @@ export default class HlsJsTech extends BaseTech {
 
   private extractTrackingUrls(interstitialEvent: InterstitialEvent): InterstitialTrackingData['trackingUrls'] {
     try {
-      console.log('[Interstitials] Full interstitial event:', interstitialEvent);
-      console.log('[Interstitials] Event dateRange:', interstitialEvent.dateRange);
       
       // extract tracking from assetList
       const assetList = interstitialEvent.assetList;
@@ -584,7 +535,6 @@ export default class HlsJsTech extends BaseTech {
         for (const asset of assetList) {
           // The X-AD-CREATIVE-SIGNALING 
           const signaling = (asset as any)['X-AD-CREATIVE-SIGNALING'];
-          console.log('[Interstitials] Asset signaling:', signaling);
           if (signaling?.payload?.tracking) {
             const trackingArray = signaling.payload.tracking;
             for (const trackItem of trackingArray) {
@@ -606,12 +556,9 @@ export default class HlsJsTech extends BaseTech {
 
       const attr = interstitialEvent.dateRange?.attr;
       if (attr) {
-        console.log('[Interstitials] DateRange attributes:', attr);
         const signalingData = attr['X-AD-CREATIVE-SIGNALING'];
         if (signalingData) {
-          console.log('[Interstitials] Raw signaling data:', signalingData);
           const parsed = typeof signalingData === 'string' ? JSON.parse(signalingData) : signalingData;
-          console.log('[Interstitials] Parsed signaling:', parsed);
 
           if (parsed?.payload?.tracking) {
             const allTrackingUrls: InterstitialTrackingData['trackingUrls'] = {
@@ -648,12 +595,10 @@ export default class HlsJsTech extends BaseTech {
     for (const url of urls) {
       const trackingKey = `${url}-${eventType}`;
       if (this.interstitialTrackingFired.has(trackingKey)) {
-        console.log(`[Interstitials] Skipping duplicate tracking: ${eventType} for ${assetId}`);
         return; // if already fired, duplicate
       }
 
       this.interstitialTrackingFired.add(trackingKey);
-      console.log(`[Interstitials] Firing ${eventType} tracking:`, url);
 
       fetch(url, { mode: 'no-cors', keepalive: true }).catch(() => {
         // ignore tracking failures
@@ -671,12 +616,8 @@ export default class HlsJsTech extends BaseTech {
     const elapsed = this.video.currentTime - this.interstitialAssetStartTime;
     const progress = (elapsed / assetDuration) * 100;
 
-    // debug to see progress of ad
-    console.log(`[Interstitials] Quartile check - Progress: ${progress.toFixed(1)}%, elapsed: ${elapsed.toFixed(2)}s, duration: ${assetDuration}s, currentTime: ${this.video.currentTime.toFixed(2)}s, startTime: ${this.interstitialAssetStartTime.toFixed(2)}s`);
-
     const trackingUrls = (this.currentInterstitialEvent as any)._trackingUrls;
     if (!trackingUrls) {
-      console.warn('[SGAI] No tracking URLs in quartile check');
       return;
     }
 
