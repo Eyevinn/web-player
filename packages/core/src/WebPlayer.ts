@@ -65,31 +65,7 @@ export default class WebPlayer extends EventEmitter {
     if (this.manifestType === ManifestType.UNKNOWN) {
       throw { errorCode: ErrorCode.UNKNOWN_MANIFEST_TYPE };
     }
-    let Tech;
-    switch (this.manifestType) {
-      case ManifestType.HLS:
-        if (canPlayManifestType(ManifestType.HLS) && isSafari()) {
-          Tech = BaseTech;
-        } else {
-          Tech = (await import('./tech/HlsJsTech')).default;
-        }
-        break;
-      case ManifestType.DASH:
-        Tech = (await import('./tech/ShakaTech')).default;
-        break;
-      case ManifestType.MSS:
-        Tech = (await import('./tech/DashJsTech')).default;
-        break;
-      case ManifestType.EYEVINN_WEBRTC_CHANNEL:
-        Tech = (await import('./tech/WebRTCTech')).default;
-        break;
-      case ManifestType.EYEVINN_WHPP_CHANNEL:
-        Tech = (await import('./tech/WHPPTech')).default;
-        break;
-      case ManifestType.WHEP:
-        Tech = (await import('./tech/WHEPTech')).default;
-        break;
-    }
+    const Tech = await this.loadTech();
     if (this._readyState === ReadyState.UNREADY) {
       // load aborted
       return;
@@ -103,6 +79,31 @@ export default class WebPlayer extends EventEmitter {
 
   private onEvent(type, data) {
     this.emit(type, data);
+  }
+
+  private async loadTech(): Promise<typeof BaseTech> {
+    if (this.manifestType === ManifestType.HLS) {
+      if (canPlayManifestType(ManifestType.HLS) && isSafari()) {
+        return BaseTech;
+      }
+      return (await import('./tech/HlsJsTech')).default;
+    }
+    if (this.manifestType === ManifestType.DASH) {
+      return (await import('./tech/ShakaTech')).default;
+    }
+    if (this.manifestType === ManifestType.MSS) {
+      return (await import('./tech/DashJsTech')).default;
+    }
+    if (this.manifestType === ManifestType.EYEVINN_WEBRTC_CHANNEL) {
+      return (await import('./tech/WebRTCTech')).default;
+    }
+    if (this.manifestType === ManifestType.EYEVINN_WHPP_CHANNEL) {
+      return (await import('./tech/WHPPTech')).default;
+    }
+    if (this.manifestType === ManifestType.WHEP) {
+      return (await import('./tech/WHEPTech')).default;
+    }
+    return BaseTech;
   }
 
   get readyState(): ReadyState {
