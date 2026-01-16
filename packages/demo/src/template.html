@@ -26,6 +26,11 @@
     </header>
     <div id="ui-container">
       <section id="example-streams"></section>
+      <section id="sgai-controls" style="display: none;">
+        <label for="sgai-duration">Break Duration (s)</label>
+        <input type="number" id="sgai-duration" value="10" min="1" max="120" style="width: 60px; margin-right: 10px;" />
+        <button class="input-button" id="sgai-adbreak-button">Trigger SGAI Ad Break</button>
+      </section>
       <section class="input-section">
         <input
           type="text"

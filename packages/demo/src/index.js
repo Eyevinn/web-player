@@ -11,6 +11,9 @@ import { PlayerAnalyticsConnector } from '@eyevinn/player-analytics-client-sdk-w
 
 const EmbedVersion = "0.9.4";
 
+const SGAI_BASE_URL = "https://eyevinn-sgaitest.eyevinn-sgai-ad-proxy.auto.prod.osaas.io";
+const SGAI_STREAM_URL = `${SGAI_BASE_URL}/loop/master.m3u8`;
+
 const ExampleStreams = [
   { title: "HLS VOD", url: "https://lab.cdn.eyevinn.technology/osc/osc-reel/a4e1156e-f872-455f-9f1f-be73b5effba8/index.m3u8" },
   { title: "MPD VOD", url: "https://lab.cdn.eyevinn.technology/osc/osc-reel/a4e1156e-f872-455f-9f1f-be73b5effba8/manifest.mpd" },
@@ -18,6 +21,7 @@ const ExampleStreams = [
   { title: "HLS LIVE", url: "https://d2fz24s2fts31b.cloudfront.net/out/v1/6484d7c664924b77893f9b4f63080e5d/manifest.m3u8" },
   { title: "MPD LIVE", url: "https://d2fz24s2fts31b.cloudfront.net/out/v1/3b6879c0836346c2a44c9b4b33520f4e/manifest.mpd" },
   { title: "HLS LIVE SSAI", url: "https://edfaeed9c7154a20828a30a26878ade0.mediatailor.eu-west-1.amazonaws.com/v1/master/1b8a07d9a44fe90e52d5698704c72270d177ae74/AdTest/master.m3u8" },
+  { title: "HLS LIVE SGAI", url: "https://eyevinn-sgaitest.eyevinn-sgai-ad-proxy.auto.prod.osaas.io/loop/master.m3u8" },
   // { title: "WHEP", url: "https://srtwhep.lab.sto.eyevinn.technology:8443/channel" }
   // { title: "WEBRTC", url: "https://broadcaster.lab.sto.eyevinn.technology:8443/broadcaster/channel/sthlm" }
 ];
@@ -76,6 +80,9 @@ async function main() {
   const shareButton = document.querySelector('#share-button');
   const embedButton = document.querySelector('#embed-button');
   const epasUrlInput = document.querySelector('#epas-eventsink-url');
+  const sgaiControls = document.querySelector('#sgai-controls');
+  const sgaiAdBreakButton = document.querySelector('#sgai-adbreak-button');
+  const sgaiDurationInput = document.querySelector('#sgai-duration');
   renderExampleButtons();
 
   if (!manifestInput.value) {
@@ -137,6 +144,37 @@ async function main() {
   let metadataReporter;
   let playerAnalytics;
 
+  function updateSgaiControls(manifestUrl) {
+    if (manifestUrl === SGAI_STREAM_URL) {
+      sgaiControls.style.display = 'block';
+    } else {
+      sgaiControls.style.display = 'none';
+    }
+  }
+
+  async function triggerSgaiAdBreak() {
+    try {
+      sgaiAdBreakButton.disabled = true;
+      sgaiAdBreakButton.textContent = 'Triggering...';
+      const duration = sgaiDurationInput.value || 10;
+      const adBreakUrl = `${SGAI_BASE_URL}/command?in=0&dur=${duration}&pod=1`;
+      const response = await fetch(adBreakUrl);
+      if (response.ok) {
+        sgaiAdBreakButton.textContent = 'Ad Break Triggered!';
+      } else {
+        sgaiAdBreakButton.textContent = 'Failed to trigger';
+      }
+    } catch (err) {
+      console.error('Failed to trigger SGAI ad break', err);
+      sgaiAdBreakButton.textContent = 'Failed to trigger';
+    } finally {
+      setTimeout(() => {
+        sgaiAdBreakButton.disabled = false;
+        sgaiAdBreakButton.textContent = 'Trigger SGAI Ad Break';
+      }, 2000);
+    }
+  }
+
   async function load() {  
     try {
       if (epasUrlInput.value) {
@@ -171,6 +209,7 @@ async function main() {
       });
 
       populateQualityPicker();
+      updateSgaiControls(manifestInput.value);
     } catch (err) {
       console.error(err);
       analyticsInitiated && playerAnalytics.deinit();
@@ -241,6 +280,10 @@ async function main() {
     <eyevinn-video source="${manifestInput.value}" ${autoplayCheckbox.checked ? 'muted autoplay' : ''} ></eyevinn-video>`;
     updateEmbedStatus('Copy code below ⬇️');
     embedPopUp(embedString);
+  };
+
+  sgaiAdBreakButton.onclick = () => {
+    triggerSgaiAdBreak();
   };
 
   snackbarCloseButton.onclick = () => {
