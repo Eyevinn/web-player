@@ -19,47 +19,597 @@
   <body>
     <header>
       <picture>
-        <source srcset="./logo-darkmode.png" media="(prefers-color-scheme: dark)">
+        <source
+          srcset="./logo-darkmode.png"
+          media="(prefers-color-scheme: dark)"
+        />
         <img src="./logo-lightmode.png" />
       </picture>
       <h1>WebPlayer@<%= htmlWebpackPlugin.options.title %></h1>
     </header>
     <div id="ui-container">
-      <section id="example-streams"></section>
+      <div class="player-controls-wrapper">
       <section class="input-section">
+          <div class="input-with-dropdown">
         <input
           type="text"
           name="manifest-url"
           id="manifest-input"
-          placeholder="Paste a Stream URI Here..."
+              placeholder="Paste a stream URL here or select from examples..."
+              autocomplete="off"
         />
-        <div class="input-buttons">
-          <button class="input-button" id="load-button">LOAD</button>
-          <div class="autoplay-wrapper">
-            <input type="checkbox" name="autoplay" id="autoplay" />
-            <label for="autoplay">Autoplay</label>
+            <button
+              type="button"
+              id="dropdown-toggle"
+              class="dropdown-toggle"
+              aria-label="Select example stream"
+            >
+              ▼
+            </button>
+            <div
+              id="example-streams-dropdown"
+              class="example-streams-dropdown hidden"
+            ></div>
           </div>
-          <button class="input-button" id="share-button">Share 📋</button>
-          <button class="input-button" id="embed-button">Embed 📋</button>
+        <div class="input-buttons">
+            <div class="input-buttons-right">
+              <button class="input-button" id="options-button">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="
+                    display: inline-block;
+                    vertical-align: middle;
+                    margin-right: 4px;
+                  "
+                >
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                  ></path>
+                </svg>
+                Options
+              </button>
+              <button class="input-button" id="share-button">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="
+                    display: inline-block;
+                    vertical-align: middle;
+                    margin-right: 4px;
+                  "
+                >
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                Share
+              </button>
+              <button class="input-button input-button-autoplay" id="autoplay-button">
+                <svg
+                  class="autoplay-checkmark"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  style="display: none; margin-right: 6px;"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Autoplay
+              </button>
+              <button class="input-button" id="load-button">LOAD</button>
+            </div>
+          </div>
+        </section>
+        <input type="hidden" id="epas-eventsink-url" />
         </div>
-      </section>
       <div id="player"></div>
-      <div style="margin-top: 10px">
-        <label>Video Quality</label>
-        <select id="level" label="Quality">
-          Video Quality
-          <option value="-1">AUTO</option>
-        </select>
+      <div class="log-section" id="log-section">
+        <div class="log-container" id="log-container">
+          <div class="log-header">
+            <span class="log-title">Logs</span>
+          </div>
+          <div class="log-content" id="log-content"></div>
+          <div class="log-footer">
+            <button class="log-clear" id="log-clear" type="button">
+              Clear
+            </button>
+            <button class="log-toggle" id="log-toggle" type="button">
+              <span class="log-toggle-text">Expand</span>
+              <span class="log-toggle-icon">▼</span>
+            </button>
+          </div>
+        </div>
       </div>
-      <div>
-        <label>EPAS eventsink URL</label>
-        <input type="text" id="epas-eventsink-url" size="60" />
+        <div class="player-debug-section" id="player-debug-section">
+          <div class="tabs">
+          <button class="tab-button" data-tab="segment-timeline">
+            Segment Timeline
+          </button>
+          <button class="tab-button active" data-tab="player-debug">
+            Player Debug
+          </button>
+          <button class="tab-button" data-tab="network-analysis">
+            Network Analysis
+          </button>
+          <button class="tab-button" data-tab="network-monitor">
+            Network Monitor
+          </button>
+        </div>
+
+        <div class="tab-content" id="segment-timeline-tab">
+          <div class="segment-timeline-container">
+            <div class="segment-timeline-controls">
+              <label>
+                <input type="checkbox" id="segment-timeline-sliding-window" checked />
+                Sliding Window
+              </label>
+              <label>
+                Window Size:
+                <select id="segment-timeline-window-size">
+                  <option value="2">2s</option>
+                  <option value="5">5s</option>
+                  <option value="10" selected>10s</option>
+                  <option value="20">20s</option>
+                  <option value="30">30s</option>
+                  <option value="60">60s</option>
+                  <option value="120">120s</option>
+                  <option value="-1">ALL</option>
+                </select>
+              </label>
+            </div>
+            <div class="segment-timeline-wrapper">
+              <div class="segment-timeline" id="segment-timeline"></div>
+            </div>
+            <div class="segment-timeline-info">
+              <div>Current Time: <span id="segment-timeline-current-time">0.00</span>s</div>
+              <div>Segments: <span id="segment-timeline-count">0</span></div>
+            </div>
+            <div class="segment-info-panel" id="segment-info-panel">
+              <div class="segment-info-header">Segment Information</div>
+              <div class="segment-info-content" id="segment-info-content">
+                <div class="segment-info-item">
+                  <span class="segment-info-label">Segment:</span>
+                  <span class="segment-info-value" id="segment-info-index">-</span>
+                </div>
+                <div class="segment-info-item">
+                  <span class="segment-info-label">Start Time:</span>
+                  <span class="segment-info-value" id="segment-info-start">-</span>
+                </div>
+                <div class="segment-info-item">
+                  <span class="segment-info-label">Duration:</span>
+                  <span class="segment-info-value" id="segment-info-duration">-</span>
+                </div>
+                <div class="segment-info-item">
+                  <span class="segment-info-label">Bitrate:</span>
+                  <span class="segment-info-value" id="segment-info-bitrate">-</span>
+                </div>
+                <div class="segment-info-item">
+                  <span class="segment-info-label">Size:</span>
+                  <span class="segment-info-value" id="segment-info-size">-</span>
+                </div>
+                <div class="segment-info-item segment-info-url">
+                  <span class="segment-info-label">URL:</span>
+                  <span class="segment-info-value" id="segment-info-url">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content active" id="player-debug-tab">
+          <div class="debug-grid">
+            <div class="debug-panel">
+              <h3>Playback State</h3>
+              <div class="metric">
+                <span class="metric-label">Current Time</span>
+                <span class="metric-value" id="currentTime">0.00s</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Duration</span>
+                <span class="metric-value" id="duration">-</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Paused</span>
+                <span class="metric-value" id="paused">true</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Ended</span>
+                <span class="metric-value" id="ended">false</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Playback Rate</span>
+                <span class="metric-value" id="playbackRate">1.0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Volume</span>
+                <span class="metric-value" id="volume">1.0</span>
+              </div>
+            </div>
+
+            <div class="debug-panel">
+              <h3>Network State</h3>
+              <div class="metric">
+                <span class="metric-label">Network State</span>
+                <span class="metric-value" id="networkState">-</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Ready State</span>
+                <span class="metric-value" id="readyState">-</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Seeking</span>
+                <span class="metric-value" id="seeking">false</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Error</span>
+                <span class="metric-value" id="error">none</span>
+              </div>
+            </div>
+
+            <div class="debug-panel">
+              <h3>Video Quality</h3>
+              <div class="metric">
+                <span class="metric-label">Resolution</span>
+                <span class="metric-value" id="resolution">-</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Total Frames</span>
+                <span class="metric-value" id="totalFrames">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Dropped Frames</span>
+                <span class="metric-value" id="droppedFrames">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Corrupted Frames</span>
+                <span class="metric-value" id="corruptedFrames">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Drop Rate</span>
+                <span class="metric-value" id="dropRate">0.00%</span>
+              </div>
+            </div>
+
+            <div class="debug-panel">
+              <h3>Buffer Info</h3>
+              <div class="metric">
+                <span class="metric-label">Buffer Ranges</span>
+                <span class="metric-value" id="bufferRanges">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Buffer Ahead</span>
+                <span class="metric-value" id="bufferAhead">0.00s</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Seekable Ranges</span>
+                <span class="metric-value" id="seekableRanges">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Played Ranges</span>
+                <span class="metric-value" id="playedRanges">0</span>
+              </div>
+              <div class="buffer-visualization">
+                <div class="buffer-bar" id="bufferBar"></div>
+              </div>
+            </div>
+
+            <div class="debug-panel">
+              <h3>Media Info</h3>
+              <div class="metric">
+                <span class="metric-label">Source URL</span>
+                <span
+                  class="metric-value"
+                  id="sourceUrl"
+                  style="word-break: break-all; font-size: 11px"
+                  >-</span
+                >
+              </div>
+              <div class="metric">
+                <span class="metric-label">Can Play Type</span>
+                <span class="metric-value" id="canPlayType">-</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Video Tracks</span>
+                <span class="metric-value" id="videoTracks">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Audio Tracks</span>
+                <span class="metric-value" id="audioTracks">0</span>
+              </div>
+            </div>
+
+            <div class="debug-panel">
+              <h3>Performance</h3>
+              <div class="metric">
+                <span class="metric-label">Creation Time</span>
+                <span class="metric-value" id="creationTime">-</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Total Video Frames</span>
+                <span class="metric-value" id="totalVideoFrames">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">FPS (Estimated)</span>
+                <span class="metric-value" id="fps">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Stall Count</span>
+                <span class="metric-value" id="stallCount">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="network-analysis-tab">
+          <div class="debug-grid">
+            <div class="debug-panel">
+              <h3>Network Statistics</h3>
+              <div class="metric">
+                <span class="metric-label">Total Requests</span>
+                <span class="metric-value" id="na-totalRequests">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Manifest Requests</span>
+                <span class="metric-value" id="na-manifestRequests">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Segment Requests</span>
+                <span class="metric-value" id="na-segmentRequests">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Failed Requests</span>
+                <span class="metric-value" id="na-failedRequests">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Avg Segment Time</span>
+                <span class="metric-value" id="na-avgSegmentTime">0ms</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Total Data</span>
+                <span class="metric-value" id="na-totalData">0 KB</span>
+              </div>
+            </div>
+
+            <div class="debug-panel">
+              <h3>Current Variant Info</h3>
+              <div class="metric">
+                <span class="metric-label">Active Bandwidth</span>
+                <span class="metric-value" id="na-activeBandwidth">-</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Active Resolution</span>
+                <span class="metric-value" id="na-activeResolution">-</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Codec</span>
+                <span class="metric-value" id="na-activeCodec">-</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Bitrate Switches</span>
+                <span class="metric-value" id="na-bitrateSwitch">0</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Last Segment URL</span>
+                <span
+                  class="metric-value"
+                  id="na-lastSegment"
+                  style="word-break: break-all; font-size: 10px"
+                  >-</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="network-monitor-tab">
+          <div class="network-stats-bar">
+            <div class="stat-item">
+              <div class="stat-label">Total Requests</div>
+              <div class="stat-value" id="totalRequests">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Manifests</div>
+              <div class="stat-value" id="manifestCount">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Segments</div>
+              <div class="stat-value" id="segmentCount">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Total Data</div>
+              <div class="stat-value" id="totalData">0</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Avg Duration</div>
+              <div class="stat-value" id="avgDuration">0ms</div>
+            </div>
+          </div>
+          <div class="network-controls">
+            <button class="network-button" id="clear-network-log">
+              Clear Log
+            </button>
+            <button class="network-button" id="export-network-data">
+              Export JSON
+            </button>
+            <div class="filter-buttons">
+              <button class="filter-button active" data-filter="all">
+                All
+              </button>
+              <button class="filter-button" data-filter="manifest">
+                Manifests
+              </button>
+              <button class="filter-button" data-filter="segment">
+                Segments
+              </button>
+            </div>
+          </div>
+          <div class="network-table-container">
+            <table class="network-table">
+              <thead>
+                <tr>
+                  <th style="width: 60px">#</th>
+                  <th style="width: 80px">Time</th>
+                  <th style="width: 100px">Type</th>
+                  <th>URL</th>
+                  <th style="width: 100px">Size</th>
+                  <th style="width: 100px">Duration</th>
+                  <th style="width: 80px">Status</th>
+                </tr>
+              </thead>
+              <tbody id="network-table-body">
+                <tr>
+                  <td colspan="7" class="no-requests">
+                    No requests captured yet. Load a stream to start monitoring.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <div id="snackbar">
-        <button id="snackbar-close-button" type="button">
+      <div id="eventsink-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Options</h2>
+            <button
+              class="modal-close"
+              id="eventsink-modal-close"
+              type="button"
+            >
+              &times;
+            </button>
+          </div>
+          <div class="modal-body">
+            <div style="margin-bottom: 20px">
+              <label for="eventsink-url-input">EPAS Eventsink URL:</label>
+              <input
+                type="text"
+                id="eventsink-url-input"
+                placeholder="Enter EPAS eventsink URL..."
+                size="60"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              class="modal-button"
+              id="eventsink-save-button"
+              type="button"
+            >
+              Save
+            </button>
+            <button
+              class="modal-button modal-button-cancel"
+              id="eventsink-cancel-button"
+              type="button"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="share-modal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Share</h2>
+            <button
+              class="modal-close"
+              id="share-modal-close"
+              type="button"
+            >
           &times;
         </button>
-        <span id="embed-code"></span>
+          </div>
+          <div class="modal-body">
+            <div style="margin-bottom: 20px">
+              <label for="share-link-input">Share Link:</label>
+              <div class="input-with-copy">
+                <input
+                  type="text"
+                  id="share-link-input"
+                  readonly
+                  size="60"
+                />
+                <button
+                  class="copy-button"
+                  id="copy-share-link-button"
+                  type="button"
+                  title="Copy to clipboard"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path
+                      d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label for="embed-link-input">Embed Code:</label>
+              <div class="input-with-copy">
+                <input
+                  type="text"
+                  id="embed-link-input"
+                  readonly
+                  size="60"
+                />
+                <button
+                  class="copy-button"
+                  id="copy-embed-link-button"
+                  type="button"
+                  title="Copy to clipboard"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path
+                      d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </body>
