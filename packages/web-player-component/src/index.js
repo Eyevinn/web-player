@@ -15,33 +15,37 @@ const ComponentAttribute = {
     ANALYTICS: 'analytics',
     EPAS_URL: 'epas-url',
     DISABLE_LEVEL_CAP: 'disable-level-cap',
-  }
-}
+  },
+};
 
-const isSet = (value) => value === "" || !!value;
+const isSet = (value) => value === '' || !!value;
 
 export default class PlayerComponent extends HTMLElement {
   static get observedAttributes() {
     return Object.values(ComponentAttribute.DYNAMIC);
-  };
+  }
   constructor() {
     super();
     const wrapper = this.setupDOM();
 
     // if we only want to play when in view, init observer
     const autoplay = this.getAttribute(ComponentAttribute.DYNAMIC.AUTOPLAY);
-    const autoplayVisible = this.getAttribute(ComponentAttribute.STATIC.AUTOPLAY_VISIBLE);
+    const autoplayVisible = this.getAttribute(
+      ComponentAttribute.STATIC.AUTOPLAY_VISIBLE
+    );
     if (!isSet(autoplay) && isSet(autoplayVisible)) {
       this.observer = new IntersectionObserver(this.inViewHandler.bind(this));
       this.observer.observe(this.video);
     }
 
-    const disablePlayerSizeLevelCap = this.getAttribute(ComponentAttribute.STATIC.DISABLE_LEVEL_CAP);
+    const disablePlayerSizeLevelCap = this.getAttribute(
+      ComponentAttribute.STATIC.DISABLE_LEVEL_CAP
+    );
     this.setupPlayer(wrapper, disablePlayerSizeLevelCap);
 
     this.setupAnalytics({
       enabled: this.getAttribute(ComponentAttribute.STATIC.ANALYTICS),
-      epasUrl: this.getAttribute(ComponentAttribute.STATIC.EPAS_URL)
+      epasUrl: this.getAttribute(ComponentAttribute.STATIC.EPAS_URL),
     });
 
     this.setupPlayerEventListener();
@@ -67,12 +71,12 @@ export default class PlayerComponent extends HTMLElement {
   setupPlayer(wrapper, disablePlayerSizeLevelCap) {
     this.player = new WebPlayer({
       video: this.video,
-      disablePlayerSizeLevelCap: !!disablePlayerSizeLevelCap
+      disablePlayerSizeLevelCap: !!disablePlayerSizeLevelCap,
     });
     renderEyevinnSkin({
       root: wrapper,
       player: this.player,
-      castAppId: {}
+      castAppId: {},
     });
   }
 
@@ -113,7 +117,7 @@ export default class PlayerComponent extends HTMLElement {
     if (!this.playerAnalytics) return;
     try {
       await this.playerAnalytics.init({
-        sessionId: `${window.location.hostname}-${Date.now()}`
+        sessionId: `${window.location.hostname}-${Date.now()}`,
       });
     } catch (err) {
       console.error(err);
@@ -126,13 +130,16 @@ export default class PlayerComponent extends HTMLElement {
     if (!this.playerAnalytics) return;
     this.playerAnalytics.load(this.video);
 
-    this.player.on(PlayerEvent.LOADED_METADATA, this.metadataReporter = () => {
-      this.playerAnalytics.reportMetadata({
-        live: this.player.isLive,
-        contentUrl: this.getAttribute(ComponentAttribute.DYNAMIC.SOURCE),
-      });
-      this.player.off(PlayerEvent.LOADED_METADATA, this.metadataReporter);
-    })
+    this.player.on(
+      PlayerEvent.LOADED_METADATA,
+      (this.metadataReporter = () => {
+        this.playerAnalytics.reportMetadata({
+          live: this.player.isLive,
+          contentUrl: this.getAttribute(ComponentAttribute.DYNAMIC.SOURCE),
+        });
+        this.player.off(PlayerEvent.LOADED_METADATA, this.metadataReporter);
+      })
+    );
   }
 
   async attributeChangedCallback(name) {
@@ -154,9 +161,8 @@ export default class PlayerComponent extends HTMLElement {
           this.video.autoplay = true;
           this.player.play();
         }
-      }
-      else {
-        console.error("Invalid source was provided to <eyevinn-video> element");
+      } else {
+        console.error('Invalid source was provided to <eyevinn-video> element');
       }
     }
     if (name === ComponentAttribute.DYNAMIC.MUTED) {
@@ -180,14 +186,12 @@ export default class PlayerComponent extends HTMLElement {
   }
 
   inViewHandler(entries) {
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       if (entry.isIntersecting) {
         this.video.muted = true;
         this.video.autoplay = true;
         this.player.play();
-      } else if (
-        this.player.isPlaying && !entry.isIntersecting
-      ) {
+      } else if (this.player.isPlaying && !entry.isIntersecting) {
         this.player.pause();
       }
     });

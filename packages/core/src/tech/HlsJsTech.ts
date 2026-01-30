@@ -55,23 +55,29 @@ export default class HlsJsTech extends BaseTech {
   private isLiveFlag: boolean;
   private playlistDuration = 0;
 
-  
   private currentInterstitialAsset: InterstitialAsset | null = null;
   private currentInterstitialEvent: InterstitialEvent | null = null;
   private interstitialTrackingFired: Set<string> = new Set();
   private interstitialAssetStartTime: number = 0;
   private currentInterstitialSessionId: string | null = null;
-  private trackingUrlsCache: Map<string, Promise<InterstitialTrackingData['trackingUrls']>> = new Map();
+  private trackingUrlsCache: Map<
+    string,
+    Promise<InterstitialTrackingData['trackingUrls']>
+  > = new Map();
   private isPlayingAd: boolean = false;
   // Cache for signaling data captured from HLS.js asset list loads
-  private assetListSignalingCache: Map<string, InterstitialTrackingData['trackingUrls']> = new Map();
-
+  private assetListSignalingCache: Map<
+    string,
+    InterstitialTrackingData['trackingUrls']
+  > = new Map();
 
   constructor(opts: IWebPlayerOptions) {
     super(opts);
 
     const conf = Object.assign({}, DEFAULT_CONFIG, {
       capLevelToPlayerSize: !opts.disablePlayerSizeLevelCap,
+      // enable HLS.js debug mode when requested by the player options
+      debug: !!(opts && (opts as any).debug),
     });
     this.hls = new Hls(conf);
 
@@ -92,16 +98,28 @@ export default class HlsJsTech extends BaseTech {
     this.hls.on(Hls.Events.LEVEL_SWITCHED, this.onBitrateChange.bind(this));
     this.hls.on(Hls.Events.ERROR, this.onErrorEvent.bind(this));
 
-    
-    this.hls.on(Hls.Events.INTERSTITIAL_STARTED, this.onInterstitialStarted.bind(this));
-    this.hls.on(Hls.Events.INTERSTITIAL_ENDED, this.onInterstitialEnded.bind(this));
-    this.hls.on(Hls.Events.INTERSTITIAL_ASSET_STARTED, this.onInterstitialAssetStarted.bind(this));
-    this.hls.on(Hls.Events.INTERSTITIAL_ASSET_ENDED, this.onInterstitialAssetEnded.bind(this));
+    this.hls.on(
+      Hls.Events.INTERSTITIAL_STARTED,
+      this.onInterstitialStarted.bind(this)
+    );
+    this.hls.on(
+      Hls.Events.INTERSTITIAL_ENDED,
+      this.onInterstitialEnded.bind(this)
+    );
+    this.hls.on(
+      Hls.Events.INTERSTITIAL_ASSET_STARTED,
+      this.onInterstitialAssetStarted.bind(this)
+    );
+    this.hls.on(
+      Hls.Events.INTERSTITIAL_ASSET_ENDED,
+      this.onInterstitialAssetEnded.bind(this)
+    );
 
     // Capture signaling data when HLS.js loads the asset list (avoids duplicate fetch)
-    this.hls.on(Hls.Events.ASSET_LIST_LOADED, this.onAssetListLoaded.bind(this));
-
-    
+    this.hls.on(
+      Hls.Events.ASSET_LIST_LOADED,
+      this.onAssetListLoaded.bind(this)
+    );
   }
 
   load(src: string): Promise<void> {
@@ -117,7 +135,6 @@ export default class HlsJsTech extends BaseTech {
       });
     });
   }
-
 
   private removeUnsupportedLevels() {
     const unsupportedLevelIndex = this.hls.levels.findIndex((level) => {
@@ -321,14 +338,14 @@ export default class HlsJsTech extends BaseTech {
    * Capture signaling data when HLS.js loads asset list (no duplicate fetch needed)
    */
   private onAssetListLoaded(_event: string, data: any) {
-
     const interstitialId = data?.event?.identifier;
     const assetListResponse = data?.assetListResponse;
 
     if (interstitialId && assetListResponse) {
       // Extract signaling data from HLS.js's fetch response
       // Check ASSETS array first (where tracking URLs actually are), then top level
-      let signaling = assetListResponse.ASSETS?.[0]?.['X-AD-CREATIVE-SIGNALING'];
+      let signaling =
+        assetListResponse.ASSETS?.[0]?.['X-AD-CREATIVE-SIGNALING'];
       if (!signaling?.payload?.tracking) {
         signaling = assetListResponse['X-AD-CREATIVE-SIGNALING'];
       }
@@ -345,31 +362,42 @@ export default class HlsJsTech extends BaseTech {
           const type = trackItem.type;
           const urls = trackItem.urls || [];
           if (type === 'start') trackingUrls.start.push(...urls);
-          else if (type === 'firstQuartile') trackingUrls.firstQuartile.push(...urls);
+          else if (type === 'firstQuartile')
+            trackingUrls.firstQuartile.push(...urls);
           else if (type === 'midpoint') trackingUrls.midpoint.push(...urls);
-          else if (type === 'thirdQuartile') trackingUrls.thirdQuartile.push(...urls);
+          else if (type === 'thirdQuartile')
+            trackingUrls.thirdQuartile.push(...urls);
           else if (type === 'complete') trackingUrls.complete.push(...urls);
         }
 
         this.assetListSignalingCache.set(interstitialId, trackingUrls);
 
         // If an asset is already playing, update its tracking URLs and fire start tracking
-        if (this.currentInterstitialAsset && this.currentInterstitialEvent?.identifier === interstitialId) {
+        if (
+          this.currentInterstitialAsset &&
+          this.currentInterstitialEvent?.identifier === interstitialId
+        ) {
           (this.currentInterstitialEvent as any)._trackingUrls = trackingUrls;
 
           // Fire start tracking now (since onInterstitialAssetStarted already fired without URLs)
-          this.fireTrackingUrls(trackingUrls.start, this.currentInterstitialAsset.identifier, 'start');
+          this.fireTrackingUrls(
+            trackingUrls.start,
+            this.currentInterstitialAsset.identifier,
+            'start'
+          );
         }
       }
     }
   }
 
-  private async onInterstitialStarted(_event: string, data: { event: InterstitialEvent }) {
+  private async onInterstitialStarted(
+    _event: string,
+    data: { event: InterstitialEvent }
+  ) {
     const interstitialEvent = data.event;
-    
-    
+
     const sessionId = `${interstitialEvent.identifier}-${Date.now()}`;
-    
+
     if (this.currentInterstitialSessionId !== sessionId) {
       this.interstitialTrackingFired.clear();
       this.currentInterstitialSessionId = sessionId;
@@ -380,7 +408,6 @@ export default class HlsJsTech extends BaseTech {
     const hlsUrl = this.hls.url;
     const primaryIdMatch = hlsUrl?.match(/_HLS_primary_id=([^&]+)/);
 
-
     const trackingData: InterstitialTrackingData = {
       event: interstitialEvent,
       trackingUrls: (interstitialEvent as any)._trackingUrls,
@@ -389,7 +416,10 @@ export default class HlsJsTech extends BaseTech {
     this.emit(PlayerEvent.INTERSTITIAL_STARTED, trackingData);
   }
 
-  private onInterstitialEnded(_event: string, data: { event: InterstitialEvent }) {
+  private onInterstitialEnded(
+    _event: string,
+    data: { event: InterstitialEvent }
+  ) {
     const interstitialEvent = data.event;
 
     const trackingData: InterstitialTrackingData = {
@@ -400,23 +430,27 @@ export default class HlsJsTech extends BaseTech {
     this.currentInterstitialAsset = null;
     this.currentInterstitialEvent = null;
     this.currentInterstitialSessionId = null;
-    
+
     // Clear caches
     this.trackingUrlsCache.delete(interstitialEvent.identifier);
     this.assetListSignalingCache.delete(interstitialEvent.identifier);
   }
 
-  private async onInterstitialAssetStarted(_event: string, data: { event: InterstitialEvent; asset: InterstitialAsset }) {
+  private async onInterstitialAssetStarted(
+    _event: string,
+    data: { event: InterstitialEvent; asset: InterstitialAsset }
+  ) {
     const { event: interstitialEvent, asset } = data;
     this.currentInterstitialAsset = asset;
     this.currentInterstitialEvent = interstitialEvent;
-    this.isPlayingAd = true;  
-    
-    
+    this.isPlayingAd = true;
+
     this.interstitialAssetStartTime = 0;
 
     // Get tracking URLs from ASSET_LIST_LOADED cache (should be populated by now)
-    let trackingUrls = this.assetListSignalingCache.get(interstitialEvent.identifier);
+    let trackingUrls = this.assetListSignalingCache.get(
+      interstitialEvent.identifier
+    );
     if (trackingUrls) {
       (interstitialEvent as any)._trackingUrls = trackingUrls;
     }
@@ -428,7 +462,6 @@ export default class HlsJsTech extends BaseTech {
         (interstitialEvent as any)._trackingUrls = trackingUrls;
       }
     }
-
 
     // Fire 'start' tracking URLs
     this.fireTrackingUrls(trackingUrls?.start, asset.identifier, 'start');
@@ -446,7 +479,10 @@ export default class HlsJsTech extends BaseTech {
     this.emit(PlayerEvent.INTERSTITIAL_ASSET_STARTED, trackingData);
   }
 
-  private onInterstitialAssetEnded(_event: string, data: { event: InterstitialEvent; asset: InterstitialAsset }) {
+  private onInterstitialAssetEnded(
+    _event: string,
+    data: { event: InterstitialEvent; asset: InterstitialAsset }
+  ) {
     const { event: interstitialEvent, asset } = data;
 
     // Use tracking URLs stored on the event
@@ -466,22 +502,24 @@ export default class HlsJsTech extends BaseTech {
     this.currentInterstitialAsset = null;
     this.currentInterstitialEvent = null;
     this.interstitialAssetStartTime = 0;
-    this.isPlayingAd = false;  // clear the ad playing flag
+    this.isPlayingAd = false; // clear the ad playing flag
   }
 
-  private async fetchTrackingFromAssetListUrl(assetListUrl: string): Promise<InterstitialTrackingData['trackingUrls']> {
+  private async fetchTrackingFromAssetListUrl(
+    assetListUrl: string
+  ): Promise<InterstitialTrackingData['trackingUrls']> {
     try {
       const response = await fetch(assetListUrl, {
-        headers: { 'Accept': 'application/json' },
-        cache: 'no-store'  
+        headers: { Accept: 'application/json' },
+        cache: 'no-store',
       });
-      
+
       if (!response.ok) {
         return undefined;
       }
-      
+
       const data = await response.json();
-      
+
       // Extract tracking from the ASSETS array
       if (data.ASSETS && Array.isArray(data.ASSETS)) {
         const allTrackingUrls: InterstitialTrackingData['trackingUrls'] = {
@@ -499,28 +537,38 @@ export default class HlsJsTech extends BaseTech {
               const type = trackItem.type;
               const urls = trackItem.urls || [];
               if (type === 'start') allTrackingUrls.start.push(...urls);
-              else if (type === 'firstQuartile') allTrackingUrls.firstQuartile.push(...urls);
-              else if (type === 'midpoint') allTrackingUrls.midpoint.push(...urls);
-              else if (type === 'thirdQuartile') allTrackingUrls.thirdQuartile.push(...urls);
-              else if (type === 'complete') allTrackingUrls.complete.push(...urls);
+              else if (type === 'firstQuartile')
+                allTrackingUrls.firstQuartile.push(...urls);
+              else if (type === 'midpoint')
+                allTrackingUrls.midpoint.push(...urls);
+              else if (type === 'thirdQuartile')
+                allTrackingUrls.thirdQuartile.push(...urls);
+              else if (type === 'complete')
+                allTrackingUrls.complete.push(...urls);
             }
           }
         }
 
         if (allTrackingUrls.start.length > 0) {
-          console.log('[Interstitials] Successfully extracted tracking URLs from asset list');
+          console.log(
+            '[Interstitials] Successfully extracted tracking URLs from asset list'
+          );
           return allTrackingUrls;
         }
       }
     } catch (e) {
-      console.warn('[Interstitials] Failed to fetch tracking from asset list URL:', e);
+      console.warn(
+        '[Interstitials] Failed to fetch tracking from asset list URL:',
+        e
+      );
     }
     return undefined;
   }
 
-  private extractTrackingUrls(interstitialEvent: InterstitialEvent): InterstitialTrackingData['trackingUrls'] {
+  private extractTrackingUrls(
+    interstitialEvent: InterstitialEvent
+  ): InterstitialTrackingData['trackingUrls'] {
     try {
-      
       // extract tracking from assetList
       const assetList = interstitialEvent.assetList;
       if (assetList && assetList.length > 0) {
@@ -533,7 +581,7 @@ export default class HlsJsTech extends BaseTech {
         };
 
         for (const asset of assetList) {
-          // The X-AD-CREATIVE-SIGNALING 
+          // The X-AD-CREATIVE-SIGNALING
           const signaling = (asset as any)['X-AD-CREATIVE-SIGNALING'];
           if (signaling?.payload?.tracking) {
             const trackingArray = signaling.payload.tracking;
@@ -541,15 +589,22 @@ export default class HlsJsTech extends BaseTech {
               const type = trackItem.type;
               const urls = trackItem.urls || [];
               if (type === 'start') allTrackingUrls.start.push(...urls);
-              else if (type === 'firstQuartile') allTrackingUrls.firstQuartile.push(...urls);
-              else if (type === 'midpoint') allTrackingUrls.midpoint.push(...urls);
-              else if (type === 'thirdQuartile') allTrackingUrls.thirdQuartile.push(...urls);
-              else if (type === 'complete') allTrackingUrls.complete.push(...urls);
+              else if (type === 'firstQuartile')
+                allTrackingUrls.firstQuartile.push(...urls);
+              else if (type === 'midpoint')
+                allTrackingUrls.midpoint.push(...urls);
+              else if (type === 'thirdQuartile')
+                allTrackingUrls.thirdQuartile.push(...urls);
+              else if (type === 'complete')
+                allTrackingUrls.complete.push(...urls);
             }
           }
         }
 
-        if (allTrackingUrls.start.length > 0 || allTrackingUrls.complete.length > 0) {
+        if (
+          allTrackingUrls.start.length > 0 ||
+          allTrackingUrls.complete.length > 0
+        ) {
           return allTrackingUrls;
         }
       }
@@ -558,7 +613,10 @@ export default class HlsJsTech extends BaseTech {
       if (attr) {
         const signalingData = attr['X-AD-CREATIVE-SIGNALING'];
         if (signalingData) {
-          const parsed = typeof signalingData === 'string' ? JSON.parse(signalingData) : signalingData;
+          const parsed =
+            typeof signalingData === 'string'
+              ? JSON.parse(signalingData)
+              : signalingData;
 
           if (parsed?.payload?.tracking) {
             const allTrackingUrls: InterstitialTrackingData['trackingUrls'] = {
@@ -573,10 +631,14 @@ export default class HlsJsTech extends BaseTech {
               const type = trackItem.type;
               const urls = trackItem.urls || [];
               if (type === 'start') allTrackingUrls.start.push(...urls);
-              else if (type === 'firstQuartile') allTrackingUrls.firstQuartile.push(...urls);
-              else if (type === 'midpoint') allTrackingUrls.midpoint.push(...urls);
-              else if (type === 'thirdQuartile') allTrackingUrls.thirdQuartile.push(...urls);
-              else if (type === 'complete') allTrackingUrls.complete.push(...urls);
+              else if (type === 'firstQuartile')
+                allTrackingUrls.firstQuartile.push(...urls);
+              else if (type === 'midpoint')
+                allTrackingUrls.midpoint.push(...urls);
+              else if (type === 'thirdQuartile')
+                allTrackingUrls.thirdQuartile.push(...urls);
+              else if (type === 'complete')
+                allTrackingUrls.complete.push(...urls);
             }
 
             return allTrackingUrls;
@@ -589,7 +651,11 @@ export default class HlsJsTech extends BaseTech {
     return undefined;
   }
 
-  private fireTrackingUrls(urls: string[] | undefined, assetId: string, eventType: string) {
+  private fireTrackingUrls(
+    urls: string[] | undefined,
+    assetId: string,
+    eventType: string
+  ) {
     if (!urls || urls.length === 0) return;
 
     for (const url of urls) {
@@ -607,7 +673,8 @@ export default class HlsJsTech extends BaseTech {
   }
 
   private checkInterstitialQuartiles() {
-    if (!this.currentInterstitialAsset || !this.currentInterstitialEvent) return;
+    if (!this.currentInterstitialAsset || !this.currentInterstitialEvent)
+      return;
 
     const asset = this.currentInterstitialAsset;
     const assetDuration = asset.duration;
@@ -622,11 +689,23 @@ export default class HlsJsTech extends BaseTech {
     }
 
     if (progress >= 25 && progress < 50) {
-      this.fireTrackingUrls(trackingUrls.firstQuartile, asset.identifier, 'firstQuartile');
+      this.fireTrackingUrls(
+        trackingUrls.firstQuartile,
+        asset.identifier,
+        'firstQuartile'
+      );
     } else if (progress >= 50 && progress < 75) {
-      this.fireTrackingUrls(trackingUrls.midpoint, asset.identifier, 'midpoint');
+      this.fireTrackingUrls(
+        trackingUrls.midpoint,
+        asset.identifier,
+        'midpoint'
+      );
     } else if (progress >= 75 && progress < 100) {
-      this.fireTrackingUrls(trackingUrls.thirdQuartile, asset.identifier, 'thirdQuartile');
+      this.fireTrackingUrls(
+        trackingUrls.thirdQuartile,
+        asset.identifier,
+        'thirdQuartile'
+      );
     }
   }
 

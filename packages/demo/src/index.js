@@ -11,7 +11,6 @@ import { PlayerDebug } from './player-debug';
 import { NetworkMonitor } from './network-monitor';
 import { NetworkAnalysis } from './network-analysis';
 import { CustomLogger } from './custom-logger';
-import { SegmentTimeline } from './segment-timeline';
 
 // Uncomment this to demo the player package
 // NOTE! you must also comment out some code in main()
@@ -76,7 +75,7 @@ async function main() {
   const autoplayButton = document.querySelector('#autoplay-button');
   const loadButton = document.querySelector('#load-button');
   const shareButton = document.querySelector('#share-button');
-  
+
   // Autoplay state (default: false)
   let autoplayEnabled = false;
   const epasUrlInput = document.querySelector('#epas-eventsink-url');
@@ -99,40 +98,168 @@ async function main() {
 
   // Custom logger
   const customLogger = new CustomLogger();
+  // Read saved player debug mode (default: false)
+  const savedDebug = localStorage.getItem('player-debug-mode') === 'true';
+  // Hide or show debug pill based on saved debug setting
+  (function initDebugPill() {
+    const debugPill = document.querySelector(
+      '.log-filter-pill[data-level="debug"]'
+    );
+    if (debugPill) {
+      if (savedDebug) {
+        debugPill.style.display = '';
+        debugPill.classList.add('active');
+        customLogger.activeFilters.add('debug');
+      } else {
+        debugPill.style.display = 'none';
+        debugPill.classList.remove('active');
+        customLogger.activeFilters.delete('debug');
+      }
+    }
+  })();
+  // Route global errors and unhandled rejections to custom logger
+  (function attachGlobalErrorHandlers() {
+    try {
+      // Preserve original console.error
+      const _consoleError = console.error.bind(console);
+      console.error = (...args) => {
+        try {
+          const parts = args.map((a) =>
+            typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)
+          );
+          // Filter out empty objects/arrays and empty strings to avoid stray "[]" or "{}"
+          const filtered = parts.filter(
+            (p) =>
+              p && p !== '{}' && p !== '[]' && p !== 'null' && p !== 'undefined'
+          );
+          const msg = filtered.join(' ');
+          // Only include non-empty message; if everything was empty, pass no message
+          if (msg) {
+            customLogger.error(msg, { args: filtered });
+          } else {
+            // Fallback: log a generic error if no useful content
+            customLogger.error('Error', { args: filtered });
+          }
+        } catch (e) {
+          // swallow
+        }
+        _consoleError(...args);
+      };
+
+      // window.onerror
+      window.onerror = (message, source, lineno, colno, err) => {
+        try {
+          const details = `${message} (${source}:${lineno}:${colno})`;
+          customLogger.error(details, err ? err.stack || err : null);
+        } catch (e) {}
+        // Let browser handle default as well
+        return false;
+      };
+
+      // Unhandled promise rejections
+      window.addEventListener('unhandledrejection', (event) => {
+        try {
+          const reason = event.reason;
+          const msg =
+            typeof reason === 'object'
+              ? JSON.stringify(reason, null, 2)
+              : String(reason);
+          customLogger.error('Unhandled Rejection: ' + msg, reason);
+        } catch (e) {}
+      });
+    } catch (e) {
+      // ignore if environment doesn't allow
+    }
+  })();
 
   // Player debug elements
   const playerDebugSection = document.querySelector('#player-debug-section');
   const playerDebug = new PlayerDebug(video, playerDebugSection);
-  const networkAnalysis = new NetworkAnalysis();
-  const networkMonitor = new NetworkMonitor((request) => {
-    // Forward requests to network analysis
-    networkAnalysis.addRequest(request);
-  });
-  const segmentTimeline = new SegmentTimeline(video, networkMonitor);
+  const networkAnalysis = new NetworkAnalysis(null);
+  const networkMonitor = new NetworkMonitor(null, customLogger);
 
-  // Tab switching
-  document.querySelectorAll('.tab-button').forEach((button) => {
-    button.addEventListener('click', () => {
-      const tabName = button.dataset.tab;
+  // Sync log and network monitor heights with player + input section
+  function syncHeights() {
+    const playerCenterContainer = document.querySelector(
+      '.player-center-container'
+    );
+    const logSection = document.getElementById('log-section');
+    const networkSection = document.getElementById('network-monitor-section');
 
-      // Update button states
-      document
-        .querySelectorAll('.tab-button')
-        .forEach((btn) => btn.classList.remove('active'));
-      button.classList.add('active');
+    if (playerCenterContainer && logSection && networkSection) {
+      const containerHeight = playerCenterContainer.offsetHeight;
+      // Set network section height first (match player center)
+      networkSection.style.height = containerHeight + 'px';
 
-      // Update tab content visibility
-      document
-        .querySelectorAll('.tab-content')
-        .forEach((content) => content.classList.remove('active'));
-      document.getElementById(`${tabName}-tab`).classList.add('active');
-    });
-  });
+      // Ensure left column matches the player+input container height
+      const leftColumn = document.querySelector('.left-column');
+      if (leftColumn) {
+        leftColumn.style.height = containerHeight + 'px';
+        leftColumn.style.overflow = 'hidden';
+      }
+
+      // Compute shared height: half of the network section height
+      const sharedHeight = Math.round(containerHeight / 2);
+      logSection.style.height = sharedHeight + 'px';
+      // Make variant info panel the same height as logs (stacked under logs)
+      const variantPanel = document.getElementById('variant-info-panel');
+      if (variantPanel) {
+        variantPanel.style.height = sharedHeight + 'px';
+        variantPanel.style.overflow = 'auto';
+      }
+    }
+  }
+
+  // Sync heights on load and resize
+  syncHeights();
+  window.addEventListener('resize', syncHeights);
+  const resizeObserver = new ResizeObserver(syncHeights);
+  const playerCenterContainer = document.querySelector(
+    '.player-center-container'
+  );
+  if (playerCenterContainer) {
+    resizeObserver.observe(playerCenterContainer);
+  }
 
   // Start player debug immediately to show default values
   playerDebug.start();
   networkMonitor.start();
-  segmentTimeline.start();
+
+  // Player debug logs (emit debug-level logs when Player Debug Mode enabled)
+  (function attachPlayerDebugLogs() {
+    const debugEvents = [
+      PlayerEvent.PLAY,
+      PlayerEvent.PAUSE,
+      PlayerEvent.PLAYING,
+      PlayerEvent.SEEKING,
+      PlayerEvent.SEEKED,
+      PlayerEvent.WAITING,
+      PlayerEvent.STALLED,
+      PlayerEvent.BUFFERING,
+      PlayerEvent.STATE_CHANGE,
+      PlayerEvent.AUDIO_TRACK_CHANGE,
+      PlayerEvent.TEXT_TRACK_CHANGE,
+      PlayerEvent.INTERSTITIAL_STARTED,
+      PlayerEvent.INTERSTITIAL_ENDED,
+      PlayerEvent.INTERSTITIAL_ASSET_STARTED,
+      PlayerEvent.INTERSTITIAL_ASSET_ENDED,
+    ];
+
+    const debugEnabled = localStorage.getItem('player-debug-mode') === 'true';
+    if (!debugEnabled) return;
+
+    debugEvents.forEach((evt) => {
+      try {
+        player.on(evt, (payload) => {
+          try {
+            customLogger.debug(`Player event: ${evt}`, payload);
+          } catch (e) {}
+        });
+      } catch (e) {
+        // ignore if event not supported
+      }
+    });
+  })();
 
   // Share modal elements
   const shareModal = document.querySelector('#share-modal');
@@ -173,6 +300,7 @@ async function main() {
     video: video,
     iceServers: iceServers,
     enableCloudflareWhepBeta: process.env.CLOUDFLARE_BETA === 'true',
+    debug: savedDebug,
   });
   renderEyevinnSkin({
     root,
@@ -197,8 +325,8 @@ async function main() {
       // Reset player debug
       playerDebug.reset();
       networkMonitor.reset();
+      // Reset variant info
       networkAnalysis.reset();
-      segmentTimeline.reset();
 
       try {
         playerAnalytics &&
@@ -207,10 +335,25 @@ async function main() {
           }));
       } catch (err) {
         console.error('Failed to initiate analytics', err);
+        customLogger.warn('Failed to initiate analytics', err);
         playerAnalytics = null;
       }
+      // Log load start
+      customLogger.info('Loading manifest', {
+        manifest: manifestInput.value,
+        autoplay: autoplayEnabled,
+      });
       await player.load(manifestInput.value, autoplayEnabled);
+      // Log load success
+      customLogger.info('Loaded manifest', {
+        manifest: manifestInput.value,
+        autoplay: autoplayEnabled,
+        isLive: player.isLive,
+      });
       playerAnalytics && playerAnalytics.load(video);
+
+      // Update network analysis with player instance
+      networkAnalysis.player = player;
 
       // Save successful load to previous searches
       if (manifestInput.value && manifestInput.value.trim() !== '') {
@@ -230,13 +373,28 @@ async function main() {
             });
             analyticsInitiated = true;
           }
+          // Log metadata and update variant info when metadata is loaded
+          customLogger.info('Loaded metadata', {
+            live: player.isLive,
+            duration: video.duration,
+          });
+          networkAnalysis.updateVariantInfo(video, player);
           player.off(PlayerEvent.LOADED_METADATA, metadataReporter);
         })
       );
 
       playerDebug.start();
       networkMonitor.start();
-      segmentTimeline.start();
+
+      // Update variant info periodically
+      const variantUpdateInterval = setInterval(() => {
+        networkAnalysis.updateVariantInfo(video, player);
+      }, 1000);
+
+      // Also update on bitrate changes
+      player.on(PlayerEvent.BITRATE_CHANGE, () => {
+        networkAnalysis.updateVariantInfo(video, player);
+      });
     } catch (err) {
       console.error(err);
       analyticsInitiated && playerAnalytics.deinit();
@@ -416,9 +574,7 @@ async function main() {
         manifestInput.value = url;
         exampleStreamsDropdown.classList.add('hidden');
         // Enable Load button when stream is selected
-        if (loadButton) {
-          loadButton.disabled = false;
-        }
+        loadButton.disabled = false;
       }
     });
   }
@@ -428,27 +584,23 @@ async function main() {
   };
 
   // Autoplay button handler
-  if (autoplayButton) {
-    autoplayButton.onclick = () => {
-      autoplayEnabled = !autoplayEnabled;
-      updateAutoplayButton();
-    };
-    updateAutoplayButton(); // Initialize button state
-  }
+  autoplayButton.onclick = () => {
+    autoplayEnabled = !autoplayEnabled;
+    updateAutoplayButton();
+  };
+  updateAutoplayButton(); // Initialize button state
 
   function updateAutoplayButton() {
-    if (autoplayButton) {
-      const checkmark = autoplayButton.querySelector('.autoplay-checkmark');
-      if (autoplayEnabled) {
-        autoplayButton.classList.add('active');
-        if (checkmark) {
-          checkmark.style.display = 'inline-block';
-        }
-      } else {
-        autoplayButton.classList.remove('active');
-        if (checkmark) {
-          checkmark.style.display = 'none';
-        }
+    const checkmark = autoplayButton.querySelector('.autoplay-checkmark');
+    if (autoplayEnabled) {
+      autoplayButton.classList.add('active');
+      if (checkmark) {
+        checkmark.style.display = 'inline-block';
+      }
+    } else {
+      autoplayButton.classList.remove('active');
+      if (checkmark) {
+        checkmark.style.display = 'none';
       }
     }
   }
@@ -458,6 +610,7 @@ async function main() {
   const optionsModal = document.querySelector('#eventsink-modal');
   const optionsModalClose = document.querySelector('#eventsink-modal-close');
   const eventsinkUrlInput = document.querySelector('#eventsink-url-input');
+  const playerDebugCheckbox = document.querySelector('#player-debug-checkbox');
   const optionsSaveButton = document.querySelector('#eventsink-save-button');
   const optionsCancelButton = document.querySelector(
     '#eventsink-cancel-button'
@@ -470,6 +623,11 @@ async function main() {
       }
       if (optionsModal) {
         optionsModal.classList.remove('hidden');
+      }
+      // Initialize checkbox from saved value
+      if (playerDebugCheckbox) {
+        playerDebugCheckbox.checked =
+          localStorage.getItem('player-debug-mode') === 'true';
       }
     };
   }
@@ -497,6 +655,38 @@ async function main() {
       }
       if (optionsModal) {
         optionsModal.classList.add('hidden');
+      }
+      // Save player debug mode
+      if (playerDebugCheckbox) {
+        const enabled = !!playerDebugCheckbox.checked;
+        localStorage.setItem('player-debug-mode', enabled ? 'true' : 'false');
+        // Toggle debug pill in logs
+        const debugPill = document.querySelector(
+          '.log-filter-pill[data-level="debug"]'
+        );
+        if (debugPill) {
+          if (enabled) {
+            debugPill.style.display = '';
+            debugPill.classList.add('active');
+            customLogger.activeFilters.add('debug');
+          } else {
+            debugPill.style.display = 'none';
+            debugPill.classList.remove('active');
+            customLogger.activeFilters.delete('debug');
+          }
+          customLogger.renderAllLogs();
+        }
+        // If HLS instance exists, try to set debug flag (may not affect existing instance fully)
+        try {
+          if (
+            player &&
+            player.tech &&
+            player.tech.hls &&
+            player.tech.hls.config
+          ) {
+            player.tech.hls.config.debug = enabled;
+          }
+        } catch (e) {}
       }
     };
   }
@@ -530,30 +720,25 @@ async function main() {
     }
   });
   // Share modal handlers
-  if (shareButton) {
-    shareButton.onclick = () => {
-      // Generate share URL and embed code
-      const manifestUrl = manifestInput.value || '';
-      const shareUrl = getShareUrl(manifestUrl);
-      const embedCode = getEmbedCode(
-        manifestUrl,
-        autoplayEnabled
-      );
+  shareButton.onclick = () => {
+    // Generate share URL and embed code
+    const manifestUrl = manifestInput.value || '';
+    const shareUrl = getShareUrl(manifestUrl);
+    const embedCode = getEmbedCode(manifestUrl, autoplayEnabled);
 
-      // Update input values
-      if (shareLinkInput) {
-        shareLinkInput.value = shareUrl;
-      }
-      if (embedLinkInput) {
-        embedLinkInput.value = embedCode;
-      }
+    // Update input values
+    if (shareLinkInput) {
+      shareLinkInput.value = shareUrl;
+    }
+    if (embedLinkInput) {
+      embedLinkInput.value = embedCode;
+    }
 
-      // Show modal
-      if (shareModal) {
-        shareModal.classList.remove('hidden');
-      }
-    };
-  }
+    // Show modal
+    if (shareModal) {
+      shareModal.classList.remove('hidden');
+    }
+  };
 
   // Copy share link button
   if (copyShareLinkButton && shareLinkInput) {
@@ -605,26 +790,21 @@ async function main() {
     };
   }
 
-
   manifestInput.oninput = () => {
     // Enable/disable Load button based on input value
     const hasValue = manifestInput.value && manifestInput.value.trim() !== '';
-    if (loadButton) {
-      loadButton.disabled = !hasValue;
-    }
+    loadButton.disabled = !hasValue;
   };
 
   if (searchParams.get('manifest')) {
     manifestInput.value = searchParams.get('manifest');
-    if (loadButton) {
-      loadButton.disabled = false;
-    }
+    loadButton.disabled = false;
     load();
   }
 
   //Work on this one...
   player.on(PlayerEvent.READY, () => {
-    console.log('player ready');
+    customLogger.info('Player ready');
   });
 
   player.on(PlayerEvent.BITRATE_CHANGE, (data) => {
@@ -635,16 +815,39 @@ async function main() {
         height: data.height, // optional, video height in pixels
       });
     }
+    // Update variant info when bitrate changes
+    networkAnalysis.updateVariantInfo(video, player);
+    // Log bitrate change with human-readable value
+    try {
+      const kbps = Math.round((data && data.bitrate ? data.bitrate : 0) / 1000);
+      customLogger.info(`Bitrate changed to ${kbps} kbps`, {
+        bitrate: data.bitrate,
+        width: data.width,
+        height: data.height,
+      });
+    } catch (e) {
+      customLogger.info('Bitrate change', {
+        bitrate: data.bitrate,
+        width: data.width,
+        height: data.height,
+      });
+    }
   });
 
   player.on(PlayerEvent.PLAYER_STOPPED, () => {
     if (analyticsInitiated) {
       playerAnalytics.reportStop();
     }
+    customLogger.info('Player stopped');
   });
 
   player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
     console.error('player reported error', errorData);
+    if (fatal) {
+      customLogger.error('Player error (fatal)', errorData);
+    } else {
+      customLogger.warn('Player warning', errorData);
+    }
     if (analyticsInitiated) {
       if (fatal) {
         playerAnalytics.reportError(errorData);
@@ -654,19 +857,18 @@ async function main() {
     }
     if (fatal) {
       player.destroy();
-      console.log('player destroyed due to error');
+      customLogger.info('player destroyed due to fatal error');
     }
   });
 
   player.on(PlayerEvent.UNREADY, () => {
-    console.log('player unready');
+    customLogger.info('Player unready');
     if (analyticsInitiated) {
       playerAnalytics.deinit();
       analyticsInitiated = false;
     }
     playerDebug.stop();
     networkMonitor.stop();
-    segmentTimeline.stop();
   });
 }
 window.onload = main;

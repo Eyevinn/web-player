@@ -1,12 +1,15 @@
 export class NetworkMonitor {
-  constructor(onRequestAdded = null) {
+  constructor(onRequestAdded = null, customLogger = null) {
     this.onRequestAdded = onRequestAdded;
+    this.customLogger = customLogger;
     this.allRequests = [];
     this.requestCounter = 0;
     this.currentFilter = 'all';
     this.processedUrls = new Set();
     this.observer = null;
     this.startTime = null;
+    this.originalFetch = null;
+    this.originalXHR = null;
     
     this.requestTableBody = document.getElementById('network-table-body');
     this.totalRequestsEl = document.getElementById('totalRequests');
@@ -52,12 +55,14 @@ export class NetworkMonitor {
       this.observer = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
           if (entry.entryType === 'resource') {
-            this.processResourceEntry(entry);
+            this.processResourceEntry(entry.toJSON());
           }
         }
       });
 
-      this.observer.observe({ entryTypes: ['resource'] });
+      // Use buffered: true to get all entries including completed ones
+      this.observer.observe({ entryTypes: ['resource'], buffered: true });
+
     } catch (e) {
       console.warn('PerformanceObserver not supported:', e);
     }
@@ -100,24 +105,44 @@ export class NetworkMonitor {
       url.includes('chunk') ||
       url.includes('init') ||
       entry.initiatorType === 'video' ||
-      entry.initiatorType === 'xmlhttprequest';
+      entry.initiatorType === 'xmlhttprequest' ||
+      entry.initiatorType === 'fetch';
+
+    // (Previously logged performance entries here; removed to avoid noisy debug logs)
 
     if (!isVideoRelated) return;
+
+    // Calculate size - try multiple properties in order of preference
+    const size = this.getSizeFromEntry(entry) || 0;
+    
+    // (Previously logged network resource entries here; removed to avoid noisy debug logs)
+
+    // Determine status from entry.responseStatus if available
+    let status = null;
+    
+    // Check if responseStatus is available on the entry
+    if (entry.responseStatus !== undefined && entry.responseStatus !== null) {
+      status = entry.responseStatus;
+    } else if (entry.responseEnd === 0) {
+      // Only infer failure if responseEnd is 0 (no response received)
+      status = 0; // Failed
+    }
 
     const request = {
       id: ++this.requestCounter,
       url: entry.name,
       type: this.guessRequestType(entry.name),
       duration: Math.round(entry.duration),
-      size: entry.transferSize || entry.encodedBodySize || 0,
+      size: size,
       timestamp: entry.startTime,
       fetchStart: entry.fetchStart,
       responseStart: entry.responseStart,
       responseEnd: entry.responseEnd,
       initiatorType: entry.initiatorType,
       nextHopProtocol: entry.nextHopProtocol,
-      status: entry.transferSize > 0 ? 200 : 0,
-      responseText: null // Will be populated if available
+      status: status,
+      responseText: null, // Will be populated if available
+      entryName: entry.name // Store for later updates
     };
 
     this.allRequests.push(request);
@@ -128,6 +153,29 @@ export class NetworkMonitor {
     if (this.onRequestAdded) {
       this.onRequestAdded(request);
     }
+  }
+
+  getSizeFromEntry(entry) {
+    // Try multiple size properties in order of preference
+    // transferSize includes headers, encodedBodySize is after content-codings,
+    // decodedBodySize is after removing all encodings
+    
+    // Check if entry has the size properties (they might be 0 due to CORS)
+    // If transferSize is 0 but we have encodedBodySize or decodedBodySize, use those
+    if (entry.transferSize !== undefined && entry.transferSize > 0) {
+      return entry.transferSize;
+    }
+    if (entry.encodedBodySize !== undefined && entry.encodedBodySize > 0) {
+      return entry.encodedBodySize;
+    }
+    if (entry.decodedBodySize !== undefined && entry.decodedBodySize > 0) {
+      return entry.decodedBodySize;
+    }
+    
+    // If all are 0 or undefined, return 0
+    // Note: transferSize can be 0 for cached resources, but encodedBodySize should still work
+    // If all are 0, it's likely a CORS restriction
+    return 0;
   }
 
   guessRequestType(url) {
@@ -141,9 +189,28 @@ export class NetworkMonitor {
       return 'init';
     }
 
-    if (lower.includes('.ts') || lower.includes('.m4s') ||
-        lower.includes('segment') || lower.includes('chunk') ||
-        lower.match(/\d+\.m4[sfv]/) || lower.match(/seg-\d+/)) {
+    if (lower.includes('.vtt')) {
+      return 'subtitle';
+    }
+
+    const isSegment =
+      lower.includes('.mp4') ||
+      lower.includes('.ts') ||
+      lower.includes('.m4s') ||
+      lower.includes('.aac') ||
+      lower.includes('segment') ||
+      lower.includes('chunk') ||
+      lower.match(/\d+\.m4[sfv]/) ||
+      lower.match(/seg-\d+/);
+
+    if (isSegment) {
+      const fileLower = this.extractFileName(url).toLowerCase();
+      if (fileLower.startsWith('a-') || fileLower.includes('aac')) {
+        return 'audio-segment';
+      }
+      if (fileLower.startsWith('v-')) {
+        return 'video-segment';
+      }
       return 'segment';
     }
 
@@ -152,7 +219,7 @@ export class NetworkMonitor {
 
   updateStats() {
     const manifestCount = this.allRequests.filter(r => r.type === 'manifest').length;
-    const segmentCount = this.allRequests.filter(r => r.type === 'segment').length;
+    const segmentCount = this.allRequests.filter(r => this.isSegmentType(r.type)).length;
     const totalSize = this.allRequests.reduce((sum, r) => sum + r.size, 0);
     const avgDuration = this.allRequests.length > 0
       ? Math.round(this.allRequests.reduce((sum, r) => sum + r.duration, 0) / this.allRequests.length)
@@ -167,7 +234,11 @@ export class NetworkMonitor {
 
   addRequestToTable(request) {
     // Apply filter
-    if (this.currentFilter !== 'all' && request.type !== this.currentFilter) {
+    if (
+      this.currentFilter !== 'all' &&
+      !(this.currentFilter === 'segment' && this.isSegmentType(request.type)) &&
+      request.type !== this.currentFilter
+    ) {
       return;
     }
 
@@ -181,21 +252,53 @@ export class NetworkMonitor {
     row.className = 'clickable-row';
     row.dataset.requestId = request.id;
 
-    const relativeTime = (request.timestamp / 1000).toFixed(2) + 's';
-    const fileName = this.extractFileName(request.url);
+    // Determine status class and text
+    let statusClass = 'status-success';
+    let statusText = 'N/A';
+    if (request.status === null || request.status === undefined) {
+      statusClass = '';
+      statusText = 'N/A';
+    } else if (request.status === 0) {
+      statusClass = 'status-error';
+      statusText = 'FAILED';
+    } else if (request.status >= 400) {
+      statusClass = 'status-error';
+      statusText = request.status.toString();
+    } else if (request.status >= 300) {
+      statusClass = 'status-warning';
+      statusText = request.status.toString();
+    } else if (request.status >= 200) {
+      statusClass = 'status-success';
+      statusText = request.status.toString();
+    }
 
+    const urlDisplay = this.extractFileName(request.url);
+    const typeLabel = this.getTypeLabel(request.type);
     row.innerHTML = `
-      <td>${request.id}</td>
-      <td>${relativeTime}</td>
-      <td><span class="type-badge type-${request.type}">${request.type}</span></td>
-      <td class="url-cell" title="${request.url}">${request.url}</td>
-      <td>${this.formatBytes(request.size)}</td>
-      <td>${request.duration}ms</td>
-      <td class="status-success">OK</td>
+      <td class="col-small">${request.id}</td>
+      <td class="col-small"><span class="type-badge type-${request.type}">${typeLabel}</span></td>
+      <td class="url-cell" title="${request.url}">${urlDisplay}</td>
+      <td class="col-small">${request.duration ? `${request.duration}ms` : '-'}</td>
+      <td class="col-small ${statusClass}">${statusText}</td>
     `;
 
     row.addEventListener('click', () => this.toggleDetails(row, request));
-    this.requestTableBody.insertBefore(row, this.requestTableBody.firstChild);
+    
+    // Insert in descending order by ID
+    // Find the correct position to maintain descending order
+    const rows = Array.from(this.requestTableBody.children);
+    let insertIndex = rows.findIndex(r => {
+      const rowId = parseInt(r.dataset.requestId || '0');
+      return request.id > rowId;
+    });
+    
+    if (insertIndex === -1) {
+      // Append to end if this is the smallest ID
+      this.requestTableBody.appendChild(row);
+    } else {
+      // Insert before the row with smaller ID
+      this.requestTableBody.insertBefore(row, rows[insertIndex]);
+    }
 
     // Limit table size
     if (this.requestTableBody.children.length > 200) {
@@ -211,36 +314,107 @@ export class NetworkMonitor {
       return;
     }
 
+    // Close any other open details rows
+    const allDetailsRows = this.requestTableBody.querySelectorAll('.details-row');
+    allDetailsRows.forEach(detailsRow => {
+      detailsRow.remove();
+    });
+
     const detailsRow = document.createElement('tr');
     detailsRow.className = 'details-row';
 
     const detailsCell = document.createElement('td');
-    detailsCell.colSpan = 7;
-    detailsCell.style.padding = '15px';
-    detailsCell.style.backgroundColor = '#2a2a2a';
+    detailsCell.colSpan = 5;
+    detailsCell.className = 'details-cell';
+    detailsCell.style.padding = '20px';
+    detailsCell.style.textAlign = 'left';
+    // Make the expanded details area a unified background color and add a border
+    detailsCell.style.backgroundColor = '#252525';
+    detailsCell.style.border = '1px solid #3a3a3a';
+    detailsCell.style.borderRadius = '6px';
+    detailsCell.style.boxSizing = 'border-box';
+    detailsCell.style.marginTop = '8px';
 
     const detailsDiv = document.createElement('div');
     detailsDiv.style.display = 'grid';
-    detailsDiv.style.gridTemplateColumns = '150px 1fr';
-    detailsDiv.style.gap = '10px';
-    detailsDiv.style.fontSize = '11px';
+    // Make the first column tight to the label content
+    detailsDiv.style.gridTemplateColumns = 'max-content 1fr';
+    detailsDiv.style.gap = '0';
+    detailsDiv.style.fontSize = '12px';
+    detailsDiv.style.textAlign = 'left';
     
-    detailsDiv.innerHTML = `
-      <div style="color: #999;">Full URL:</div>
-      <div style="color: #ccc; word-break: break-all;">${request.url}</div>
-      <div style="color: #999;">File Name:</div>
-      <div style="color: #ccc;">${this.extractFileName(request.url)}</div>
-      <div style="color: #999;">Type:</div>
-      <div style="color: #ccc;">${request.type}</div>
-      <div style="color: #999;">Initiator:</div>
-      <div style="color: #ccc;">${request.initiatorType}</div>
-      <div style="color: #999;">Protocol:</div>
-      <div style="color: #ccc;">${request.nextHopProtocol || 'N/A'}</div>
-      <div style="color: #999;">Size:</div>
-      <div style="color: #ccc;">${this.formatBytes(request.size)} (${request.size} bytes)</div>
-      <div style="color: #999;">Duration:</div>
-      <div style="color: #ccc;">${request.duration}ms</div>
-    `;
+    // Build rows dynamically, only showing fields with data
+    const rows = [];
+    const typeLabel = this.getTypeLabel(request.type);
+    
+    // Type
+    rows.push({
+      label: 'Type',
+      value: `<span class="type-badge type-${request.type}">${typeLabel}</span>`
+    });
+    
+    // File (full URL)
+    if (request.url) {
+      const safeUrl = request.url;
+      rows.push({
+        label: 'URL',
+        value: `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>`
+      });
+    }
+    
+    // Protocol
+    if (request.nextHopProtocol) {
+      rows.push({
+        label: 'Protocol',
+        value: request.nextHopProtocol
+      });
+    }
+    
+    // Size
+    if (request.size > 0) {
+      rows.push({
+        label: 'Size',
+        value: `${this.formatBytes(request.size)} <span style="color: #999;">(${request.size.toLocaleString()} bytes)</span>`
+      });
+    }
+    
+    // Duration
+    if (request.duration) {
+      rows.push({
+        label: 'Duration',
+        value: `${request.duration}ms`
+      });
+    }
+    
+    // Status
+    if (request.status !== null && request.status !== undefined) {
+      let statusDisplay;
+      if (request.status === 0) {
+        statusDisplay = '<span style="color: #f44336; font-weight: 600;">FAILED</span>';
+      } else if (request.status >= 400) {
+        statusDisplay = `<span style="color: #f44336; font-weight: 600;">${request.status}</span>`;
+      } else if (request.status >= 300) {
+        statusDisplay = `<span style="color: #ff9800; font-weight: 600;">${request.status}</span>`;
+      } else {
+        statusDisplay = `<span style="color: #00c853; font-weight: 600;">${request.status}</span>`;
+      }
+      rows.push({
+        label: 'Status',
+        value: statusDisplay
+      });
+    }
+    
+    // Build HTML with separators
+    let html = '';
+    rows.forEach((row, index) => {
+      const borderTop = index > 0 ? 'border-top: 1px solid #2a2a2a; padding-top: 12px; margin-top: 12px;' : '';
+      html += `
+        <div style="color: #999; font-weight: 500; ${borderTop}">${row.label}:</div>
+        <div style="color: #e0e0e0; padding-left: 10px; ${borderTop}">${row.value}</div>
+      `;
+    });
+    
+    detailsDiv.innerHTML = html;
 
     detailsCell.appendChild(detailsDiv);
     detailsRow.appendChild(detailsCell);
@@ -257,18 +431,23 @@ export class NetworkMonitor {
 
     const filtered = this.currentFilter === 'all'
       ? this.allRequests
-      : this.allRequests.filter(r => r.type === this.currentFilter);
+      : this.allRequests.filter(r =>
+          this.currentFilter === 'segment'
+            ? this.isSegmentType(r.type)
+            : r.type === this.currentFilter
+        );
 
     if (filtered.length === 0) {
       this.requestTableBody.innerHTML = `
         <tr>
-          <td colspan="7" class="no-requests">
+          <td colspan="5" class="no-requests">
             No ${this.currentFilter} requests found.
           </td>
         </tr>
       `;
     } else {
-      filtered.reverse().forEach(req => this.addRequestToTable(req));
+      // Sort by ID in descending order
+      filtered.sort((a, b) => b.id - a.id).forEach(req => this.addRequestToTable(req));
     }
   }
 
@@ -295,6 +474,16 @@ export class NetworkMonitor {
     } catch {
       return url.split('/').pop() || url;
     }
+  }
+
+  isSegmentType(type) {
+    return type === 'segment' || type === 'audio-segment' || type === 'video-segment';
+  }
+
+  getTypeLabel(type) {
+    if (type === 'audio-segment') return 'audio';
+    if (type === 'video-segment') return 'video';
+    return type.replace(/-/g, ' ');
   }
 
   formatBytes(bytes) {

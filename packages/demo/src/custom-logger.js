@@ -4,43 +4,97 @@ export class CustomLogger {
     this.maxLogs = 1000;
     this.logContainer = document.getElementById('log-content');
     this.logSection = document.getElementById('log-section');
-    this.logToggle = document.getElementById('log-toggle');
     this.logClear = document.getElementById('log-clear');
-    this.isExpanded = false; // Start collapsed
+    // Default active filters: all levels active
+    this.activeFilters = new Set(['all', 'error', 'warn', 'info', 'debug']);
 
     this.initEventListeners();
-    // Initialize as collapsed
-    this.initializeCollapsed();
   }
 
-  initializeCollapsed() {
-    const logContent = document.getElementById('log-content');
-    const toggleText = this.logToggle.querySelector('.log-toggle-text');
-    const toggleIcon = this.logToggle.querySelector('.log-toggle-icon');
-
-    if (logContent) {
-      // Show approximately 3 rows of logs (each row is ~24px with line-height 1.6 and font-size 12px)
-      // 3 rows * 24px = 72px, plus padding = ~96px
-      logContent.style.maxHeight = '72px';
-      logContent.style.padding = '12px';
-      logContent.style.overflowY = 'auto';
-      if (toggleText) toggleText.textContent = 'Expand';
-      if (toggleIcon) toggleIcon.textContent = '▼';
+  // Helper: produce a normalized string for data for comparison
+  _normalizeData(data) {
+    if (data === null || data === undefined) return '';
+    try {
+      if (typeof data === 'string') return data.trim();
+      if (typeof data === 'object') {
+        // Stable stringify keys sorted to help comparisons
+        const replacer = (key, value) => value;
+        return JSON.stringify(data, Object.keys(data).sort(), 2);
+      }
+      return String(data);
+    } catch (e) {
+      return String(data || '');
     }
+  }
+
+  // Helper: check if a log entry actually has a body worth showing
+  _hasBody(data) {
+    if (data === null || data === undefined) return false;
+    if (typeof data === 'string') return data.trim().length > 0;
+    if (typeof data === 'object') {
+      try {
+        return Object.keys(data).length > 0;
+      } catch (e) {
+        return String(data).trim().length > 0;
+      }
+    }
+    return true;
   }
 
   initEventListeners() {
-    if (this.logToggle) {
-      this.logToggle.addEventListener('click', () => {
-        this.toggle();
-      });
-    }
-
     if (this.logClear) {
       this.logClear.addEventListener('click', () => {
         this.clear();
       });
     }
+
+    // Filter pill event listeners
+    const filterPills = document.querySelectorAll('.log-filter-pill');
+    filterPills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const level = pill.dataset.level;
+
+        if (level === 'all') {
+          // Toggle all filters
+          const allActive = pill.classList.contains('active');
+          filterPills.forEach((p) => {
+            if (allActive) {
+              p.classList.remove('active');
+              if (p.dataset.level !== 'all') {
+                this.activeFilters.delete(p.dataset.level);
+              }
+            } else {
+              p.classList.add('active');
+              this.activeFilters.add(p.dataset.level);
+            }
+          });
+        } else {
+          // Toggle individual filter
+          pill.classList.toggle('active');
+          if (pill.classList.contains('active')) {
+            this.activeFilters.add(level);
+          } else {
+            this.activeFilters.delete(level);
+          }
+
+          // Update "All" button state
+          const allPill = document.querySelector(
+            '.log-filter-pill[data-level="all"]'
+          );
+          const allLevels = ['error', 'warn', 'info', 'debug'];
+          const allActive = allLevels.every((l) => this.activeFilters.has(l));
+          if (allActive) {
+            allPill.classList.add('active');
+            this.activeFilters.add('all');
+          } else {
+            allPill.classList.remove('active');
+            this.activeFilters.delete('all');
+          }
+        }
+
+        this.renderAllLogs();
+      });
+    });
   }
 
   log(level, message, data = null) {
@@ -51,6 +105,39 @@ export class CustomLogger {
       message,
       data,
     };
+    // Deduplicate: avoid showing the same message+data multiple times,
+    // and avoid duplicate when same entry exists as warn and error.
+    const normalizedData = this._normalizeData(data);
+    // Look back a window of recent logs (last 50)
+    const lookback = 50;
+    const recent = this.logs.slice(-lookback);
+    for (let i = recent.length - 1; i >= 0; i--) {
+      const existing = recent[i];
+      if (!existing) continue;
+      const existingData = this._normalizeData(existing.data);
+      if (existing.message === message && existingData === normalizedData) {
+        // exact same content
+        if (existing.level === level) {
+          // already logged same level -> skip
+          return;
+        }
+        // If existing is warn and new is error, upgrade it
+        if (existing.level === 'warn' && level === 'error') {
+          existing.level = 'error';
+          existing.timestamp = timestamp;
+          existing.data = data;
+          // Re-render logs to reflect upgraded level
+          this.renderAllLogs();
+          return;
+        }
+        // If existing is error and new is warn, skip (don't duplicate/downgrade)
+        if (existing.level === 'error' && level === 'warn') {
+          return;
+        }
+        // For other mismatched levels, skip adding duplicate
+        return;
+      }
+    }
 
     this.logs.push(logEntry);
 
@@ -81,6 +168,11 @@ export class CustomLogger {
   renderLog(logEntry) {
     if (!this.logContainer) return;
 
+    // Check if this log level should be displayed
+    if (!this.shouldDisplayLog(logEntry.level)) {
+      return;
+    }
+
     const logElement = document.createElement('div');
     logElement.className = `log-entry log-${logEntry.level}`;
 
@@ -92,16 +184,119 @@ export class CustomLogger {
       logEntry.message
     )}</span>`;
 
-    if (logEntry.data) {
-      const dataStr =
-        typeof logEntry.data === 'object'
-          ? JSON.stringify(logEntry.data, null, 2)
-          : String(logEntry.data);
-      content += `<pre class="log-data">${this.escapeHtml(dataStr)}</pre>`;
-    }
-
     logElement.innerHTML = content;
+    // If there is data (non-empty), create a hidden expandable block and attach toggle on click
+    if (this._hasBody(logEntry.data)) {
+      try {
+        const dataStr =
+          typeof logEntry.data === 'object'
+            ? JSON.stringify(logEntry.data, null, 2)
+            : String(logEntry.data);
+        const pre = document.createElement('pre');
+        pre.className = 'log-data';
+        pre.style.display = 'none';
+        pre.textContent = dataStr;
+        logElement.appendChild(pre);
+
+        // Toggle expand/collapse on click
+        logElement.style.cursor = 'pointer';
+        logElement.addEventListener('click', (e) => {
+          // Prevent clicks on links or interactive elements inside message from toggling
+          const target = e.target;
+          if (
+            target &&
+            (target.tagName === 'A' ||
+              target.tagName === 'BUTTON' ||
+              (target.closest && target.closest('.no-toggle')))
+          ) {
+            return;
+          }
+          if (pre.style.display === 'none') {
+            pre.style.display = 'block';
+            logElement.classList.add('expanded');
+          } else {
+            pre.style.display = 'none';
+            logElement.classList.remove('expanded');
+          }
+        });
+      } catch (e) {
+        // ignore rendering error
+      }
+    }
     this.logContainer.appendChild(logElement);
+
+    // Auto-scroll to bottom
+    this.logContainer.scrollTop = this.logContainer.scrollHeight;
+  }
+
+  shouldDisplayLog(level) {
+    // If debug logs are globally disabled via the Player Debug Mode, never show them
+    if (level === 'debug') {
+      const debugEnabled = typeof localStorage !== 'undefined' && localStorage.getItem('player-debug-mode') === 'true';
+      if (!debugEnabled) return false;
+    }
+    return this.activeFilters.has('all') || this.activeFilters.has(level);
+  }
+
+  renderAllLogs() {
+    if (!this.logContainer) return;
+
+    this.logContainer.innerHTML = '';
+
+    this.logs.forEach((logEntry) => {
+      if (this.shouldDisplayLog(logEntry.level)) {
+        const logElement = document.createElement('div');
+        logElement.className = `log-entry log-${logEntry.level}`;
+
+        const time = new Date(logEntry.timestamp).toLocaleTimeString();
+        let content = `<span class="log-prompt">$</span>`;
+        content += `<span class="log-time">[${time}]</span>`;
+        content += `<span class="log-level">[${logEntry.level.toUpperCase()}]</span>`;
+        content += `<span class="log-message">${this.escapeHtml(
+          logEntry.message
+        )}</span>`;
+
+        logElement.innerHTML = content;
+        // If there is data, create a hidden expandable block and attach toggle on click
+        if (logEntry.data) {
+          try {
+            const dataStr =
+              typeof logEntry.data === 'object'
+                ? JSON.stringify(logEntry.data, null, 2)
+                : String(logEntry.data);
+            const pre = document.createElement('pre');
+            pre.className = 'log-data';
+            pre.style.display = 'none';
+            pre.textContent = dataStr;
+            logElement.appendChild(pre);
+
+            // Toggle expand/collapse on click
+            logElement.style.cursor = 'pointer';
+            logElement.addEventListener('click', (e) => {
+              const target = e.target;
+              if (
+                target &&
+                (target.tagName === 'A' ||
+                  target.tagName === 'BUTTON' ||
+                  (target.closest && target.closest('.no-toggle')))
+              ) {
+                return;
+              }
+              if (pre.style.display === 'none') {
+                pre.style.display = 'block';
+                logElement.classList.add('expanded');
+              } else {
+                pre.style.display = 'none';
+                logElement.classList.remove('expanded');
+              }
+            });
+          } catch (e) {
+            // ignore rendering error
+          }
+        }
+        this.logContainer.appendChild(logElement);
+      }
+    });
 
     // Auto-scroll to bottom
     this.logContainer.scrollTop = this.logContainer.scrollHeight;
@@ -111,30 +306,6 @@ export class CustomLogger {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
-  }
-
-  toggle() {
-    this.isExpanded = !this.isExpanded;
-    const logContent = document.getElementById('log-content');
-    const toggleText = this.logToggle.querySelector('.log-toggle-text');
-    const toggleIcon = this.logToggle.querySelector('.log-toggle-icon');
-
-    if (logContent) {
-      if (this.isExpanded) {
-        logContent.style.maxHeight = '200px';
-        logContent.style.padding = '12px';
-        logContent.style.overflowY = 'auto';
-        if (toggleText) toggleText.textContent = 'Collapse';
-        if (toggleIcon) toggleIcon.textContent = '▲';
-      } else {
-        // Show approximately 3 rows of logs when collapsed
-        logContent.style.maxHeight = '72px';
-        logContent.style.padding = '12px';
-        logContent.style.overflowY = 'auto';
-        if (toggleText) toggleText.textContent = 'Expand';
-        if (toggleIcon) toggleIcon.textContent = '▼';
-      }
-    }
   }
 
   clear() {

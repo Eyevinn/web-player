@@ -1,176 +1,142 @@
 export class NetworkAnalysis {
-  constructor() {
-    this.networkRequests = [];
-    this.manifestData = null;
-    this.lastVariantUrl = null;
-    this.bitrateSwitch = 0;
-    this.startTime = Date.now();
-    
-    // Element references
-    this.totalRequestsEl = document.getElementById('na-totalRequests');
-    this.manifestRequestsEl = document.getElementById('na-manifestRequests');
-    this.segmentRequestsEl = document.getElementById('na-segmentRequests');
-    this.failedRequestsEl = document.getElementById('na-failedRequests');
-    this.avgSegmentTimeEl = document.getElementById('na-avgSegmentTime');
-    this.totalDataEl = document.getElementById('na-totalData');
-    this.activeBandwidthEl = document.getElementById('na-activeBandwidth');
-    this.activeResolutionEl = document.getElementById('na-activeResolution');
-    this.activeCodecEl = document.getElementById('na-activeCodec');
-    this.bitrateSwitchEl = document.getElementById('na-bitrateSwitch');
-    this.lastSegmentEl = document.getElementById('na-lastSegment');
+  constructor(player = null) {
+    this.player = player;
+
+    // Element references for variant info (pills)
+    this.bandwidthsContainer = document.getElementById('na-bandwidths');
+    this.resolutionsContainer = document.getElementById('na-resolutions');
+    this.codecsContainer = document.getElementById('na-codecs');
+    this.audioCodecsContainer = document.getElementById('na-audiocodecs');
+    this.qualityLevelsContainer = document.getElementById('na-quality-levels');
+    this.audioTracksContainer = document.getElementById('na-audiotracks');
+    this.subtitlesContainer = document.getElementById('na-subtitles');
   }
 
-  addRequest(request) {
-    this.networkRequests.push(request);
-    
-    // Determine request type
-    let requestType = 'other';
-    if (request.url.includes('.m3u8')) {
-      requestType = 'manifest';
-      
-      // Parse manifest if we got the response
-      if (request.responseText) {
-        this.parseManifest(request.url, request.responseText);
-      }
-    } else if (request.url.includes('.ts') || request.url.includes('.m4s') || 
-               request.url.includes('.mp4') || request.url.match(/\/[0-9]+\.m4[sv]$/)) {
-      requestType = 'segment';
-      
-      // Track variant changes
-      const variantUrl = this.extractVariantFromSegmentUrl(request.url);
-      if (variantUrl && variantUrl !== this.lastVariantUrl) {
-        this.lastVariantUrl = variantUrl;
-        this.bitrateSwitch++;
-      }
-    }
-    
-    request.type = requestType;
-    this.updateStatistics();
-  }
+  updateVariantInfo(video, player) {
+    if (!video) return;
 
-  extractVariantFromSegmentUrl(url) {
-    // Try to extract the variant path (everything before the segment name)
-    const match = url.match(/(.+)\/[^\/]+\.(ts|m4s)$/);
-    return match ? match[1] : null;
-  }
+    const playerInstance = player || this.player;
 
-  parseManifest(url, content) {
-    const lines = content.split('\n');
-    const variants = [];
-    let currentVariant = {};
+    if (!playerInstance) return;
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-
-      if (line.startsWith('#EXT-X-STREAM-INF:')) {
-        // Parse variant info
-        currentVariant = { url: url };
-
-        const bandwidthMatch = line.match(/BANDWIDTH=(\d+)/);
-        if (bandwidthMatch) currentVariant.bandwidth = parseInt(bandwidthMatch[1]);
-
-        const resolutionMatch = line.match(/RESOLUTION=(\d+x\d+)/);
-        if (resolutionMatch) currentVariant.resolution = resolutionMatch[1];
-
-        const codecsMatch = line.match(/CODECS="([^"]+)"/);
-        if (codecsMatch) currentVariant.codecs = codecsMatch[1];
-
-        const frameRateMatch = line.match(/FRAME-RATE=([\d.]+)/);
-        if (frameRateMatch) currentVariant.frameRate = parseFloat(frameRateMatch[1]);
-
-        // Next line should be the variant URL
-        if (i + 1 < lines.length && !lines[i + 1].startsWith('#')) {
-          currentVariant.playlistUrl = lines[i + 1].trim();
-          variants.push(currentVariant);
+    try {
+      // Only render Quality Levels (codecSet per level) under Tracks
+      if (
+        playerInstance.tech &&
+        playerInstance.tech.hls &&
+        playerInstance.tech.hls.levels
+      ) {
+        console.log(playerInstance.tech.hls);
+        const levelsAll = playerInstance.tech.hls.levels || [];
+        if (this.qualityLevelsContainer) {
+          this.qualityLevelsContainer.innerHTML = '';
+          levelsAll.forEach((lvl, idx) => {
+            const heightPart = lvl && lvl.height ? `${lvl.height}p` : '';
+            const kbPart =
+              lvl && lvl.bitrate ? `${Math.round(lvl.bitrate / 1000)}kb` : '';
+            const codecSetStr =
+              lvl && lvl.codecs
+                ? lvl.codecs
+                    .split(',')
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                    .join(',')
+                : '';
+            const partsLabel = [heightPart, kbPart, codecSetStr]
+              .filter(Boolean)
+              .join(' / ');
+            const label = partsLabel || `level ${idx}`;
+            const isActive =
+              playerInstance.currentLevel &&
+              playerInstance.currentLevel.id === idx;
+            const el = document.createElement('span');
+            el.className = 'na-pill' + (isActive ? ' active' : '');
+            el.textContent = label;
+            this.qualityLevelsContainer.appendChild(el);
+          });
+        }
+        // Render available audio tracks (from HLS) and mark selected
+        try {
+          const hls = playerInstance.tech.hls;
+          if (
+            this.audioTracksContainer &&
+            hls &&
+            Array.isArray(hls.audioTracks)
+          ) {
+            this.audioTracksContainer.innerHTML = '';
+            const currentAudio =
+              hls.audioTrack !== undefined && hls.audioTrack !== null
+                ? String(hls.audioTrack)
+                : null;
+            hls.audioTracks.forEach((at) => {
+              const id = String(at.id);
+              const lang = at.lang ? String(at.lang).trim() : '';
+              const name = at.name ? String(at.name).trim() : '';
+              let label = '';
+              if (lang && name) label = `${lang} / ${name}`;
+              else if (name) label = name;
+              else if (lang) label = lang;
+              else label = `Track ${id}`;
+              const isActive = currentAudio === id;
+              const pill = document.createElement('span');
+              pill.className = 'na-pill' + (isActive ? ' active' : '');
+              pill.textContent = label;
+              this.audioTracksContainer.appendChild(pill);
+            });
+          }
+        } catch (e) {
+          // ignore
+        }
+        // Subtitle tracks - prefer HLS subtitleTracks, fallback to video.textTracks
+        try {
+          const hls = playerInstance.tech.hls;
+          let subtitles = null;
+          let currentSubtitle = null;
+          if (hls && Array.isArray(hls.subtitleTracks)) {
+            subtitles = hls.subtitleTracks;
+            currentSubtitle = hls.subtitleTrack !== undefined ? String(hls.subtitleTrack) : null;
+          } else if (video && video.textTracks) {
+            subtitles = Array.from(video.textTracks);
+            // find first showing track
+            const showing = subtitles.findIndex((t) => t.mode === 'showing');
+            currentSubtitle = showing >= 0 ? String(showing) : null;
+          }
+          if (this.subtitlesContainer && Array.isArray(subtitles)) {
+            this.subtitlesContainer.innerHTML = '';
+            subtitles.forEach((st, index) => {
+              // HLS subtitle track objects may have id/name/lang similar to audioTracks
+              const id = st.id !== undefined ? String(st.id) : String(index);
+              const lang = st.lang ? String(st.lang).trim() : '';
+              const name = st.name ? String(st.name).trim() : '';
+              let label = '';
+              if (lang && name) label = `${lang} / ${name}`;
+              else if (name) label = name;
+              else if (lang) label = lang;
+              else label = `Sub ${id}`;
+              const isActive = currentSubtitle === id || currentSubtitle === String(index);
+              const pill = document.createElement('span');
+              pill.className = 'na-pill' + (isActive ? ' active' : '');
+              pill.textContent = label;
+              this.subtitlesContainer.appendChild(pill);
+            });
+          }
+        } catch (e) {
+          // ignore
         }
       }
-    }
-
-    if (variants.length > 0) {
-      this.manifestData = {
-        url: url,
-        variants: variants,
-        parsed: new Date().toISOString()
-      };
-
-      // Update current variant info (assume highest bitrate initially)
-      const topVariant = variants.sort((a, b) => (b.bandwidth || 0) - (a.bandwidth || 0))[0];
-      if (topVariant) {
-        if (this.activeBandwidthEl) {
-          this.activeBandwidthEl.textContent = 
-            topVariant.bandwidth ? (topVariant.bandwidth / 1000).toFixed(0) + ' kbps' : '-';
-        }
-        if (this.activeResolutionEl) {
-          this.activeResolutionEl.textContent = topVariant.resolution || '-';
-        }
-        if (this.activeCodecEl) {
-          this.activeCodecEl.textContent = topVariant.codecs || '-';
-        }
-      }
-    }
-  }
-
-  updateStatistics() {
-    const total = this.networkRequests.length;
-    const manifests = this.networkRequests.filter(r => r.type === 'manifest').length;
-    const segments = this.networkRequests.filter(r => r.type === 'segment').length;
-    const failed = this.networkRequests.filter(r => r.status >= 400 || r.status === 0).length;
-
-    const segmentRequests = this.networkRequests.filter(r => r.type === 'segment');
-    const avgTime = segmentRequests.length > 0
-      ? segmentRequests.reduce((sum, r) => sum + (r.duration || 0), 0) / segmentRequests.length
-      : 0;
-
-    const totalBytes = this.networkRequests.reduce((sum, r) => sum + (r.size || 0), 0);
-
-    if (this.totalRequestsEl) this.totalRequestsEl.textContent = total;
-    if (this.manifestRequestsEl) this.manifestRequestsEl.textContent = manifests;
-    if (this.segmentRequestsEl) this.segmentRequestsEl.textContent = segments;
-    
-    if (this.failedRequestsEl) {
-      this.failedRequestsEl.textContent = failed;
-      this.failedRequestsEl.className = 'metric-value ' + (failed > 0 ? 'error' : 'good');
-    }
-    
-    if (this.avgSegmentTimeEl) {
-      this.avgSegmentTimeEl.textContent = Math.round(avgTime) + 'ms';
-    }
-    if (this.totalDataEl) {
-      this.totalDataEl.textContent = this.formatBytes(totalBytes);
-    }
-    if (this.bitrateSwitchEl) {
-      this.bitrateSwitchEl.textContent = this.bitrateSwitch;
-    }
-
-    if (segmentRequests.length > 0) {
-      const lastSeg = segmentRequests[segmentRequests.length - 1];
-      const shortUrl = lastSeg.url.split('/').pop();
-      if (this.lastSegmentEl) {
-        this.lastSegmentEl.textContent = shortUrl;
-      }
+    } catch (e) {
+      // Silently fail
     }
   }
 
   reset() {
-    this.networkRequests = [];
-    this.manifestData = null;
-    this.lastVariantUrl = null;
-    this.bitrateSwitch = 0;
-    this.startTime = Date.now();
-    this.updateStatistics();
-    
     // Reset variant info
-    if (this.activeBandwidthEl) this.activeBandwidthEl.textContent = '-';
-    if (this.activeResolutionEl) this.activeResolutionEl.textContent = '-';
-    if (this.activeCodecEl) this.activeCodecEl.textContent = '-';
-    if (this.lastSegmentEl) this.lastSegmentEl.textContent = '-';
-  }
-
-  formatBytes(bytes) {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    if (this.bandwidthsContainer) this.bandwidthsContainer.innerHTML = '';
+    if (this.resolutionsContainer) this.resolutionsContainer.innerHTML = '';
+    if (this.codecsContainer) this.codecsContainer.innerHTML = '';
+    if (this.audioCodecsContainer) this.audioCodecsContainer.innerHTML = '';
+    if (this.qualityLevelsContainer) this.qualityLevelsContainer.innerHTML = '';
+    if (this.audioTracksContainer) this.audioTracksContainer.innerHTML = '';
+    if (this.subtitlesContainer) this.subtitlesContainer.innerHTML = '';
   }
 }
