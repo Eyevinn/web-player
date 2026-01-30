@@ -26,7 +26,7 @@ export enum PlaybackState {
   BUFFERING,
 
   BITRATE_CHANGE,
-  PLAYER_STOPPED
+  PLAYER_STOPPED,
 }
 
 export interface IVideoLevel {
@@ -57,7 +57,7 @@ export function getTextTrackId(textTrack) {
 }
 
 export default class BaseTech extends EventEmitter {
-  public name = "BaseTech";
+  public name = 'BaseTech';
   protected video: HTMLVideoElement;
   protected state: IPlayerState;
 
@@ -204,7 +204,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   protected onVolumeChange() {
-    const fields: { [s: string]: number | boolean | string } = {
+    const fields: { [s: string]: number | boolean | string } = {
       volume: this.video.volume,
     };
     if (this.state.isMuted !== this.isMuted) {
@@ -217,12 +217,18 @@ export default class BaseTech extends EventEmitter {
 
   protected onAudioTrackChange() {
     this.updateState({ audioTracks: this.audioTracks });
-    this.emit(PlayerEvent.AUDIO_TRACK_CHANGE);
+    this.emit(
+      PlayerEvent.AUDIO_TRACK_CHANGE,
+      this.audioTracks.find((audioTrack) => audioTrack.enabled)
+    );
   }
 
   protected onTextTrackChange() {
     this.updateState({ textTracks: this.textTracks });
-    this.emit(PlayerEvent.TEXT_TRACK_CHANGE);
+    this.emit(
+      PlayerEvent.TEXT_TRACK_CHANGE,
+      this.textTracks.find((textTrack) => textTrack.enabled)
+    );
   }
 
   protected onEnded() {
@@ -386,7 +392,7 @@ export default class BaseTech extends EventEmitter {
       audioTracks: [],
       textTracks: [],
       volume: this.video.volume,
-      ...defaultState
+      ...defaultState,
     });
   }
 

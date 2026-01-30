@@ -16,8 +16,9 @@ const readyStates = {
 };
 
 export class PlayerDebug {
-  constructor(video, playerDebugSection) {
+  constructor(video, playerDebugSection, player = null) {
     this.video = video;
+    this.player = player;
     this.playerDebugSection = playerDebugSection;
     this.updateInterval = null;
     this.stallCount = 0;
@@ -196,7 +197,8 @@ export class PlayerDebug {
 
       // Creation time
       if (creationTimeEl && quality.creationTime) {
-        creationTimeEl.textContent = quality.creationTime.toFixed(2) + 's';
+        creationTimeEl.textContent =
+          (quality.creationTime / 1000).toFixed(2) + 's';
       }
     }
 
@@ -234,18 +236,30 @@ export class PlayerDebug {
     const videoTracksEl = document.getElementById('videoTracks');
     const audioTracksEl = document.getElementById('audioTracks');
 
+    console.log('this.video', this.video);
+
     if (sourceUrlEl) sourceUrlEl.textContent = this.video.currentSrc || '-';
     if (canPlayTypeEl)
       canPlayTypeEl.textContent =
         this.video.canPlayType('application/vnd.apple.mpegurl') || 'unknown';
-    if (videoTracksEl)
-      videoTracksEl.textContent = this.video.videoTracks
-        ? this.video.videoTracks.length
-        : 0;
-    if (audioTracksEl)
-      audioTracksEl.textContent = this.video.audioTracks
-        ? this.video.audioTracks.length
-        : 0;
+    if (videoTracksEl) {
+      const videoTrackCount =
+        this.player && typeof this.player.getVideoLevels === 'function'
+          ? this.player.getVideoLevels().length
+          : this.video.videoTracks
+          ? this.video.videoTracks.length
+          : 0;
+      videoTracksEl.textContent = videoTrackCount;
+    }
+    if (audioTracksEl) {
+      const audioTrackCount =
+        this.player && this.player.tech && this.player.tech.audioTracks
+          ? this.player.tech.audioTracks.length
+          : this.video.audioTracks
+          ? this.video.audioTracks.length
+          : 0;
+      audioTracksEl.textContent = audioTrackCount;
+    }
 
     // Performance
     const stallCountEl = document.getElementById('stallCount');

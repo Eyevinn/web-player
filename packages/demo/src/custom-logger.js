@@ -105,40 +105,6 @@ export class CustomLogger {
       message,
       data,
     };
-    // Deduplicate: avoid showing the same message+data multiple times,
-    // and avoid duplicate when same entry exists as warn and error.
-    const normalizedData = this._normalizeData(data);
-    // Look back a window of recent logs (last 50)
-    const lookback = 50;
-    const recent = this.logs.slice(-lookback);
-    for (let i = recent.length - 1; i >= 0; i--) {
-      const existing = recent[i];
-      if (!existing) continue;
-      const existingData = this._normalizeData(existing.data);
-      if (existing.message === message && existingData === normalizedData) {
-        // exact same content
-        if (existing.level === level) {
-          // already logged same level -> skip
-          return;
-        }
-        // If existing is warn and new is error, upgrade it
-        if (existing.level === 'warn' && level === 'error') {
-          existing.level = 'error';
-          existing.timestamp = timestamp;
-          existing.data = data;
-          // Re-render logs to reflect upgraded level
-          this.renderAllLogs();
-          return;
-        }
-        // If existing is error and new is warn, skip (don't duplicate/downgrade)
-        if (existing.level === 'error' && level === 'warn') {
-          return;
-        }
-        // For other mismatched levels, skip adding duplicate
-        return;
-      }
-    }
-
     this.logs.push(logEntry);
 
     // Limit log size
@@ -232,7 +198,9 @@ export class CustomLogger {
   shouldDisplayLog(level) {
     // If debug logs are globally disabled via the Player Debug Mode, never show them
     if (level === 'debug') {
-      const debugEnabled = typeof localStorage !== 'undefined' && localStorage.getItem('player-debug-mode') === 'true';
+      const debugEnabled =
+        typeof localStorage !== 'undefined' &&
+        localStorage.getItem('player-debug-mode') === 'true';
       if (!debugEnabled) return false;
     }
     return this.activeFilters.has('all') || this.activeFilters.has(level);

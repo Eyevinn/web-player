@@ -26,7 +26,6 @@ export class NetworkAnalysis {
         playerInstance.tech.hls &&
         playerInstance.tech.hls.levels
       ) {
-        console.log(playerInstance.tech.hls);
         const levelsAll = playerInstance.tech.hls.levels || [];
         if (this.qualityLevelsContainer) {
           this.qualityLevelsContainer.innerHTML = '';
@@ -94,7 +93,10 @@ export class NetworkAnalysis {
           let currentSubtitle = null;
           if (hls && Array.isArray(hls.subtitleTracks)) {
             subtitles = hls.subtitleTracks;
-            currentSubtitle = hls.subtitleTrack !== undefined ? String(hls.subtitleTrack) : null;
+            currentSubtitle =
+              hls.subtitleTrack !== undefined
+                ? String(hls.subtitleTrack)
+                : null;
           } else if (video && video.textTracks) {
             subtitles = Array.from(video.textTracks);
             // find first showing track
@@ -113,7 +115,8 @@ export class NetworkAnalysis {
               else if (name) label = name;
               else if (lang) label = lang;
               else label = `Sub ${id}`;
-              const isActive = currentSubtitle === id || currentSubtitle === String(index);
+              const isActive =
+                currentSubtitle === id || currentSubtitle === String(index);
               const pill = document.createElement('span');
               pill.className = 'na-pill' + (isActive ? ' active' : '');
               pill.textContent = label;

@@ -334,8 +334,8 @@ async function main() {
             sessionId: `web-player-demo-${Date.now()}`,
           }));
       } catch (err) {
-        console.error('Failed to initiate analytics', err);
-        customLogger.warn('Failed to initiate analytics', err);
+        console.warn('Failed to initiate analytics', err);
+        customLogger.error('Failed to initiate analytics', err);
         playerAnalytics = null;
       }
       // Log load start
@@ -354,6 +354,7 @@ async function main() {
 
       // Update network analysis with player instance
       networkAnalysis.player = player;
+      playerDebug.player = player;
 
       // Save successful load to previous searches
       if (manifestInput.value && manifestInput.value.trim() !== '') {
@@ -802,6 +803,17 @@ async function main() {
     load();
   }
 
+  function formatTrackLabel(track, fallback) {
+    if (!track || typeof track !== 'object') return fallback;
+    const lang =
+      track.lang || track.language || track.code || track.locale || '';
+    const name = track.name || track.label || track.id || '';
+    const parts = [lang, name]
+      .map((part) => String(part || '').trim())
+      .filter(Boolean);
+    return parts.length > 0 ? parts.join(' / ') : fallback;
+  }
+
   //Work on this one...
   player.on(PlayerEvent.READY, () => {
     customLogger.info('Player ready');
@@ -834,6 +846,26 @@ async function main() {
     }
   });
 
+  video.addEventListener('volumechange', () => {
+    const volumePct = Math.round(video.volume * 100);
+    const muted = video.muted;
+    customLogger.info(
+      `Volume changed to ${volumePct}%${muted ? ' (muted)' : ''}`,
+      { volume: video.volume, muted }
+    );
+  });
+
+  player.on(PlayerEvent.AUDIO_TRACK_CHANGE, (data) => {
+    console.log('audio track change', data);
+    const label = formatTrackLabel(data, 'Audio track changed');
+    customLogger.info(`Audio track changed: ${label}`, data);
+  });
+
+  player.on(PlayerEvent.TEXT_TRACK_CHANGE, (data) => {
+    const label = formatTrackLabel(data, 'Subtitle track changed');
+    customLogger.info(`Subtitle track changed: ${label}`, data);
+  });
+
   player.on(PlayerEvent.PLAYER_STOPPED, () => {
     if (analyticsInitiated) {
       playerAnalytics.reportStop();
@@ -842,11 +874,11 @@ async function main() {
   });
 
   player.on(PlayerEvent.ERROR, ({ errorData, fatal }) => {
-    console.error('player reported error', errorData);
+    console.warn('player reported error', errorData);
     if (fatal) {
       customLogger.error('Player error (fatal)', errorData);
     } else {
-      customLogger.warn('Player warning', errorData);
+      customLogger.warn('Player warning (non-fatal)', errorData);
     }
     if (analyticsInitiated) {
       if (fatal) {
