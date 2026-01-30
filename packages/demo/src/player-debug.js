@@ -235,10 +235,17 @@ export class PlayerDebug {
     const canPlayTypeEl = document.getElementById('canPlayType');
     const videoTracksEl = document.getElementById('videoTracks');
     const audioTracksEl = document.getElementById('audioTracks');
+    const subtitleTracksEl = document.getElementById('subtitleTracks');
 
     console.log('this.video', this.video);
 
-    if (sourceUrlEl) sourceUrlEl.textContent = this.video.currentSrc || '-';
+    if (sourceUrlEl) {
+      const manifestUrl =
+        this.player && this.player.currentSrc
+          ? this.player.currentSrc
+          : this.video.currentSrc;
+      sourceUrlEl.textContent = manifestUrl || '-';
+    }
     if (canPlayTypeEl)
       canPlayTypeEl.textContent =
         this.video.canPlayType('application/vnd.apple.mpegurl') || 'unknown';
@@ -259,6 +266,17 @@ export class PlayerDebug {
           ? this.video.audioTracks.length
           : 0;
       audioTracksEl.textContent = audioTrackCount;
+    }
+    if (subtitleTracksEl) {
+      const subtitleTrackCount =
+        this.player && this.player.tech && this.player.tech.textTracks
+          ? this.player.tech.textTracks.length
+          : this.video.textTracks
+            ? Array.from(this.video.textTracks).filter(
+                (track) => track.kind !== 'metadata'
+              ).length
+            : 0;
+      subtitleTracksEl.textContent = subtitleTrackCount;
     }
 
     // Performance

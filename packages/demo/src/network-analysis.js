@@ -27,6 +27,20 @@ export class NetworkAnalysis {
         playerInstance.tech.hls.levels
       ) {
         const levelsAll = playerInstance.tech.hls.levels || [];
+        const toHumanCodec = (codec) => {
+          const c = String(codec || '').trim().toLowerCase();
+          if (!c) return '';
+          if (c.startsWith('avc')) return 'H.264/AVC';
+          if (c.startsWith('hev1') || c.startsWith('hvc1')) return 'H.265/HEVC';
+          if (c.startsWith('av01')) return 'AV1';
+          if (c.startsWith('vp09') || c.startsWith('vp9')) return 'VP9';
+          if (c.startsWith('mp4a')) return 'AAC';
+          if (c.includes('ec-3')) return 'Dolby Digital Plus';
+          if (c.includes('ac-3')) return 'Dolby Digital';
+          if (c.startsWith('opus')) return 'Opus';
+          return codec;
+        };
+
         if (this.qualityLevelsContainer) {
           this.qualityLevelsContainer.innerHTML = '';
           levelsAll.forEach((lvl, idx) => {
@@ -38,8 +52,9 @@ export class NetworkAnalysis {
                 ? lvl.codecs
                     .split(',')
                     .map((s) => s.trim())
+                    .map((s) => toHumanCodec(s))
                     .filter(Boolean)
-                    .join(',')
+                    .join(', ')
                 : '';
             const partsLabel = [heightPart, kbPart, codecSetStr]
               .filter(Boolean)

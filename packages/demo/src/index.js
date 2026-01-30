@@ -21,6 +21,14 @@ const EmbedVersion = '0.9.4';
 
 const ExampleStreams = [
   {
+    title: 'HLS LIVE SGAI',
+    url: 'https://eyevinnlab-sgailucas.eyevinn-sgai-ad-proxy.auto.prod.osaas.io/loop/master.m3u8',
+  },
+  {
+    title: 'HLS VOD MULTI AUDIO MULTI SUBTITLES',
+    url: 'https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8',
+  },
+  {
     title: 'HLS VOD',
     url: 'https://lab.cdn.eyevinn.technology/osc/osc-reel/a4e1156e-f872-455f-9f1f-be73b5effba8/index.m3u8',
   },
