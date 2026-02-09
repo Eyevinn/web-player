@@ -141,6 +141,9 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 	const changeTextTrack = useCallback((id) => player.setTextTrack(id), [
 		player,
 	]);
+	const changeVideoLevel = useCallback((level) => {
+		player.currentLevel = level;
+	}, [player]);
 	const seekByPercentage = useCallback(
 		(percentage: number) => player.seekTo({ percentage }),
 		[player]
@@ -166,6 +169,7 @@ export function usePlayer(webPlayer: WebPlayer, castAppId: string) {
 		toggleMute,
 		changeAudioTrack,
 		changeTextTrack,
+		changeVideoLevel,
 		seekByPercentage,
 		seekByChange,
 		seekToLive,

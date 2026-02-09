@@ -2,11 +2,14 @@
 	position: relative;
 	display: flex;
 	align-items: center;
+	flex: 1;
+	min-width: 0;
+	width: 100%;
 
 	& > * {
-		margin-right: 1em;
+		margin-right: 0.5em;
 
-		&*:last-child {
+		&:last-child {
 			margin-right: 0;
 		}
 	}
@@ -21,6 +24,8 @@
 	.time {
 		color: #ffffff;
 		white-space: nowrap;
+		font-size: 0.875em;
+		flex-shrink: 0;
 	}
 
 	.progressbarWrapper {
@@ -28,8 +33,10 @@
 		justify-content: center;
 		align-items: center;
 
+		flex: 1 1 auto;
+		min-width: 0;
 		width: 100%;
-		padding: 0.5em 0;
+		padding: 0.25em 0;
 
 		cursor: pointer;
 	}
