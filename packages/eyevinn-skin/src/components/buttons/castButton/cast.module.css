@@ -4,3 +4,14 @@
 
 	cursor: pointer;
 }
+
+/* Hide container when cast launcher is not visible */
+.container:has(google-cast-launcher[style*="display: none"]),
+.container:has(google-cast-launcher[hidden]),
+.container:has(google-cast-launcher[style*="visibility: hidden"]) {
+	width: 0;
+	height: 0;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+}

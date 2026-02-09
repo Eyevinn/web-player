@@ -18,6 +18,7 @@ import {
 import TextTrackButton from './components/buttons/textTrack/textTrackButton';
 import AirPlayButton from './components/buttons/airplayButton/AirPlayButton';
 import CastButton from './components/buttons/castButton/CastButton';
+import VideoQualityButton from './components/buttons/videoQuality/VideoQualityButton';
 import { useAirPlay, usePlayer } from './util/hooks';
 import ContextMenu from './components/contextMenu/ContextMenu';
 import CastOverlay from './components/castOverlay/CastOverlay';
@@ -29,7 +30,7 @@ export default function EyevinnSkin({
   rootElement,
 }: {
   player: WebPlayer;
-  castAppId: string;
+  castAppId?: string;
   rootElement: HTMLElement;
 }) {
   const skinContainerRef = useRef<HTMLDivElement>();
@@ -40,6 +41,7 @@ export default function EyevinnSkin({
     toggleMute,
     changeAudioTrack,
     changeTextTrack,
+    changeVideoLevel,
     seekByPercentage,
     seekByChange,
     seekToLive,
@@ -188,8 +190,18 @@ export default function EyevinnSkin({
               isSeekable={state?.isSeekable}
             />
           )}
-          <div class={style.divider} />
-          <CastButton />
+          {(!state?.isLive || state?.isSeekable) && (
+            <Timeline
+              isLive={state?.isLive}
+              isAtLiveEdge={state?.isAtLiveEdge}
+              isSeekable={state?.isSeekable}
+              handleSeek={seekByPercentage}
+              handleSeekToLive={seekToLive}
+              currentTime={state?.currentTime}
+              duration={state?.duration}
+            />
+          )}
+          {castAppId != null && <CastButton />}
           {airplayAvailable && <AirPlayButton onClick={toggleAirPlay} />}
           {state?.isCasting === false && !!state?.textTracks.length && (
             <TextTrackButton
@@ -203,6 +215,13 @@ export default function EyevinnSkin({
               onChange={changeAudioTrack}
             />
           )}
+          {state?.isCasting === false && player.getVideoLevels().length > 0 && (
+            <VideoQualityButton
+              videoLevels={player.getVideoLevels()}
+              currentLevel={player.currentLevel}
+              onChange={changeVideoLevel}
+            />
+          )}
           <VolumeControls
             muted={state?.isMuted}
             toggleMute={toggleMute}
@@ -214,17 +233,6 @@ export default function EyevinnSkin({
             onClick={toggleFullscreen}
           />
         </div>
-        {(!state?.isLive || state?.isSeekable) && (
-          <Timeline
-            isLive={state?.isLive}
-            isAtLiveEdge={state?.isAtLiveEdge}
-            isSeekable={state?.isSeekable}
-            handleSeek={seekByPercentage}
-            handleSeekToLive={seekToLive}
-            currentTime={state?.currentTime}
-            duration={state?.duration}
-          />
-        )}
       </div>
     </div>
   );

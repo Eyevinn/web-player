@@ -26,7 +26,7 @@ export enum PlaybackState {
   BUFFERING,
 
   BITRATE_CHANGE,
-  PLAYER_STOPPED
+  PLAYER_STOPPED,
 }
 
 export interface IVideoLevel {
@@ -57,7 +57,7 @@ export function getTextTrackId(textTrack) {
 }
 
 export default class BaseTech extends EventEmitter {
-  public name = "BaseTech";
+  public name = 'BaseTech';
   protected video: HTMLVideoElement;
   protected state: IPlayerState;
 
@@ -82,39 +82,39 @@ export default class BaseTech extends EventEmitter {
     this.video.addEventListener('play', (this.onPlay = this.onPlay.bind(this)));
     this.video.addEventListener(
       'playing',
-      (this.onPlaying = this.onPlaying.bind(this))
+      (this.onPlaying = this.onPlaying.bind(this)),
     );
     this.video.addEventListener(
       'pause',
-      (this.onPause = this.onPause.bind(this))
+      (this.onPause = this.onPause.bind(this)),
     );
     this.video.addEventListener(
       'timeupdate',
-      (this.onTimeUpdate = this.onTimeUpdate.bind(this))
+      (this.onTimeUpdate = this.onTimeUpdate.bind(this)),
     );
     this.video.addEventListener(
       'waiting',
-      (this.onWaiting = this.onWaiting.bind(this))
+      (this.onWaiting = this.onWaiting.bind(this)),
     );
     this.video.addEventListener(
       'seeking',
-      (this.onSeeking = this.onSeeking.bind(this))
+      (this.onSeeking = this.onSeeking.bind(this)),
     );
     this.video.addEventListener(
       'seeked',
-      (this.onSeeked = this.onSeeked.bind(this))
+      (this.onSeeked = this.onSeeked.bind(this)),
     );
     this.video.addEventListener(
       'canplay',
-      (this.onLoadedData = this.onLoadedData.bind(this))
+      (this.onLoadedData = this.onLoadedData.bind(this)),
     );
     this.video.addEventListener(
       'volumechange',
-      (this.onVolumeChange = this.onVolumeChange.bind(this))
+      (this.onVolumeChange = this.onVolumeChange.bind(this)),
     );
     this.video.addEventListener(
       'ended',
-      (this.onEnded = this.onEnded.bind(this))
+      (this.onEnded = this.onEnded.bind(this)),
     );
 
     // @ts-ignore
@@ -122,7 +122,7 @@ export default class BaseTech extends EventEmitter {
       // @ts-ignore
       this.video.audioTracks.addEventListener(
         'change',
-        (this.onAudioTrackChange = this.onAudioTrackChange.bind(this))
+        (this.onAudioTrackChange = this.onAudioTrackChange.bind(this)),
       );
     }
   }
@@ -204,7 +204,7 @@ export default class BaseTech extends EventEmitter {
   }
 
   protected onVolumeChange() {
-    const fields: { [s: string]: number | boolean | string } = {
+    const fields: { [s: string]: number | boolean | string } = {
       volume: this.video.volume,
     };
     if (this.state.isMuted !== this.isMuted) {
@@ -217,12 +217,18 @@ export default class BaseTech extends EventEmitter {
 
   protected onAudioTrackChange() {
     this.updateState({ audioTracks: this.audioTracks });
-    this.emit(PlayerEvent.AUDIO_TRACK_CHANGE);
+    this.emit(
+      PlayerEvent.AUDIO_TRACK_CHANGE,
+      this.audioTracks.find((audioTrack) => audioTrack.enabled),
+    );
   }
 
   protected onTextTrackChange() {
     this.updateState({ textTracks: this.textTracks });
-    this.emit(PlayerEvent.TEXT_TRACK_CHANGE);
+    this.emit(
+      PlayerEvent.TEXT_TRACK_CHANGE,
+      this.textTracks.find((textTrack) => textTrack.enabled),
+    );
   }
 
   protected onEnded() {
@@ -278,7 +284,7 @@ export default class BaseTech extends EventEmitter {
 
   get audioTrack() {
     const audioTrack = this.audioTracks.find(
-      (audioTrack) => audioTrack.enabled
+      (audioTrack) => audioTrack.enabled,
     );
     return audioTrack?.id;
   }
@@ -348,7 +354,7 @@ export default class BaseTech extends EventEmitter {
     }
     return playPromise.then(
       () => true,
-      () => false
+      () => false,
     );
   }
 
@@ -386,7 +392,7 @@ export default class BaseTech extends EventEmitter {
       audioTracks: [],
       textTracks: [],
       volume: this.video.volume,
-      ...defaultState
+      ...defaultState,
     });
   }
 
