@@ -29,9 +29,25 @@ export default class DashPlayer extends BaseTech {
 
   load(src: string): Promise<void> {
     super.setDefaultState();
-    return this.shakaPlayer.load(src).catch(() => {
-      // TODO error handling
+    return this.shakaPlayer.load(src).catch((error) => {
+      this.handleLoadError(error);
+      throw error;
     });
+  }
+
+  private handleLoadError(error: any): void {
+    const errorDetails = error || {};
+    const severity = errorDetails.severity ?? 2;
+    const fatal = severity > 1;
+
+    const errorData = {
+      category: errorDetails.category?.toString() ?? 'unknown',
+      code: errorDetails.code?.toString() ?? 'unknown',
+      message: errorDetails.data?.[1]?.toString() ?? 'Load failed',
+      data: errorDetails.data ?? []
+    };
+
+    this.emit(PlayerEvent.ERROR, { errorData, fatal });
   }
 
   protected onBitrateChange() {
