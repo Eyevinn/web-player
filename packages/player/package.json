@@ -1,6 +1,6 @@
 {
   "name": "@eyevinn/web-player",
-  "version": "0.11.3",
+  "version": "0.11.4",
   "author": "Eyevinn Technology <work@eyevinn.se>",
   "contributors": [
     "Benjamin Wallberg <benjamin.wallberg@eyevinn.se> (Eyevinn Technology AB)"
@@ -29,8 +29,8 @@
     "url": "https://github.com/Eyevinn/web-player/issues"
   },
   "dependencies": {
-    "@eyevinn/web-player-core": "^0.17.3",
-    "@eyevinn/web-player-eyevinn-skin": "^0.12.3"
+    "@eyevinn/web-player-core": "^0.17.4",
+    "@eyevinn/web-player-eyevinn-skin": "^0.12.4"
   },
   "devDependencies": {
     "buffer": "^6.0.3",
