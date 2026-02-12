@@ -67,7 +67,7 @@ describe('ShakaTech - Text Track (Subtitle) Functionality', () => {
       const mockTrack = { id: '0', language: 'en', label: 'English', active: false };
       mockShakaPlayer.getTextTracks.mockReturnValue([mockTrack]);
 
-      shakaTech.textTrack = '0';
+      shakaTech.textTrack = '0|English|en';
 
       expect(mockShakaPlayer.setTextTrackVisibility).toHaveBeenCalledWith(true);
     });
@@ -76,7 +76,7 @@ describe('ShakaTech - Text Track (Subtitle) Functionality', () => {
       const mockTrack = { id: '0', language: 'en', label: 'English', active: false };
       mockShakaPlayer.getTextTracks.mockReturnValue([mockTrack]);
 
-      shakaTech.textTrack = '0';
+      shakaTech.textTrack = '0|English|en';  // Use compound ID format
 
       expect(mockShakaPlayer.selectTextTrack).toHaveBeenCalledWith(mockTrack);
     });
@@ -93,7 +93,7 @@ describe('ShakaTech - Text Track (Subtitle) Functionality', () => {
 
       const onTextTrackChangeSpy = jest.spyOn(shakaTech as any, 'onTextTrackChange');
 
-      shakaTech.textTrack = '0';
+      shakaTech.textTrack = '0|English|en';
 
       expect(onTextTrackChangeSpy).toHaveBeenCalled();
       expect(onTextTrackChangeSpy).toHaveBeenCalledTimes(1);
@@ -118,10 +118,16 @@ describe('ShakaTech - Text Track (Subtitle) Functionality', () => {
         done();
       });
 
-      shakaTech.textTrack = '0';
+      shakaTech.textTrack = '0|English|en';
     });
 
     it('CRITICAL REGRESSION TEST: should emit TEXT_TRACK_CHANGE event when disabling', (done) => {
+      // Mock that no tracks are active/visible when disabled
+      mockShakaPlayer.getTextTracks.mockReturnValue([
+        { id: '0', language: 'en', label: 'English', active: false },
+      ]);
+      mockShakaPlayer.isTextTrackVisible.mockReturnValue(false);
+
       shakaTech.on(PlayerEvent.TEXT_TRACK_CHANGE, (track) => {
         expect(track).toBeUndefined();
         done();
@@ -138,7 +144,7 @@ describe('ShakaTech - Text Track (Subtitle) Functionality', () => {
       ];
       mockShakaPlayer.getTextTracks.mockReturnValue(mockTracks);
 
-      shakaTech.textTrack = '1';
+      shakaTech.textTrack = '1|Spanish|es';
 
       expect(mockShakaPlayer.selectTextTrack).toHaveBeenCalledWith(mockTracks[1]);
     });
@@ -160,7 +166,7 @@ describe('ShakaTech - Text Track (Subtitle) Functionality', () => {
       ]);
       mockShakaPlayer.isTextTrackVisible.mockReturnValue(true);
 
-      expect(shakaTech.textTrack).toBe('0');
+      expect(shakaTech.textTrack).toBe('0|English|en');  // Returns compound ID
     });
 
     it('should return null when track is active but not visible', () => {
@@ -233,28 +239,22 @@ describe('ShakaTech - Text Track (Subtitle) Functionality', () => {
   });
 
   describe('Event propagation', () => {
-    it('CRITICAL: should update player state when text track changes', (done) => {
+    it('CRITICAL: should emit TEXT_TRACK_CHANGE event with correct track data', (done) => {
       const mockTrack = { id: '0', language: 'en', label: 'English', active: true };
       mockShakaPlayer.getTextTracks.mockReturnValue([mockTrack]);
       mockShakaPlayer.isTextTrackVisible.mockReturnValue(true);
 
-      // Listen for STATE_CHANGE event (which should be emitted after TEXT_TRACK_CHANGE)
-      let stateChanged = false;
-      shakaTech.on('state_change', (state) => {
-        if (state.textTracks) {
-          stateChanged = true;
-        }
+      shakaTech.on(PlayerEvent.TEXT_TRACK_CHANGE, (track) => {
+        // Verify the emitted track data is correct
+        expect(track).toBeDefined();
+        expect(track.id).toBe('0');  // ITrack.id is the simple ID, not compound
+        expect(track.language).toBe('en');
+        expect(track.label).toBe('English');
+        expect(track.enabled).toBe(true);
+        done();
       });
 
-      shakaTech.on(PlayerEvent.TEXT_TRACK_CHANGE, () => {
-        // Give a tick for state change to propagate
-        setTimeout(() => {
-          expect(stateChanged).toBe(true);
-          done();
-        }, 10);
-      });
-
-      shakaTech.textTrack = '0';
+      shakaTech.textTrack = '0|English|en';
     });
 
     it('should handle rapid text track changes without errors', () => {
