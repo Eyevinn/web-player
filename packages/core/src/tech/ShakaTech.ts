@@ -111,8 +111,10 @@ export default class DashPlayer extends BaseTech {
         .getTextTracks()
         .find((t) => getTextTrackId(t) === trackId);
       this.shakaPlayer.selectTextTrack(internalTrack);
+      this.onTextTrackChange();
     } else {
       this.shakaPlayer.setTextTrackVisibility(false);
+      this.onTextTrackChange();
     }
   }
 
