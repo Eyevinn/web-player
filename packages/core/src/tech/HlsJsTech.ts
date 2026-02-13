@@ -2,6 +2,7 @@ import BaseTech, { IVideoLevel, PlaybackState } from './BaseTech';
 import Hls from 'hls.js';
 import { PlayerEvent } from '../util/constants';
 import { IWebPlayerOptions } from '../WebPlayer';
+import { formatHlsError } from '../util/errors';
 
 const DEFAULT_CONFIG = {
   capLevelOnFPSDrop: true,
@@ -178,10 +179,7 @@ export default class HlsJsTech extends BaseTech {
   }
 
   protected onErrorEvent(event, data) {
-    const fatal = data?.fatal;
-    const errorData = this.errorFormat(data);
-
-    this.emit(PlayerEvent.ERROR, { errorData, fatal });
+    this.emit(PlayerEvent.ERROR, formatHlsError(data));
   }
 
   get currentLevel() {
@@ -508,12 +506,11 @@ export default class HlsJsTech extends BaseTech {
         }
 
         if (allTrackingUrls.start.length > 0) {
-          console.log('[Interstitials] Successfully extracted tracking URLs from asset list');
           return allTrackingUrls;
         }
       }
     } catch (e) {
-      console.warn('[Interstitials] Failed to fetch tracking from asset list URL:', e);
+      // Failed to fetch tracking from asset list URL
     }
     return undefined;
   }
@@ -584,7 +581,7 @@ export default class HlsJsTech extends BaseTech {
         }
       }
     } catch (e) {
-      console.warn('Failed to parse interstitial tracking data:', e);
+      // Failed to parse interstitial tracking data
     }
     return undefined;
   }

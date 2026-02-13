@@ -1,5 +1,7 @@
 import { MediaPlayer, MediaPlayerClass } from 'dashjs';
 import BaseTech, { IBaseTechOptions, PlaybackState } from './BaseTech';
+import { PlayerEvent } from '../util/constants';
+import { formatDashError } from '../util/errors';
 
 export default class MssPlayer extends BaseTech {
   private mediaPlayer: MediaPlayerClass;
@@ -19,6 +21,7 @@ export default class MssPlayer extends BaseTech {
         resolve();
       });
       this.mediaPlayer.on(MediaPlayer.events.ERROR, (ev) => {
+        this.emit(PlayerEvent.ERROR, formatDashError(ev));
         reject(`Failed to load Mss Player`);
       });
     });
@@ -29,10 +32,10 @@ export default class MssPlayer extends BaseTech {
   }
 
   destroy() {
+    super.destroy();
     if (this.mediaPlayer) {
       this.mediaPlayer.reset();
       this.mediaPlayer = null;
     }
-    super.destroy();
   }
 }
