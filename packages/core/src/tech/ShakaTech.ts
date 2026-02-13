@@ -3,6 +3,7 @@ import shaka from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
 import BaseTech, { IVideoLevel, ITrack, getTextTrackId } from './BaseTech';
 import { PlayerEvent } from '../util/constants';
+import { formatShakaError } from '../util/errors';
 
 export default class DashPlayer extends BaseTech {
   public name = "ShakaTech";
@@ -11,7 +12,7 @@ export default class DashPlayer extends BaseTech {
   constructor(opts: IWebPlayerOptions) {
     super(opts);
     shaka.polyfill.installAll();
-    this.shakaPlayer = new shaka.Player(this.video);
+    this.shakaPlayer = new shaka.Player();
 
     const restrictToElementSize = !opts.disablePlayerSizeLevelCap;
     this.shakaPlayer.configure({ abr: { restrictToElementSize: restrictToElementSize } });
@@ -28,11 +29,19 @@ export default class DashPlayer extends BaseTech {
     );
   }
 
-  load(src: string): Promise<void> {
+  async load(src: string): Promise<void> {
     super.setDefaultState();
-    return this.shakaPlayer.load(src).catch(() => {
-      // TODO error handling
-    });
+    try {
+      await this.shakaPlayer.attach(this.video);
+      await this.shakaPlayer.load(src);
+    } catch (error) {
+      this.handleLoadError(error);
+      throw error;
+    }
+  }
+
+  private handleLoadError(error: any): void {
+    this.emit(PlayerEvent.ERROR, formatShakaError(error));
   }
 
   protected onBitrateChange() {
@@ -54,16 +63,7 @@ export default class DashPlayer extends BaseTech {
 
   protected onError(data) {
     const errorDetails = data?.detail;
-    console.log(errorDetails);
-    const fatal = errorDetails.severity > 1 ? true : false;
-
-    let errorData = {
-      category: errorDetails.category.toString(),
-      code: errorDetails.code.toString(),
-      message: errorDetails.data[1].toString(),
-      data: errorDetails.data
-    };
-    this.emit(PlayerEvent.ERROR, { errorData, fatal });
+    this.emit(PlayerEvent.ERROR, formatShakaError(errorDetails));
   }
 
   get isLive() {
