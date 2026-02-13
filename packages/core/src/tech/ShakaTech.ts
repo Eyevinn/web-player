@@ -1,5 +1,5 @@
 //@ts-ignore
-import { Player } from 'shaka-player';
+import shaka from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
 import BaseTech, { IVideoLevel, ITrack, getTextTrackId } from './BaseTech';
 import { PlayerEvent } from '../util/constants';
@@ -10,7 +10,8 @@ export default class DashPlayer extends BaseTech {
 
   constructor(opts: IWebPlayerOptions) {
     super(opts);
-    this.shakaPlayer = new Player(this.video);
+    shaka.polyfill.installAll();
+    this.shakaPlayer = new shaka.Player(this.video);
 
     const restrictToElementSize = !opts.disablePlayerSizeLevelCap;
     this.shakaPlayer.configure({ abr: { restrictToElementSize: restrictToElementSize } });
