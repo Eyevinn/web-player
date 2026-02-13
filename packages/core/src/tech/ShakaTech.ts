@@ -11,7 +11,7 @@ export default class DashPlayer extends BaseTech {
   constructor(opts: IWebPlayerOptions) {
     super(opts);
     shaka.polyfill.installAll();
-    this.shakaPlayer = new shaka.Player(this.video);
+    this.shakaPlayer = new shaka.Player();
 
     const restrictToElementSize = !opts.disablePlayerSizeLevelCap;
     this.shakaPlayer.configure({ abr: { restrictToElementSize: restrictToElementSize } });
@@ -28,12 +28,15 @@ export default class DashPlayer extends BaseTech {
     );
   }
 
-  load(src: string): Promise<void> {
+  async load(src: string): Promise<void> {
     super.setDefaultState();
-    return this.shakaPlayer.load(src).catch((error) => {
+    try {
+      await this.shakaPlayer.attach(this.video);
+      await this.shakaPlayer.load(src);
+    } catch (error) {
       this.handleLoadError(error);
       throw error;
-    });
+    }
   }
 
   private handleLoadError(error: any): void {
