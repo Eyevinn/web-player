@@ -36,13 +36,23 @@ video {
 
 .input-section .input-buttons .input-button, .input-section .input-buttons .autoplay-wrapper {
 	font-size: 1em;
-	width: 10.5em;
 	height: 2.15em;
 	margin: 0.5em 0.3em;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+.input-section .input-buttons .input-button {
+	width: 10.5em;
 	min-width: 10.3em;
+}
+
+.input-section .input-buttons .autoplay-wrapper {
+	width: auto;
+	min-width: auto;
+	white-space: nowrap;
+	padding: 0 0.3em;
 }
 
 @media (max-width: 790px) {

@@ -83,6 +83,7 @@ async function main() {
   const sgaiControls = document.querySelector('#sgai-controls');
   const sgaiAdBreakButton = document.querySelector('#sgai-adbreak-button');
   const sgaiDurationInput = document.querySelector('#sgai-duration');
+  const sgaiCheckbox = document.querySelector('#sgai-checkbox');
   renderExampleButtons();
 
   if (!manifestInput.value) {
@@ -97,7 +98,7 @@ async function main() {
   const searchParams = new URL(window.location.href).searchParams;
 
   const root = document.querySelector('#player');
-  const video = document.createElement('video');
+  let video = document.createElement('video');
   root.appendChild(video);
 
   const snackbar = document.querySelector('#snackbar');
@@ -127,12 +128,13 @@ async function main() {
   }
 
   // Comment out this if you want to demo the player package
-  const player = new WebPlayer({ 
-    video: video, 
+  let player = new WebPlayer({
+    video: video,
     iceServers: iceServers,
     enableCloudflareWhepBeta: process.env.CLOUDFLARE_BETA === "true",
+    enableSgai: sgaiCheckbox.checked,
   });
-  renderEyevinnSkin({
+  let skin = renderEyevinnSkin({
     root,
     player,
   });
@@ -147,6 +149,7 @@ async function main() {
   function updateSgaiControls(manifestUrl) {
     if (manifestUrl === SGAI_STREAM_URL) {
       sgaiControls.style.display = 'block';
+      sgaiCheckbox.checked = true;
     } else {
       sgaiControls.style.display = 'none';
     }
@@ -175,15 +178,33 @@ async function main() {
     }
   }
 
-  async function load() {  
+  async function load() {
     try {
       if (epasUrlInput.value) {
         playerAnalytics = new PlayerAnalyticsConnector(
           epasUrlInput.value
         );
       }
-  
-      player.reset();
+
+      // Recreate player if SGAI option changed
+      const wantSgai = sgaiCheckbox.checked;
+      if (wantSgai !== player.opts?.enableSgai) {
+        player.destroy();
+        // Remove old video element and create fresh one
+        const newVideo = document.createElement('video');
+        video.parentNode.replaceChild(newVideo, video);
+        video = newVideo;
+        player = new WebPlayer({
+          video: video,
+          iceServers: iceServers,
+          enableCloudflareWhepBeta: process.env.CLOUDFLARE_BETA === "true",
+          enableSgai: wantSgai,
+        });
+        player.on('*', () => {}); // re-init event forwarding
+        skin = renderEyevinnSkin({ root, player });
+      } else {
+        player.reset();
+      }
 
       try {
         playerAnalytics && await playerAnalytics.init({
