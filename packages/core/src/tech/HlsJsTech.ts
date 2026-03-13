@@ -7,6 +7,7 @@ const DEFAULT_CONFIG = {
   capLevelOnFPSDrop: true,
   capLevelToPlayerSize: true,
   enableInterstitialPlayback: true,
+  preferManagedMediaSource: true,
 };
 
 const LIVE_EDGE = 5; // seconds from liveEdge
@@ -595,7 +596,7 @@ export default class HlsJsTech extends BaseTech {
     for (const url of urls) {
       const trackingKey = `${url}-${eventType}`;
       if (this.interstitialTrackingFired.has(trackingKey)) {
-        return; // if already fired, duplicate
+        continue; // skip this URL, check remaining
       }
 
       this.interstitialTrackingFired.add(trackingKey);

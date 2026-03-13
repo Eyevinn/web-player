@@ -12,6 +12,7 @@ export interface IWebPlayerOptions {
   disablePlayerSizeLevelCap?: boolean;
   iceServers?: RTCIceServer[];
   enableCloudflareWhepBeta?: boolean;
+  enableSgai?: boolean;
 }
 
 export enum ReadyState {
@@ -26,7 +27,7 @@ export default class WebPlayer extends EventEmitter {
   private _readyState: ReadyState = ReadyState.UNREADY;
 
   private tech: BaseTech;
-  private opts: IWebPlayerOptions;
+  public opts: IWebPlayerOptions;
 
   public video: HTMLVideoElement;
   public currentSrc?: string;
@@ -83,6 +84,13 @@ export default class WebPlayer extends EventEmitter {
 
   private async loadTech(): Promise<typeof BaseTech> {
     if (this.manifestType === ManifestType.HLS) {
+      if (this.opts.enableSgai) {
+        // SGAI mode: always use hls.js for HLS interstitial support (including Safari)
+        const HlsJsTech = (await import('./tech/HlsJsTech')).default;
+        if (HlsJsTech.isSupported()) {
+          return HlsJsTech;
+        }
+      }
       if (canPlayManifestType(ManifestType.HLS) && isSafari()) {
         return BaseTech;
       }
