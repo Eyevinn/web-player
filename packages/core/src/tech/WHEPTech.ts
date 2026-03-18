@@ -31,6 +31,9 @@ export default class WHEPTech extends BaseTech {
 
   destroy() {
     this.player.destroy();
+    this.video.srcObject = null;
+    this.video.removeAttribute("src");
+    this.video.load();
     super.destroy();
   }
 }

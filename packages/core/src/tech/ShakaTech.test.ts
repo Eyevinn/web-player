@@ -1,303 +1,431 @@
-import ShakaTech from './ShakaTech';
 import { PlayerEvent } from '../util/constants';
 
 // Mock shaka-player
-jest.mock('shaka-player', () => {
-  const mockShakaPlayer = {
-    configure: jest.fn(),
-    load: jest.fn().mockResolvedValue(undefined),
-    destroy: jest.fn().mockResolvedValue(undefined),
-    getTextTracks: jest.fn().mockReturnValue([]),
-    selectTextTrack: jest.fn(),
-    setTextTrackVisibility: jest.fn(),
-    isTextTrackVisible: jest.fn().mockReturnValue(false),
-    getVariantTracks: jest.fn().mockReturnValue([]),
-    getAudioLanguages: jest.fn().mockReturnValue([]),
-    selectVariantTrack: jest.fn(),
-    selectAudioLanguage: jest.fn(),
-    getConfiguration: jest.fn().mockReturnValue({}),
-    getManifest: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-  };
+const mockShakaPlayer = {
+  configure: jest.fn(),
+  addEventListener: jest.fn(),
+  attach: jest.fn().mockResolvedValue(undefined),
+  load: jest.fn().mockResolvedValue(undefined),
+  destroy: jest.fn(),
+  isLive: jest.fn().mockReturnValue(false),
+  seekRange: jest.fn().mockReturnValue({ start: 0, end: 100 }),
+  getVariantTracks: jest.fn().mockReturnValue([]),
+  getTextTracks: jest.fn().mockReturnValue([]),
+  getAudioLanguages: jest.fn().mockReturnValue([]),
+  selectAudioLanguage: jest.fn(),
+  selectTextTrack: jest.fn(),
+  setTextTrackVisibility: jest.fn(),
+  isTextTrackVisible: jest.fn().mockReturnValue(false),
+  selectVariantTrack: jest.fn(),
+};
 
-  return {
-    Player: jest.fn(() => mockShakaPlayer),
+jest.mock('shaka-player', () => ({
+  __esModule: true,
+  default: {
     polyfill: {
       installAll: jest.fn(),
     },
-  };
-});
+    Player: jest.fn().mockImplementation(() => mockShakaPlayer),
+  },
+}));
 
-describe('ShakaTech - Text Track (Subtitle) Functionality', () => {
-  let shakaTech: ShakaTech;
-  let mockVideoElement: HTMLVideoElement;
-  let mockShakaPlayer: any;
+// Mock mitt
+jest.mock('mitt', () => ({
+  __esModule: true,
+  default: () => {
+    const handlers = new Map<string, Set<Function>>();
+    return {
+      on(type: string, handler: Function) {
+        if (!handlers.has(type)) handlers.set(type, new Set());
+        handlers.get(type)!.add(handler);
+      },
+      off(type: string, handler: Function) {
+        handlers.get(type)?.delete(handler);
+      },
+      emit(type: string, data?: any) {
+        handlers.get(type)?.forEach((h) => h(data));
+      },
+      all: { clear() { handlers.clear(); } },
+    };
+  },
+}));
+
+import DashPlayer from './ShakaTech';
+// @ts-ignore - shaka-player types don't export as module, but our mock does
+import shaka from 'shaka-player';
+
+function createMockVideo(): HTMLVideoElement {
+  const listeners: Record<string, Function[]> = {};
+  return {
+    muted: false,
+    volume: 1,
+    paused: true,
+    currentTime: 0,
+    duration: 100,
+    src: '',
+    seekable: { length: 0, end: jest.fn() },
+    addEventListener(event: string, handler: Function) {
+      if (!listeners[event]) listeners[event] = [];
+      listeners[event].push(handler);
+    },
+    removeEventListener: jest.fn(),
+    play: jest.fn().mockResolvedValue(undefined),
+    pause: jest.fn(),
+    load: jest.fn(),
+    _trigger(event: string, data?: any) {
+      (listeners[event] || []).forEach((h) => h(data));
+    },
+    _listeners: listeners,
+  } as unknown as HTMLVideoElement & { _trigger: Function; _listeners: Record<string, Function[]> };
+}
+
+describe('ShakaTech (DashPlayer)', () => {
+  let video: ReturnType<typeof createMockVideo>;
+  let tech: DashPlayer;
 
   beforeEach(() => {
-    // Create mock video element
-    mockVideoElement = document.createElement('video');
-
-    // Mock audioTracks to prevent BaseTech constructor errors
-    Object.defineProperty(mockVideoElement, 'audioTracks', {
-      value: {
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        length: 0
-      },
-      writable: true
-    });
-
-    // Create ShakaTech instance
-    shakaTech = new ShakaTech({ video: mockVideoElement });
-
-    // Get the mocked shaka player instance
-    mockShakaPlayer = (shakaTech as any).shakaPlayer;
-
-    // Reset all mocks
     jest.clearAllMocks();
+    video = createMockVideo();
+    tech = new DashPlayer({ video } as any);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    tech.destroy();
   });
 
-  describe('textTrack setter', () => {
-    it('should call setTextTrackVisibility(true) when enabling a text track', () => {
-      const mockTrack = { id: '0', language: 'en', label: 'English', active: false };
-      mockShakaPlayer.getTextTracks.mockReturnValue([mockTrack]);
-
-      shakaTech.textTrack = '0|English|en';
-
-      expect(mockShakaPlayer.setTextTrackVisibility).toHaveBeenCalledWith(true);
+  describe('constructor', () => {
+    it('should call shaka.polyfill.installAll()', () => {
+      expect(shaka.polyfill.installAll).toHaveBeenCalled();
     });
 
-    it('should call selectTextTrack with the correct track', () => {
-      const mockTrack = { id: '0', language: 'en', label: 'English', active: false };
-      mockShakaPlayer.getTextTracks.mockReturnValue([mockTrack]);
-
-      shakaTech.textTrack = '0|English|en';  // Use compound ID format
-
-      expect(mockShakaPlayer.selectTextTrack).toHaveBeenCalledWith(mockTrack);
+    it('should create a shaka.Player instance', () => {
+      expect(shaka.Player).toHaveBeenCalled();
     });
 
-    it('should call setTextTrackVisibility(false) when disabling text tracks', () => {
-      shakaTech.textTrack = null;
-
-      expect(mockShakaPlayer.setTextTrackVisibility).toHaveBeenCalledWith(false);
+    it('should have name "ShakaTech"', () => {
+      expect(tech.name).toBe('ShakaTech');
     });
 
-    it('CRITICAL REGRESSION TEST: should call onTextTrackChange when enabling a track', () => {
-      const mockTrack = { id: '0', language: 'en', label: 'English', active: false };
-      mockShakaPlayer.getTextTracks.mockReturnValue([mockTrack]);
-
-      const onTextTrackChangeSpy = jest.spyOn(shakaTech as any, 'onTextTrackChange');
-
-      shakaTech.textTrack = '0|English|en';
-
-      expect(onTextTrackChangeSpy).toHaveBeenCalled();
-      expect(onTextTrackChangeSpy).toHaveBeenCalledTimes(1);
+    it('should configure ABR restrictToElementSize based on options', () => {
+      expect(mockShakaPlayer.configure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          abr: expect.objectContaining({ restrictToElementSize: true }),
+        })
+      );
     });
 
-    it('CRITICAL REGRESSION TEST: should call onTextTrackChange when disabling tracks', () => {
-      const onTextTrackChangeSpy = jest.spyOn(shakaTech as any, 'onTextTrackChange');
+    it('should register event listeners on shakaPlayer', () => {
+      expect(mockShakaPlayer.addEventListener).toHaveBeenCalledWith(
+        'variantchanged',
+        expect.any(Function)
+      );
+      expect(mockShakaPlayer.addEventListener).toHaveBeenCalledWith(
+        'adaptation',
+        expect.any(Function)
+      );
+      expect(mockShakaPlayer.addEventListener).toHaveBeenCalledWith(
+        'error',
+        expect.any(Function)
+      );
+    });
+  });
 
-      shakaTech.textTrack = null;
-
-      expect(onTextTrackChangeSpy).toHaveBeenCalled();
-      expect(onTextTrackChangeSpy).toHaveBeenCalledTimes(1);
+  describe('load()', () => {
+    it('should attach and load the source', async () => {
+      await tech.load('http://example.com/stream.mpd');
+      expect(mockShakaPlayer.attach).toHaveBeenCalledWith(video);
+      expect(mockShakaPlayer.load).toHaveBeenCalledWith('http://example.com/stream.mpd');
     });
 
-    it('CRITICAL REGRESSION TEST: should emit TEXT_TRACK_CHANGE event when enabling', (done) => {
-      const mockTrack = { id: '0', language: 'en', label: 'English', active: true };
-      mockShakaPlayer.getTextTracks.mockReturnValue([mockTrack]);
-      mockShakaPlayer.isTextTrackVisible.mockReturnValue(true);
+    it('should emit ERROR on load failure', async () => {
+      const loadError = {
+        severity: 2,
+        category: 1,
+        code: 1001,
+        data: ['', 'Failed to fetch manifest'],
+      };
+      mockShakaPlayer.load.mockRejectedValueOnce(loadError);
 
-      shakaTech.on(PlayerEvent.TEXT_TRACK_CHANGE, (track) => {
-        expect(track).toBeDefined();
-        done();
+      const errorHandler = jest.fn();
+      tech.on(PlayerEvent.ERROR, errorHandler);
+
+      await expect(tech.load('http://bad.url/stream.mpd')).rejects.toEqual(loadError);
+
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errorData: expect.objectContaining({
+            category: '1',
+            code: '1001',
+            message: 'Failed to fetch manifest',
+          }),
+          fatal: true,
+        })
+      );
+    });
+
+    it('should set fatal=false for severity <= 1', async () => {
+      const loadError = {
+        severity: 1,
+        category: 2,
+        code: 2001,
+        data: ['', 'Recoverable error'],
+      };
+      mockShakaPlayer.load.mockRejectedValueOnce(loadError);
+
+      const errorHandler = jest.fn();
+      tech.on(PlayerEvent.ERROR, errorHandler);
+
+      await expect(tech.load('http://example.com/stream.mpd')).rejects.toEqual(loadError);
+
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.objectContaining({ fatal: false })
+      );
+    });
+
+    it('should handle null error gracefully', async () => {
+      mockShakaPlayer.load.mockRejectedValueOnce(null);
+
+      const errorHandler = jest.fn();
+      tech.on(PlayerEvent.ERROR, errorHandler);
+
+      await expect(tech.load('http://example.com/stream.mpd')).rejects.toBeNull();
+
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errorData: expect.objectContaining({
+            category: 'unknown',
+            code: '-1',
+            message: 'Shaka error',
+          }),
+          fatal: true,
+        })
+      );
+    });
+  });
+
+  describe('onError (runtime error)', () => {
+    it('should emit ERROR on shaka error event', () => {
+      const errorHandler = jest.fn();
+      tech.on(PlayerEvent.ERROR, errorHandler);
+
+      // Find the 'error' listener registered on shakaPlayer
+      const errorListenerCall = mockShakaPlayer.addEventListener.mock.calls.find(
+        (call) => call[0] === 'error'
+      );
+      expect(errorListenerCall).toBeTruthy();
+
+      const onError = errorListenerCall![1];
+      onError({
+        detail: {
+          severity: 2,
+          category: 1,
+          code: 1002,
+          data: ['', 'Network error'],
+        },
       });
 
-      shakaTech.textTrack = '0|English|en';
-    });
-
-    it('CRITICAL REGRESSION TEST: should emit TEXT_TRACK_CHANGE event when disabling', (done) => {
-      // Mock that no tracks are active/visible when disabled
-      mockShakaPlayer.getTextTracks.mockReturnValue([
-        { id: '0', language: 'en', label: 'English', active: false },
-      ]);
-      mockShakaPlayer.isTextTrackVisible.mockReturnValue(false);
-
-      shakaTech.on(PlayerEvent.TEXT_TRACK_CHANGE, (track) => {
-        expect(track).toBeUndefined();
-        done();
-      });
-
-      shakaTech.textTrack = null;
-    });
-
-    it('should handle multiple text tracks correctly', () => {
-      const mockTracks = [
-        { id: '0', language: 'en', label: 'English', active: false },
-        { id: '1', language: 'es', label: 'Spanish', active: false },
-        { id: '2', language: 'fr', label: 'French', active: false },
-      ];
-      mockShakaPlayer.getTextTracks.mockReturnValue(mockTracks);
-
-      shakaTech.textTrack = '1|Spanish|es';
-
-      expect(mockShakaPlayer.selectTextTrack).toHaveBeenCalledWith(mockTracks[1]);
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errorData: expect.objectContaining({
+            category: '1',
+            code: '1002',
+            message: 'Network error',
+          }),
+          fatal: true,
+        })
+      );
     });
   });
 
-  describe('textTrack getter', () => {
-    it('should return null when no text track is active', () => {
-      mockShakaPlayer.getTextTracks.mockReturnValue([
-        { id: '0', language: 'en', label: 'English', active: false },
-      ]);
-      mockShakaPlayer.isTextTrackVisible.mockReturnValue(false);
-
-      expect(shakaTech.textTrack).toBeNull();
-    });
-
-    it('should return track ID when a text track is active and visible', () => {
-      mockShakaPlayer.getTextTracks.mockReturnValue([
-        { id: '0', language: 'en', label: 'English', active: true },
-      ]);
-      mockShakaPlayer.isTextTrackVisible.mockReturnValue(true);
-
-      expect(shakaTech.textTrack).toBe('0|English|en');  // Returns compound ID
-    });
-
-    it('should return null when track is active but not visible', () => {
-      mockShakaPlayer.getTextTracks.mockReturnValue([
-        { id: '0', language: 'en', label: 'English', active: true },
-      ]);
-      mockShakaPlayer.isTextTrackVisible.mockReturnValue(false);
-
-      expect(shakaTech.textTrack).toBeNull();
+  describe('isLive', () => {
+    it('should delegate to shakaPlayer.isLive()', () => {
+      mockShakaPlayer.isLive.mockReturnValue(true);
+      expect(tech.isLive).toBe(true);
+      expect(mockShakaPlayer.isLive).toHaveBeenCalled();
     });
   });
 
-  describe('textTracks getter', () => {
-    it('should return an empty array when no text tracks are available', () => {
-      mockShakaPlayer.getTextTracks.mockReturnValue([]);
-
-      expect(shakaTech.textTracks).toEqual([]);
+  describe('duration', () => {
+    it('should return seekRange end - start', () => {
+      mockShakaPlayer.seekRange.mockReturnValue({ start: 10, end: 110 });
+      expect(tech.duration).toBe(100);
     });
 
-    it('should return formatted text tracks', () => {
-      mockShakaPlayer.getTextTracks.mockReturnValue([
-        { id: '0', language: 'en', label: 'English', active: false },
-        { id: '1', language: 'es', label: 'Spanish', active: false },
+    it('should return 0 if seekRange is zero-length', () => {
+      mockShakaPlayer.seekRange.mockReturnValue({ start: 0, end: 0 });
+      expect(tech.duration).toBe(0);
+    });
+  });
+
+  describe('audioTrack', () => {
+    it('should return active track language', () => {
+      mockShakaPlayer.getVariantTracks.mockReturnValue([
+        { active: true, language: 'en' },
+        { active: false, language: 'sv' },
       ]);
-      mockShakaPlayer.isTextTrackVisible.mockReturnValue(false);
+      expect(tech.audioTrack).toBe('en');
+    });
 
-      const tracks = shakaTech.textTracks;
+    it('should set audio language', () => {
+      tech.audioTrack = 'sv';
+      expect(mockShakaPlayer.selectAudioLanguage).toHaveBeenCalledWith('sv');
+    });
+  });
 
+  describe('audioTracks', () => {
+    it('should return mapped audio languages', () => {
+      mockShakaPlayer.getAudioLanguages.mockReturnValue(['en', 'sv']);
+      mockShakaPlayer.getVariantTracks.mockReturnValue([
+        { active: true, language: 'en' },
+      ]);
+
+      const tracks = tech.audioTracks;
       expect(tracks).toHaveLength(2);
       expect(tracks[0]).toEqual({
-        id: '0',
-        label: 'English',
+        id: 'en',
         language: 'en',
-        enabled: false,
+        label: 'en',
+        enabled: true,
       });
       expect(tracks[1]).toEqual({
-        id: '1',
-        label: 'Spanish',
-        language: 'es',
+        id: 'sv',
+        language: 'sv',
+        label: 'sv',
         enabled: false,
       });
     });
+  });
 
-    it('should mark the active track as enabled', () => {
+  describe('textTrack', () => {
+    it('should return null when no text track visible', () => {
       mockShakaPlayer.getTextTracks.mockReturnValue([
-        { id: '0', language: 'en', label: 'English', active: true },
-        { id: '1', language: 'es', label: 'Spanish', active: false },
+        { active: true, id: '1', label: 'English', language: 'en' },
       ]);
-      mockShakaPlayer.isTextTrackVisible.mockReturnValue(true);
-
-      const tracks = shakaTech.textTracks;
-
-      expect(tracks[0].enabled).toBe(true);
-      expect(tracks[1].enabled).toBe(false);
+      mockShakaPlayer.isTextTrackVisible.mockReturnValue(false);
+      expect(tech.textTrack).toBeNull();
     });
 
-    it('should filter duplicate tracks with same language and label', () => {
+    it('should return track id when visible', () => {
       mockShakaPlayer.getTextTracks.mockReturnValue([
-        { id: '0', language: 'en', label: 'English', active: false },
-        { id: '1', language: 'en', label: 'English', active: false },
-        { id: '2', language: 'es', label: 'Spanish', active: false },
+        { active: true, id: '1', label: 'English', language: 'en' },
+      ]);
+      mockShakaPlayer.isTextTrackVisible.mockReturnValue(true);
+      expect(tech.textTrack).toBe('1|English|en');
+    });
+
+    it('should set text track visibility and select track', () => {
+      mockShakaPlayer.getTextTracks.mockReturnValue([
+        { id: '1', label: 'English', language: 'en' },
+        { id: '2', label: 'Swedish', language: 'sv' },
+      ]);
+      tech.textTrack = '2|Swedish|sv';
+      expect(mockShakaPlayer.setTextTrackVisibility).toHaveBeenCalledWith(true);
+      expect(mockShakaPlayer.selectTextTrack).toHaveBeenCalledWith(
+        expect.objectContaining({ id: '2', label: 'Swedish', language: 'sv' })
+      );
+    });
+
+    it('should hide text tracks when set to null/falsy', () => {
+      tech.textTrack = null;
+      expect(mockShakaPlayer.setTextTrackVisibility).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('textTracks', () => {
+    it('should return deduplicated text tracks', () => {
+      mockShakaPlayer.getTextTracks.mockReturnValue([
+        { id: '1', label: 'English', language: 'en', active: false },
+        { id: '2', label: 'English', language: 'en', active: false }, // duplicate
+        { id: '3', label: 'Swedish', language: 'sv', active: false },
       ]);
       mockShakaPlayer.isTextTrackVisible.mockReturnValue(false);
 
-      const tracks = shakaTech.textTracks;
-
+      const tracks = tech.textTracks;
       expect(tracks).toHaveLength(2);
-      expect(tracks.filter(t => t.language === 'en')).toHaveLength(1);
+      expect(tracks.map((t) => t.language)).toEqual(['en', 'sv']);
     });
   });
 
-  describe('Event propagation', () => {
-    it('CRITICAL: should emit TEXT_TRACK_CHANGE event with correct track data', (done) => {
-      const mockTrack = { id: '0', language: 'en', label: 'English', active: true };
-      mockShakaPlayer.getTextTracks.mockReturnValue([mockTrack]);
-      mockShakaPlayer.isTextTrackVisible.mockReturnValue(true);
-
-      shakaTech.on(PlayerEvent.TEXT_TRACK_CHANGE, (track) => {
-        // Verify the emitted track data is correct
-        expect(track).toBeDefined();
-        expect(track.id).toBe('0');  // ITrack.id is the simple ID, not compound
-        expect(track.language).toBe('en');
-        expect(track.label).toBe('English');
-        expect(track.enabled).toBe(true);
-        done();
+  describe('currentLevel', () => {
+    it('should return current active variant track', () => {
+      mockShakaPlayer.getVariantTracks.mockReturnValue([
+        { id: 1, width: 1920, height: 1080, bandwidth: 5000000, active: true },
+        { id: 2, width: 1280, height: 720, bandwidth: 3000000, active: false },
+      ]);
+      const level = tech.currentLevel;
+      expect(level).toEqual({
+        id: 1,
+        width: 1920,
+        height: 1080,
+        bitrate: 5000000,
       });
-
-      shakaTech.textTrack = '0|English|en';
     });
 
-    it('should handle rapid text track changes without errors', () => {
-      const mockTracks = [
-        { id: '0', language: 'en', label: 'English', active: false },
-        { id: '1', language: 'es', label: 'Spanish', active: false },
-      ];
-      mockShakaPlayer.getTextTracks.mockReturnValue(mockTracks);
+    it('should enable ABR when set to null', () => {
+      tech.currentLevel = null;
+      expect(mockShakaPlayer.configure).toHaveBeenCalledWith(
+        expect.objectContaining({ abr: { enabled: true } })
+      );
+    });
 
-      // Rapidly change tracks
-      expect(() => {
-        for (let i = 0; i < 10; i++) {
-          shakaTech.textTrack = String(i % 2);
-          shakaTech.textTrack = null;
-        }
-      }).not.toThrow();
+    it('should disable ABR and select specific track', () => {
+      const level = { id: 2, width: 1280, height: 720, bitrate: 3000000 };
+      mockShakaPlayer.getVariantTracks.mockReturnValue([
+        { id: 1, width: 1920, height: 1080, bandwidth: 5000000, active: true },
+        { id: 2, width: 1280, height: 720, bandwidth: 3000000, active: false },
+      ]);
+      tech.currentLevel = level;
+      expect(mockShakaPlayer.configure).toHaveBeenCalledWith(
+        expect.objectContaining({ abr: { enabled: false } })
+      );
+      expect(mockShakaPlayer.selectVariantTrack).toHaveBeenCalled();
     });
   });
 
-  describe('Edge cases', () => {
-    it('should handle setting text track when track does not exist', () => {
-      mockShakaPlayer.getTextTracks.mockReturnValue([
-        { id: '0', language: 'en', label: 'English', active: false },
+  describe('getVideoLevels()', () => {
+    it('should return mapped variant tracks', () => {
+      mockShakaPlayer.getVariantTracks.mockReturnValue([
+        { id: 1, width: 1920, height: 1080, bandwidth: 5000000 },
+        { id: 2, width: 1280, height: 720, bandwidth: 3000000 },
+      ]);
+      const levels = tech.getVideoLevels();
+      expect(levels).toEqual([
+        { id: 1, width: 1920, height: 1080, bitrate: 5000000 },
+        { id: 2, width: 1280, height: 720, bitrate: 3000000 },
+      ]);
+    });
+  });
+
+  describe('destroy()', () => {
+    it('should destroy shaka player', () => {
+      tech.destroy();
+      expect(mockShakaPlayer.destroy).toHaveBeenCalled();
+    });
+  });
+
+  describe('bitrate change', () => {
+    it('should emit BITRATE_CHANGE on adaptation', () => {
+      const handler = jest.fn();
+      tech.on(PlayerEvent.BITRATE_CHANGE, handler);
+
+      mockShakaPlayer.getVariantTracks.mockReturnValue([
+        { active: true, type: 'variant', bandwidth: 5000000, width: 1920, height: 1080 },
       ]);
 
-      // Try to set a track ID that doesn't exist
-      expect(() => {
-        shakaTech.textTrack = '99';
-      }).not.toThrow();
+      // Find the 'adaptation' listener
+      const adaptationCall = mockShakaPlayer.addEventListener.mock.calls.find(
+        (call) => call[0] === 'adaptation'
+      );
+      expect(adaptationCall).toBeTruthy();
+      adaptationCall![1]();
 
-      // Should NOT call selectTextTrack when track is not found
-      expect(mockShakaPlayer.selectTextTrack).not.toHaveBeenCalled();
-
-      // But should still call onTextTrackChange and set visibility
-      expect(mockShakaPlayer.setTextTrackVisibility).toHaveBeenCalledWith(true);
-    });
-
-    it('should handle undefined text track value', () => {
-      expect(() => {
-        shakaTech.textTrack = undefined as any;
-      }).not.toThrow();
-
-      expect(mockShakaPlayer.setTextTrackVisibility).toHaveBeenCalledWith(false);
+      expect(handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bitrate: 5000000,
+          width: 1920,
+          height: 1080,
+        })
+      );
     });
   });
 });

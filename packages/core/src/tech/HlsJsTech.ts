@@ -2,6 +2,7 @@ import BaseTech, { IVideoLevel, PlaybackState } from './BaseTech';
 import Hls from 'hls.js';
 import { PlayerEvent } from '../util/constants';
 import { IWebPlayerOptions } from '../WebPlayer';
+import { formatHlsError } from '../util/errors';
 
 const DEFAULT_CONFIG = {
   capLevelOnFPSDrop: true,
@@ -179,10 +180,7 @@ export default class HlsJsTech extends BaseTech {
   }
 
   protected onErrorEvent(event, data) {
-    const fatal = data?.fatal;
-    const errorData = this.errorFormat(data);
-
-    this.emit(PlayerEvent.ERROR, { errorData, fatal });
+    this.emit(PlayerEvent.ERROR, formatHlsError(data));
   }
 
   get currentLevel() {
@@ -277,43 +275,6 @@ export default class HlsJsTech extends BaseTech {
 
   seekToLive() {
     this.currentTime = this.hls.liveSyncPosition;
-  }
-
-  errorFormat(data) {
-    let errorData = {
-      category: data?.type, // optional, eg. NETWORK, DECODER, etc.
-      code: '-1',
-      message: '', // optional
-      data: data, // optional
-    };
-    const errorDetails = data?.details;
-    switch (errorDetails) {
-      //All Fatal
-      case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
-      case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
-      case Hls.ErrorDetails.FRAG_LOAD_ERROR: //fatal = true || false
-        (errorData.code = `${data.response.code}`),
-          (errorData.message = data.response.text);
-        break;
-      case Hls.ErrorDetails.MANIFEST_PARSING_ERROR:
-        errorData.message = data.reason;
-        break;
-      case Hls.ErrorDetails.MANIFEST_LOAD_TIMEOUT:
-      case Hls.ErrorDetails.FRAG_LOAD_TIMEOUT: //fatal = true || false
-      case Hls.ErrorDetails.KEY_LOAD_TIMEOUT:
-        break;
-      //Non Fatal
-      case Hls.ErrorDetails.AUDIO_TRACK_LOAD_ERROR:
-      case Hls.ErrorDetails.KEY_LOAD_ERROR:
-        (errorData.code = `${data.response.code}`),
-          (errorData.message = data.response.text);
-        break;
-      case Hls.ErrorDetails.LEVEL_LOAD_TIMEOUT:
-      case Hls.ErrorDetails.AUDIO_TRACK_LOAD_TIMEOUT:
-      default:
-    }
-
-    return errorData;
   }
 
   // Interstitial handlers
@@ -509,12 +470,11 @@ export default class HlsJsTech extends BaseTech {
         }
 
         if (allTrackingUrls.start.length > 0) {
-          console.log('[Interstitials] Successfully extracted tracking URLs from asset list');
           return allTrackingUrls;
         }
       }
     } catch (e) {
-      console.warn('[Interstitials] Failed to fetch tracking from asset list URL:', e);
+      // Failed to fetch tracking from asset list URL
     }
     return undefined;
   }
@@ -585,7 +545,7 @@ export default class HlsJsTech extends BaseTech {
         }
       }
     } catch (e) {
-      console.warn('Failed to parse interstitial tracking data:', e);
+      // Failed to parse interstitial tracking data
     }
     return undefined;
   }

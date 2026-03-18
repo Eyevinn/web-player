@@ -3,6 +3,7 @@ import shaka from 'shaka-player';
 import { IWebPlayerOptions } from '../WebPlayer';
 import BaseTech, { IVideoLevel, ITrack, getTextTrackId } from './BaseTech';
 import { PlayerEvent } from '../util/constants';
+import { formatShakaError } from '../util/errors';
 
 export default class DashPlayer extends BaseTech {
   public name = "ShakaTech";
@@ -40,18 +41,7 @@ export default class DashPlayer extends BaseTech {
   }
 
   private handleLoadError(error: any): void {
-    const errorDetails = error || {};
-    const severity = errorDetails.severity ?? 2;
-    const fatal = severity > 1;
-
-    const errorData = {
-      category: errorDetails.category?.toString() ?? 'unknown',
-      code: errorDetails.code?.toString() ?? 'unknown',
-      message: errorDetails.data?.[1]?.toString() ?? 'Load failed',
-      data: errorDetails.data ?? []
-    };
-
-    this.emit(PlayerEvent.ERROR, { errorData, fatal });
+    this.emit(PlayerEvent.ERROR, formatShakaError(error));
   }
 
   protected onBitrateChange() {
@@ -73,16 +63,7 @@ export default class DashPlayer extends BaseTech {
 
   protected onError(data) {
     const errorDetails = data?.detail;
-    console.log(errorDetails);
-    const fatal = errorDetails.severity > 1 ? true : false;
-
-    let errorData = {
-      category: errorDetails.category.toString(),
-      code: errorDetails.code.toString(),
-      message: errorDetails.data[1].toString(),
-      data: errorDetails.data
-    };
-    this.emit(PlayerEvent.ERROR, { errorData, fatal });
+    this.emit(PlayerEvent.ERROR, formatShakaError(errorDetails));
   }
 
   get isLive() {
