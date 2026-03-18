@@ -1,4 +1,5 @@
 import { PlayerEvent } from '../util/constants';
+import { formatHlsError } from '../util/errors';
 
 // Track Hls event listeners
 const hlsListeners: Record<string, Function> = {};
@@ -426,52 +427,54 @@ describe('HlsJsTech', () => {
     });
   });
 
-  describe('errorFormat()', () => {
+  describe('formatHlsError()', () => {
     it('should format manifest load error with HTTP status', () => {
-      const result = tech.errorFormat({
+      const result = formatHlsError({
         type: 'networkError',
         details: 'manifestLoadError',
         fatal: true,
         response: { code: 404, text: 'Not Found' },
       });
 
-      expect(result).toEqual({
+      expect(result.errorData).toEqual({
         category: 'networkError',
         code: '404',
         message: 'Not Found',
         data: expect.any(Object),
       });
+      expect(result.fatal).toBe(true);
     });
 
     it('should format parsing error with reason', () => {
-      const result = tech.errorFormat({
+      const result = formatHlsError({
         type: 'networkError',
         details: 'manifestParsingError',
         fatal: true,
         reason: 'Malformed M3U8',
       });
 
-      expect(result.message).toBe('Malformed M3U8');
+      expect(result.errorData.message).toBe('Malformed M3U8');
     });
 
     it('should format timeout error with default code', () => {
-      const result = tech.errorFormat({
+      const result = formatHlsError({
         type: 'networkError',
         details: 'manifestLoadTimeout',
         fatal: true,
       });
 
-      expect(result.code).toBe('-1');
+      expect(result.errorData.code).toBe('-1');
     });
 
     it('should handle null data gracefully', () => {
-      const result = tech.errorFormat(null);
-      expect(result).toEqual({
-        category: undefined,
+      const result = formatHlsError(null);
+      expect(result.errorData).toEqual({
+        category: 'unknown',
         code: '-1',
         message: '',
         data: null,
       });
+      expect(result.fatal).toBe(false);
     });
   });
 });
