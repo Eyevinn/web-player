@@ -127,9 +127,13 @@ export default class DashPlayer extends BaseTech {
       const internalTrack = this.shakaPlayer
         .getTextTracks()
         .find((t) => getTextTrackId(t) === trackId);
-      this.shakaPlayer.selectTextTrack(internalTrack);
+      if (internalTrack) {
+        this.shakaPlayer.selectTextTrack(internalTrack);
+      }
+      this.onTextTrackChange();
     } else {
       this.shakaPlayer.setTextTrackVisibility(false);
+      this.onTextTrackChange();
     }
   }
 

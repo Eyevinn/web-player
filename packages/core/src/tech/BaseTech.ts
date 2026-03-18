@@ -50,7 +50,7 @@ export interface IPlayerState {
 }
 
 export function getTextTrackId(textTrack) {
-  if (!textTrack) {
+  if (!textTrack || textTrack.id === undefined) {
     return null;
   }
   return `${textTrack.id}|${textTrack.label}|${textTrack.language}`;
