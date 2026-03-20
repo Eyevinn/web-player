@@ -274,9 +274,9 @@ describe('ShakaTech (DashPlayer)', () => {
 
   describe('audioTracks', () => {
     it('should return mapped audio languages', () => {
-      mockShakaPlayer.getAudioLanguages.mockReturnValue(['en', 'sv']);
       mockShakaPlayer.getVariantTracks.mockReturnValue([
         { active: true, language: 'en' },
+        { active: false, language: 'sv' },
       ]);
 
       const tracks = tech.audioTracks;

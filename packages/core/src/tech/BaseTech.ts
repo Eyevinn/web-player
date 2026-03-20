@@ -321,6 +321,7 @@ export default class BaseTech extends EventEmitter {
     if (this.video.textTracks) {
       // @ts-ignore
       for (const textTrack of this.video.textTracks || []) {
+        // @ts-ignore
         textTrack.enabled = getTextTrackId(textTrack) === id;
       }
     }
