@@ -87,12 +87,20 @@ export default class DashPlayer extends BaseTech {
   }
 
   get audioTracks() {
-    return this.shakaPlayer?.getAudioLanguages().map((audioLang) => ({
-      id: audioLang,
-      language: audioLang,
-      label: audioLang,
-      enabled: this.audioTrack === audioLang,
-    }));
+    const tracks = this.shakaPlayer?.getVariantTracks() || [];
+    const seen = new Set<string>();
+    return tracks
+      .filter((track) => {
+        if (seen.has(track.language)) return false;
+        seen.add(track.language);
+        return true;
+      })
+      .map((track) => ({
+        id: track.language,
+        language: track.language,
+        label: track.language,
+        enabled: this.audioTrack === track.language,
+      }));
   }
 
   get textTrack() {
