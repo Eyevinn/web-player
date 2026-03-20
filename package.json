@@ -1,8 +1,10 @@
 {
   "name": "root",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "postinstall": "lerna bootstrap",
     "build": "lerna run build",
     "dev": "lerna run dev --stream --parallel",
     "test": "lerna run test",
@@ -30,7 +32,7 @@
     "@types/jest": "^28.1.7",
     "events": "^3.3.0",
     "jest-environment-jsdom": "^28.1.3",
-    "lerna": "^3.22.1",
+    "lerna": "^9.0.7",
     "microbundle": "^0.15.1",
     "parcel": "^2.10.3",
     "prettier": "^2.1.1",
