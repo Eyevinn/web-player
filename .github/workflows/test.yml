@@ -20,6 +20,7 @@ jobs:
     - name: npm install and test
       run: |
         npm install --ignore-scripts
-        npx lerna run build --concurrency 1
+        npx lerna run build --scope @eyevinn/web-player-core --scope @eyevinn/web-player-airplay --scope @eyevinn/web-player-debug
+        npx lerna run build
         npm test
 
