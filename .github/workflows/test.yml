@@ -20,6 +20,6 @@ jobs:
     - name: npm install and test
       run: |
         npm install --ignore-scripts
-        npm run build
+        npx lerna run build --concurrency 1
         npm test
 
